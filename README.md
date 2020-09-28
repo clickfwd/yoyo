@@ -431,7 +431,7 @@ class Review extends Component
 
 ```html
 <div>
-    <button yoyo:on="click" yoyo:get="like">Found Helpful</button>
+    <button yoyo:on="click" yoyo:get="helpful">Found Helpful</button>
 </div>
 ```
 
@@ -442,7 +442,7 @@ All components automatically listen for the `refresh` event and trigger the `ren
 You can include additional data to send to the component on update requests using the `yoyo:vars` directive which accepts a separated list of name of `key:<expression>` values.
 
 ```
-<button yoyo:on="click" yoyo:get="like" yoyo:vars="id:100">Found Helpful</button>
+<button yoyo:on="click" yoyo:get="helpful" yoyo:vars="id:100">Found Helpful</button>
 ```
 
 Yoyo will automatically track and send component public properties and input values with every request. The `yoyo:vars` directive allows including additional parameters.
