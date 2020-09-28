@@ -578,9 +578,9 @@ $this->emitSelf('productAddedToCart');
 
 ```js
 <script>
-	Yoyo.on(window,'productAddedToCart', (event) => {
-		alert('A product was added to the card with ID:' + event.detail.params.productId;
-	});
+Yoyo.on(window,'productAddedToCart', (event) => {
+	alert('A product was added to the card with ID:' + event.detail.params.productId;
+});
 </script>
 ```
 
@@ -914,17 +914,17 @@ Yoyo adds a few functions and variables that can be used within Yoyo component t
 	
 - Run component public methods in template files.
 
-		```php
-		class HelloWorld extends Component
-		{
-		    public $message = 'Hello World!';
-		    
-		    public function _helloTo($name)
-		    {
-			    return "Hello $name";
-		    }
-		}
-		```
+	```php
+	class HelloWorld extends Component
+	{
+	    public $message = 'Hello World!';
+
+	    public function _helloTo($name)
+	    {
+		    return "Hello $name";
+	    }
+	}
+	```
 	
 	```twig
 	<div>
