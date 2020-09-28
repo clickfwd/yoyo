@@ -1,0 +1,33 @@
+{
+    "name": "clickfwd/yoyo",
+    "description": "Framework to build dynamic interfaces with seamless communication between frontend and backend.",
+    "keywords": ["framework", "yoyo"],
+    "version": "0.0.1",
+    "license": "MIT",
+    "homepage": "https://github.com/Clickfwd/yoyo",
+    "support": {
+        "issues": "https://github.com/Clickfwd/yoyo/issues",
+        "source": "https://github.com/Clickfwd/yoyo"
+    },
+    "authors": [
+        {
+            "name": "Clickfwd"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,    
+    "require": {
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.3.10",
+        "pestphp/pest": "^0.3.6"
+    },
+    "autoload": {
+        "files": [
+            "src/yoyo/helpers.php"
+        ],
+        "psr-4": {
+            "Clickfwd\\Yoyo\\": "src/yoyo"
+        }
+    }
+}
