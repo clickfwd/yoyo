@@ -762,7 +762,7 @@ Yoyo implements several Blade directives that can be used within Yoyo component 
 	class HelloWorld extends Component
 	{
 	    public $message = 'Hello World!';
-	    
+
 	    public function _helloTo($name)
 	    {
 		    return "Hello $name";
