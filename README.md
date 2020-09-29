@@ -533,7 +533,7 @@ All the emit methods are available as closures in the template.
 When triggering Javascript notifications to Yoyo components, any data passed in the `params` key in the second argument will be automatically bound to the component's public property of the same name.
 
 ```js
-Yoyo.trigger(window, 'counter', { params: { count: count} });
+Yoyo.trigger(window, 'counter:updated', { params: { count: count} });
 ```
 
 ### Passing Data with Events
