@@ -43,7 +43,11 @@ class Configuration
     public static function scripts(): void
     {
         ?>
+        <?php if (empty(self::$options['htmx'])):?>
         <script src="https://unpkg.com/htmx.org@<?php echo self::$htmx; ?>/dist/htmx.js"></script>
+        <?php else: ?>
+        <script src="<?php echo self::$options['htmx']; ?>"></script>
+        <?php endif; ?>
         <script src="<?php echo self::scriptsPath(); ?>/yoyo.js"></script>
         <script>
         Yoyo.config.defaultSwapStyle = "<?php echo self::swap(); ?>";
