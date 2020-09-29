@@ -18,7 +18,7 @@
 
 Yoyo is a PHP framework you can use on any project to create rich dynamic interfaces using server-rendered HTML.
 
-With Yoyo you create reactive components that are seamlessly updated without the need to write any Javascript code.
+With Yoyo, you create reactive components that are seamlessly updated without the need to write any Javascript code.
 
 Yoyo ships with a simple templating system, and  offers out-of-the-box support for [Blade](https://laravel.com/docs/8.x/blade), without having to use Laravel, and [Twig](https://twig.symfony.com/).
 
@@ -201,15 +201,13 @@ $results = array_filter($entries, function($entry) use ($query) {
 
 The `$results` array can be populated from any source (i.e. database, API, etc.)
 
-The example can be converted into a live search input, with a 200ms debounce to minimize the number of requests. Replace the `form` tag with:
+The example can be converted into a live search input, with a 300ms debounce to minimize the number of requests. Replace the `form` tag with:
 
-```php
+```html
 <input yoyo:on="keyup delay:300ms changed" type="text" name="query" value="<?php echo $query; ?>" />
 ```
 
 The `yoyo:on="keyup delay:300ms change"` directive tells Yoyo to make a request on the keyup event, with a 300ms debounce, and only if the input text changed. 
-
-The `id` attribute on the input is necessary to maintain the input focus and cursor position when updating the component. 
 
 Now let's turn this into a dynamic component using a class.
 
@@ -247,8 +245,8 @@ class Search extends Component
 
 And the template:
 
-```php
-# /app/resources/views/yoyo/search.php
+```html
+<!-- /app/resources/views/yoyo/search.php -->
 
 <input yoyo:on="keyup delay:300ms changed" type="text" name="query" value="<?php echo $query; ?>" />
 
