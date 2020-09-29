@@ -437,7 +437,7 @@ All components automatically listen for the `refresh` event and trigger the `ren
 
 ### Passing Data to Actions
 
-You can include additional data to send to the component on update requests using the `yoyo:vars` directive which accepts a separated list of name of `key:<expression>` values.
+You can include additional data to send to the component on update requests using the `yoyo:vars` directive which accepts a separated list of `key:<expression>` values.
 
 ```
 <button yoyo:on="click" yoyo:get="helpful" yoyo:vars="id:100">Found Helpful</button>
