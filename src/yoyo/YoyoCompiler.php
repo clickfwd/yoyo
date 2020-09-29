@@ -147,6 +147,7 @@ class YoyoCompiler
         if ($id !== '') {
             $this->componentId = $id;
         }
+
         $this->addMethodAttribute($element);
 
         // Get default attributes
@@ -157,6 +158,13 @@ class YoyoCompiler
 
         if (! $element->hasAttribute('id')) {
             $element->setAttribute('id', $this->componentId);
+        }
+
+        // Add yoyo extension attribute and merge existing extensions
+
+        if ($ext = $element->getAttribute(self::yoprefix('ext'))) {
+            $element->removeAttribute(self::yoprefix('ext'));
+            $attributes['ext'] .= ', '.$ext;
         }
 
         $class = $element->getAttribute('class');
@@ -298,12 +306,12 @@ class YoyoCompiler
         $attributes = array_merge(
             array_fill_keys(self::YOYO_ATTRIBUTES, ''),
             [
-            'ext' => 'yoyo',
-            // Adding refresh trigger to prevent default click trigger
-            'on' => 'refresh',
-            'target' => 'this',
-            'include' => "#{$componentId} *",
-            'vars' => $variables,
+                'ext' => 'yoyo',
+                // Adding refresh trigger to prevent default click trigger
+                'on' => 'refresh',
+                'target' => 'this',
+                'include' => "#{$componentId} *",
+                'vars' => $variables,
             ], $this->attributes
         );
 

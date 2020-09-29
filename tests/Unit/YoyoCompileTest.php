@@ -65,3 +65,8 @@ test('static output is not compiled on update', function () {
     expect(compile_html('foo', '<div '.yoattr('ignore').'>Foo</div>', $spinning = true))
         ->toEqual('<div>Foo</div>');
 })->group('static');
+
+test('can add additional extensions', function () {
+    expect(compile_html('foo', '<div '.yoattr('ext', 'new-ext').'></div>'))
+        ->toMatch('/'.hxattr('ext', 'yoyo, new-ext').'/');
+});
