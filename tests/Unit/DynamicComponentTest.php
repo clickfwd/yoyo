@@ -61,11 +61,3 @@ test('counter component decrement', function () {
 test('component method not found', function () {
     update('counter', 'random');
 })->throws(ComponentMethodNotFound::class);
-
-test('component underscore-prefixed method is not public', function () {
-    update('counter', '_getCount');
-})->throws(NonPublicComponentMethodCall::class);
-
-test('component method is not public', function () {
-    update('counter', 'secret');
-})->throws(NonPublicComponentMethodCall::class);

@@ -24,11 +24,6 @@ class Counter extends Component
         $this->emit('counter:updated', ['count' => $this->count]);
     }
 
-    protected function secret()
-    {
-        // Cannot be accessed through direct request
-    }
-
     public function _getCount()
     {
         return 'The count is now '.$this->count;
