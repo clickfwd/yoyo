@@ -1,6 +1,6 @@
 <div id="counter">
-    <button yoyo yo-get="increment" yo-trigger="click" >+</button>
-    <button yoyo yo-get="decrement" yo-trigger="click" >-</button>
+    <button yoyo:get="increment">+</button>
+    <button yoyo:get="decrement">-</button>
     <span><?php echo $count; ?></span>
-    <span><?php echo $getCount(); ?></span>
+    <span><?php echo $this->currentCount; ?></span>
 </div>

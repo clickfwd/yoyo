@@ -52,21 +52,21 @@ YOYO;
 
     public function emit($expression)
     {
-        return "<?php \$emit({$expression}); ?>";
+        return "<?php \$this->emit({$expression}); ?>";
     }
 
     public function emitTo($expression)
     {
-        return "<?php \$emitTo({$expression}); ?>";
+        return "<?php \$this->emitTo({$expression}); ?>";
     }
 
     public function emitSelf($expression)
     {
-        return "<?php \$emitSelf({$expression}); ?>";
+        return "<?php \$this->emitSelf({$expression}); ?>";
     }
 
     public function emitUp($expression)
     {
-        return "<?php \$emitUp({$expression}); ?>";
+        return "<?php \$this->emitUp({$expression}); ?>";
     }
 }

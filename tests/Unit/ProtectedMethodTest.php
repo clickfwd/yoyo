@@ -22,8 +22,4 @@ beforeAll(function () {
 
 test('component method is not public', function () {
     update('protected-methods', 'secret');
-})->throws(NonPublicComponentMethodCall::class);
-
-test('component underscore-prefixed method is not public', function () {
-    update('protected-methods', '_also_secret');
-})->throws(NonPublicComponentMethodCall::class);
+})->throws(NonPublicComponentMethodCall::class)->group('notpublic');

@@ -13,6 +13,7 @@ class YoyoTwigExtension extends AbstractExtension implements GlobalsInterface
     public function getFunctions()
     {
         return [
+            $this->yoyo_scripts(),
             $this->yoyo(),
             $this->emit(),
             $this->emitTo(),
@@ -24,13 +25,14 @@ class YoyoTwigExtension extends AbstractExtension implements GlobalsInterface
     public function getGlobals(): array
     {
         return [
-            'yoyo' => new YoyoVariable(),
         ];
     }
 
-    private static function raw($string)
+    private function yoyo_scripts()
     {
-        return new Markup($string, 'UTF-8');
+        return new TwigFunction('yoyo_scripts', function (): Markup {
+            return self::raw(yoyo_scripts());
+        });
     }
 
     private function yoyo()
@@ -72,5 +74,10 @@ class YoyoTwigExtension extends AbstractExtension implements GlobalsInterface
         return new TwigFunction('emitUp', function ($eventName, $payload = []) {
             (BrowserEventsService::getInstance())->emitUp($eventName, $payload);
         });
+    }
+
+    private static function raw($string)
+    {
+        return new Markup($string, 'UTF-8');
     }
 }

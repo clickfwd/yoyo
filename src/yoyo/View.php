@@ -6,7 +6,9 @@ class View
 {
     private $viewPath;
 
-    private $cache = [];
+    private $templatePathsCache = [];
+
+    private $yoyoComponent;
 
     public function __construct($paths)
     {
@@ -24,17 +26,25 @@ class View
         return call_user_func_array($this->$name, $args);
     }
 
+    public function startYoyoRendering($component)
+    {
+        $this->yoyoComponent = $component;
+
+        return $this;
+    }
+
     public function render($template, $vars = []): string
     {
-        foreach ($vars as $key => $value) {
-            $$key = $value;
-        }
-
         ob_start();
 
-        include $this->cache[$template];
+        $path = $this->templatePathsCache[$template];
 
-        return ob_get_clean();
+        \Closure::bind(function () use ($path, $vars) {
+            extract($vars, EXTR_SKIP);
+            include $path;
+        }, $this->yoyoComponent ? $this->yoyoComponent : $this)();
+
+        return ltrim(ob_get_clean());
     }
 
     public function makeFromString($content, $vars = []): string
@@ -46,13 +56,13 @@ class View
     {
         foreach ($this->viewPath as $path) {
             if (file_exists("{$path}/{$template}.php")) {
-                $this->cache[$template] = "{$path}/{$template}.php";
+                $this->templatePathsCache[$template] = "{$path}/{$template}.php";
 
                 return true;
             }
         }
 
-        $this->cache[$template] = false;
+        $this->templatePathsCache[$template] = false;
 
         return false;
     }

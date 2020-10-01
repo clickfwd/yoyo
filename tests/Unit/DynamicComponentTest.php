@@ -2,13 +2,14 @@
 
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
-use Clickfwd\Yoyo\Exceptions\NonPublicComponentMethodCall;
 use Clickfwd\Yoyo\View;
 use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
 use Clickfwd\Yoyo\Yoyo;
 use function Tests\encode_vars;
+use function Tests\htmlformat;
 use function Tests\hxattr;
 use function Tests\render;
+use function Tests\response;
 use function Tests\update;
 use function Tests\yoprefix_value;
 
@@ -20,6 +21,7 @@ beforeAll(function () {
     ]);
 
     require_once __DIR__.'/../app/Yoyo/Counter.php';
+    require_once __DIR__.'/../app/Yoyo/ComputedProperty.php';
 
     $view = new YoyoViewProvider(new View(__DIR__.'/../app/resources/views/yoyo'));
 
@@ -61,3 +63,8 @@ test('counter component decrement', function () {
 test('component method not found', function () {
     update('counter', 'random');
 })->throws(ComponentMethodNotFound::class);
+
+test('component computed property', function () {
+    $output = render('computed-property');
+    expect(htmlformat($output))->toEqual(response('computed-property'));
+});

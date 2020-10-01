@@ -1,0 +1,1 @@
+<p id="computed"><?php echo $this->foo_bar; ?></p>

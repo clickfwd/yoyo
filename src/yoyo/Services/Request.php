@@ -57,9 +57,9 @@ class Request
         return $output;
     }
 
-    public function input($key)
+    public function input($key, $default = null)
     {
-        $value = $this->request[$key] ?? null;
+        $value = $this->request[$key] ?? $default;
 
         if ($decoded = YoyoHelpers::test_json($value)) {
             return $decoded;
