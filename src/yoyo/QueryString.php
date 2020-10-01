@@ -36,8 +36,6 @@ class QueryString
 
         $queryParams = array_intersect_key($queryParams, array_flip($this->keys));
 
-        $queryParams = array_filter($queryParams);
-
         return $queryParams;
     }
 

@@ -60,14 +60,14 @@ class YoyoHelpers
 
     public static function studly($str)
     {
-        $str = str_replace('-', '', ucwords($str, '-'));
+        $str = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $str)));
 
         return $str;
     }
 
-    public static function randString($length = 6)
+    public static function randString($length = 8)
     {
-        $characters = 'abcdefghijklmnopqrstuvwxyz';
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {

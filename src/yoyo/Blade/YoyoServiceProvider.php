@@ -9,6 +9,14 @@ class YoyoServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerBladeDirectives();
+        $this->registerViewCompilerEngine();
+    }
+
+    protected function registerViewCompilerEngine()
+    {
+        $this->app->make('view.engine.resolver')->register('blade', function () {
+            return new YoyoBladeCompilerEngine($this->app['blade.compiler']);
+        });
     }
 
     protected function registerBladeDirectives()

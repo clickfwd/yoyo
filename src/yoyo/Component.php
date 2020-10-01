@@ -3,6 +3,7 @@
 namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Concerns\BrowserEvents;
+use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
 use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
 use Clickfwd\Yoyo\Services\Request;
@@ -24,6 +25,8 @@ abstract class Component
     protected $spinning;
 
     protected $queryString = [];
+
+    protected $computedPropertyCache = [];
 
     private static $excludePublicMethods = [
         '__construct',
@@ -67,12 +70,10 @@ abstract class Component
 
     public function mount()
     {
-        return $this;
     }
 
     public function beforeRender()
     {
-        return $this;
     }
 
     public function getName()
@@ -120,6 +121,8 @@ abstract class Component
             throw new MissingComponentTemplate($template, get_class($this));
         }
 
+        $view->startYoyoRendering($this);
+
         // Make public properties and methods available to views
 
         $vars = array_merge($this->viewVars(), $vars);
@@ -133,7 +136,11 @@ abstract class Component
     {
         $view = Yoyo::getViewProvider();
 
+        $view->startYoyoRendering($this);
+
         $html = $view->makeFromString($content, $this->viewVars());
+
+        $view->endYoyoRendering();
 
         return $html;
     }
@@ -141,8 +148,6 @@ abstract class Component
     protected function viewVars(): array
     {
         $vars = [];
-
-        $vars['yoyoId'] = $this->createVariableFromMethod(new ReflectionMethod($this, 'yoyoId'));
 
         $vars['spinning'] = $this->spinning;
 
@@ -152,43 +157,7 @@ abstract class Component
 
         $properties = ClassHelpers::getPublicVars($this);
 
-        $componentMethods = $this->extractPublicMethods();
-
-        $eventMethods = $this->extractEventMethods();
-
-        return array_merge($vars, $properties, $componentMethods, $eventMethods);
-    }
-
-    protected function extractPublicMethods(): array
-    {
-        $vars = [];
-
-        $class = get_class($this);
-
-        foreach (ClassHelpers::getPublicMethods($this, self::$excludePublicMethods) as $method) {
-            $methodName = $method;
-
-            if ($method[0] == '_' && $method[1] !== '_') {
-                $methodName = substr($method, 1);
-            }
-
-            $vars[$methodName] = $this->createVariableFromMethod(new ReflectionMethod($this, $method));
-        }
-
-        return $vars;
-    }
-
-    protected function extractEventMethods(): array
-    {
-        $vars = [];
-
-        // Methods injected through EventsManager trait
-
-        foreach (['emit', 'emitTo', 'emitSelf', 'emitUp'] as $method) {
-            $vars[$method] = $this->createVariableFromMethod(new ReflectionMethod($this, $method));
-        }
-
-        return $vars;
+        return array_merge($vars, $properties);
     }
 
     protected function createVariableFromMethod(ReflectionMethod $method)
@@ -205,15 +174,6 @@ abstract class Component
         });
     }
 
-    protected function yoyoId($name = null)
-    {
-        if ($name) {
-            return $this->id.'-'.$name;
-        }
-
-        return $this->id;
-    }
-
     protected function buildParametersForView(array $array = []): string
     {
         $output = [];
@@ -223,5 +183,37 @@ abstract class Component
         $vars = array_merge($vars, $array);
 
         return YoyoHelpers::encode_vars($vars);
+    }
+
+    // For Twig compatibility, because computed properties are not resolved through __get
+
+    public function __call(string $name, array $arguments)
+    {
+        $studlyProperty = YoyoHelpers::studly($name);
+
+        if (method_exists($this, $computedMethodName = 'get'.$studlyProperty.'Property')) {
+            if (isset($this->computedPropertyCache[$name])) {
+                return $this->computedPropertyCache[$name];
+            }
+
+            return $this->computedPropertyCache[$name] = $this->$computedMethodName();
+        }
+
+        throw new ComponentMethodNotFound($this->getName(), $name);
+    }
+
+    public function __get($property)
+    {
+        $studlyProperty = YoyoHelpers::studly($property);
+
+        if (method_exists($this, $computedMethodName = 'get'.$studlyProperty.'Property')) {
+            if (isset($this->computedPropertyCache[$property])) {
+                return $this->computedPropertyCache[$property];
+            }
+
+            return $this->computedPropertyCache[$property] = $this->$computedMethodName();
+        }
+
+        throw new ComponentMethodNotFound($this->getName(), $name);
     }
 }

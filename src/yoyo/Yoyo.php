@@ -68,7 +68,7 @@ class Yoyo
         if (isset($attributes['id'])) {
             $id = $attributes['id'];
         } else {
-            $id = $this->request->input(YoyoCompiler::yoprefix_value('id')) ?? YoyoCompiler::yoprefix_value(YoyoHelpers::randString());
+            $id = $this->request->input(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
         }
 
         return $id;

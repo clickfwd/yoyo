@@ -12,9 +12,23 @@ class BladeViewProvider implements ViewInterface
 
     private $vars;
 
+    private $engine;
+
     public function __construct($view)
     {
         $this->view = $view;
+    }
+
+    public function startYoyoRendering($component): void
+    {
+        $this->engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
+
+        $this->engine->startYoyoRendering($component);
+    }
+
+    public function stopYoyoRendering(): void
+    {
+        $this->engine->stopYoyoRendering();
     }
 
     public function render($template, $vars = []): ViewInterface
@@ -45,6 +59,10 @@ class BladeViewProvider implements ViewInterface
 
     public function __toString()
     {
-        return (string) $this->view->make($this->template, $this->vars);
+        $output = (string) $this->view->make($this->template, $this->vars);
+
+        $this->stopYoyoRendering();
+
+        return $output;
     }
 }

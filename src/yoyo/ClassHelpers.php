@@ -72,4 +72,11 @@ class ClassHelpers
 
         return $publicMethods ?? [];
     }
+
+    public static function methodIsPrivate($instance, $method)
+    {
+        $reflection = new ReflectionMethod($instance, $method);
+
+        return ! $reflection->isPublic();
+    }
 }

@@ -32,6 +32,7 @@ class YoyoCompiler
 
     public const YOYO_ATTRIBUTES = [
         'confirm',
+        'encoding',
         'ext',
         'history-elt',
         'include',
@@ -261,6 +262,16 @@ class YoyoCompiler
             }
 
             $element->setAttribute(self::yoprefix('post'), self::COMPONENT_DEFAULT_ACTION);
+
+            // If the form has an upload input, set the encoding to multipart/form-data
+
+            $xpath = new DOMXPath($element->ownerDocument);
+
+            $inputs = $xpath->query('//*[@type="file"]', $element);
+
+            if ($inputs->item(0)) {
+                $element->setAttribute(self::yoprefix('encoding'), 'multipart/form-data');
+            }
         }
     }
 
