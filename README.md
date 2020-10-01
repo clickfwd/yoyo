@@ -7,7 +7,7 @@
 - [Rendering Components](#rendering-components)
 - [Properties](#properties)
 - [Actions](#actions)
-- [Component Methods](#component-methods)
+- [Computed Properties](#computed-properties)
 - [Events](#events)
 - [Query String](#query-string)
 - [Using Blade](#using-blade)
@@ -452,7 +452,7 @@ class HelloWorld extends Component
 {
 	public $message = 'Hello World!';
 	
-    // Computed Property
+   	// Computed Property
 	public function getHelloWorldProperty()
 	{
 		return $message;
