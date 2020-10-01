@@ -445,28 +445,27 @@ You can include additional data to send to the component on update requests usin
 
 Yoyo will automatically track and send component public properties and input values with every request. The `yoyo:vars` directive allows including additional parameters.
 
-## Component Methods
-
-In addition to public properties being available to your component template, any public method on the component can also be executed on the template.
-
-To differentiate component methods that you want to make available in the template from public actions that can be directly executed through a component request, prefix the method with a single underscore.
+## Computed Properties
 
 ```php
 class HelloWorld extends Component
 {
 	public $message = 'Hello World!';
 	
-	public function _helloTo($name)
+    // Computed Property
+	public function getHelloWorldProperty()
 	{
-		return "Hello $name";
+		return $message;
 	}
 }
 ```
 	
+Now, you can access `$this->hello_world` from either the component's class or template:
+
 ```php
 <div>
-	<h1><?php echo $helloTo('Bob') ;?></h1>
-	<!-- Will output "Hello Bob!" -->
+	<h1><?php echo $this->hello_world ;?></h1>
+	<!-- Will output "Hello World!" -->
 </div>
 ```
 
@@ -525,7 +524,7 @@ public function increment()
 All the emit methods are available as closures in the template.
 
 ```php
-<?php $emit('counter:updated', ['count' => $count]) ; ?>
+<?php $this->emit('counter:updated', ['count' => $count]) ; ?>
 ```
 
 ### Using Javascript
@@ -754,24 +753,24 @@ Yoyo implements several Blade directives that can be used within Yoyo component 
 	@emitTo('component-name', 'eventName', ['foo' => 'bar']);
 	```
     
-- Run component public methods in template files.
+- Computed properties
 
 	```php
 	class HelloWorld extends Component
 	{
 	    public $message = 'Hello World!';
 
-	    public function _helloTo($name)
+	    public function getHelloWorldProperty()
 	    {
-		    return "Hello $name";
+		    return $message;
 	    }
 	}
 	```
 
 	```blade
 	<div>
-	    <h1>{{ $helloTo('Bob') }}</h1>
-	    <!-- Will output "Hello Bob!" -->
+	    <h1>{{ $this->hello_world }}</h1>
+	    <!-- Will output "Hello World!" -->
 	</div>
 	```
 
@@ -836,15 +835,15 @@ Find `yoyo.js` in the following vendor path and copy it to your project's public
 /vendor/clickfwd/yoyo/src/assets/js/yoyo.js 
 ```
 
-To load the necessary scripts in your Blade template you can use the `yoyo.scripts` the `<head>` tag:
+To load the necessary scripts in your Twig template you can use the `yoyo_scripts` function in the `<head>` tag:
 
 ```twig
-{{ yoyo.scripts }}
+{{ yoyo_scripts() }}
 ```
 
 ### Rendering a Twig View
 
-You can use the Blade instance to render any Blade view.
+You can use the Twig instance to render any Twig view.
 
 ```
 $twig = \Clickfwd\Yoyo\Yoyo::getViewProvider()->getProviderInstance();
@@ -854,7 +853,7 @@ echo $twig->render('home');
 
 ### Rendering Yoyo Twig Components
 
-To render Yoyo components inside Blade views, use the `yoyo` function.
+To render Yoyo components inside Twig views, use the `yoyo` function.
 
 ```twig
 yoyo('search')
@@ -910,24 +909,24 @@ Yoyo adds a few functions and variables that can be used within Yoyo component t
 	{{ emitTo('component-name', 'eventName', {'foo':'bar'}) }}
 	```
 	
-- Run component public methods in template files.
+- Computed properties
 
 	```php
 	class HelloWorld extends Component
 	{
 	    public $message = 'Hello World!';
 
-	    public function _helloTo($name)
+	    public function getHelloWorldProperty()
 	    {
-		    return "Hello $name";
+		    return $this->message;
 	    }
 	}
 	```
 	
 	```twig
 	<div>
-		<h1>{{ yoyo.call('helloTo', 'Bob') }}</h1>
-		<!-- Will output "Hello Bob!" -->
+		<h1>{{ this.hello_world }}</h1>
+		<!-- Will output "Hello World!" -->
 	</div>
 	```
 

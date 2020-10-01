@@ -12,11 +12,23 @@ class TwigViewProvider implements ViewInterface
 
     private $vars;
 
+    private $yoyoComponent;
+
     public static $twig_template_extension = 'twig';
 
     public function __construct($view)
     {
         $this->view = $view;
+    }
+
+    public function startYoyoRendering($component): void
+    {
+        $this->yoyoComponent = $component;
+    }
+
+    public function stopYoyoRendering(): void
+    {
+        //
     }
 
     public function render($template, $vars = []): ViewInterface
@@ -47,6 +59,8 @@ class TwigViewProvider implements ViewInterface
 
     public function __toString()
     {
+        $this->vars['this'] = $this->yoyoComponent;
+
         return (string) $this->view->render($this->template.'.'.self::$twig_template_extension, $this->vars);
     }
 }

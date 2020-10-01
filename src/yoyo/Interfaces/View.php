@@ -13,4 +13,8 @@ interface View
     public function exists($template): bool;
 
     public function getProviderInstance();
+
+    public function startYoyoRendering($component): void;
+
+    public function stopYoyoRendering(): void;
 }

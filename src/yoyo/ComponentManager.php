@@ -82,7 +82,7 @@ class ComponentManager
 
         $excludedActions = ClassHelpers::getPublicMethodsBaseClass($this->component, ['render']);
 
-        if (in_array($action, $excludedActions) || $action[0] == '_' || ! is_callable([$this->component, $action])) {
+        if (in_array($action, $excludedActions) || ClassHelpers::methodIsPrivate($this->component, $action)) {
             throw new NonPublicComponentMethodCall($class, $action);
         }
 
@@ -92,7 +92,13 @@ class ComponentManager
                 ->mount();
 
         if ($action !== 'render') {
-            $this->component->$action();
+            $actionResponse = $this->component->$action();
+
+            $type = gettype($actionResponse);
+
+            if ($type !== 'string' && $type !== 'NULL') {
+                throw new \Exception("Component [{$class}] action [{$action}] response should be a string, instead was [{$type}]");
+            }
         }
 
         $this->component->beforeRender();
@@ -110,11 +116,12 @@ class ComponentManager
 
     private function processAnonymousComponent($variables = [], $attributes = []): string
     {
-        $view = $this->component
-                    ->spinning($this->spinning)
-                    ->boot($variables, $attributes)
-                    ->mount()
-                    ->render();
+        $this->component
+                ->spinning($this->spinning)
+                ->boot($variables, $attributes)
+                ->mount();
+
+        $view = (string) $this->component->render();
 
         return $view;
     }

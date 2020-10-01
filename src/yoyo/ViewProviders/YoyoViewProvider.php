@@ -17,6 +17,16 @@ class YoyoViewProvider implements ViewInterface
         $this->view = $view;
     }
 
+    public function startYoyoRendering($component): void
+    {
+        $this->view->startYoyoRendering($component);
+    }
+
+    public function stopYoyoRendering(): void
+    {
+        //
+    }
+
     public function render($template, $vars = []): ViewInterface
     {
         $this->template = $template;

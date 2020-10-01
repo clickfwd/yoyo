@@ -262,7 +262,7 @@ class YoyoCompiler
             }
 
             $element->setAttribute(self::yoprefix('post'), self::COMPONENT_DEFAULT_ACTION);
-            
+
             // If the form has an upload input, set the encoding to multipart/form-data
 
             $xpath = new DOMXPath($element->ownerDocument);

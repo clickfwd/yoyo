@@ -24,7 +24,7 @@ class Counter extends Component
         $this->emit('counter:updated', ['count' => $this->count]);
     }
 
-    public function _getCount()
+    public function getCurrentCountProperty()
     {
         return 'The count is now '.$this->count;
     }
