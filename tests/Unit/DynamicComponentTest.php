@@ -22,6 +22,7 @@ beforeAll(function () {
 
     require_once __DIR__.'/../app/Yoyo/Counter.php';
     require_once __DIR__.'/../app/Yoyo/ComputedProperty.php';
+    require_once __DIR__.'/../app/Yoyo/ComputedPropertyCache.php';
 
     $view = new YoyoViewProvider(new View(__DIR__.'/../app/resources/views/yoyo'));
 
@@ -67,4 +68,9 @@ test('component method not found', function () {
 test('component computed property', function () {
     $output = render('computed-property');
     expect(htmlformat($output))->toEqual(response('computed-property'));
+});
+
+test('component computed property cache', function () {
+    $output = render('computed-property-cache');
+    expect(htmlformat($output))->toEqual(response('computed-property-cache'));
 });

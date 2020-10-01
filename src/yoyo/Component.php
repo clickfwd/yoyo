@@ -214,6 +214,6 @@ abstract class Component
             return $this->computedPropertyCache[$property] = $this->$computedMethodName();
         }
 
-        throw new ComponentMethodNotFound($this->getName(), $name);
+        throw new ComponentMethodNotFound($this->getName(), $property);
     }
 }
