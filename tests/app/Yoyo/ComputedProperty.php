@@ -8,7 +8,7 @@ class ComputedProperty extends Component
 {
     public $foo = 'bar';
 
-    public function getFooBarProperty()
+    protected function getFooBarProperty()
     {
         return $this->foo;
     }
