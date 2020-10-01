@@ -251,6 +251,16 @@ class YoyoCompiler
 
             $element->setAttribute(self::yoprefix('on'), 'submit');
 
+            // If the form has an upload input, set the encoding to multipart/form-data
+
+            $xpath = new DOMXPath($element->ownerDocument);
+
+            $inputs = $xpath->query('//*[@type="file"]', $element);
+
+            if ($inputs->item(0)) {
+                $element->setAttribute(self::yoprefix('encoding'), 'multipart/form-data');
+            }
+                        
             // If the form tag doesn't have a method set, set POST by default
 
             foreach ($element->attributes as $attr) {
@@ -262,16 +272,6 @@ class YoyoCompiler
             }
 
             $element->setAttribute(self::yoprefix('post'), self::COMPONENT_DEFAULT_ACTION);
-
-            // If the form has an upload input, set the encoding to multipart/form-data
-
-            $xpath = new DOMXPath($element->ownerDocument);
-
-            $inputs = $xpath->query('//*[@type="file"]', $element);
-
-            if ($inputs->item(0)) {
-                $element->setAttribute(self::yoprefix('encoding'), 'multipart/form-data');
-            }
         }
     }
 
