@@ -14,7 +14,7 @@ abstract class Component
 {
     use BrowserEvents;
 
-    protected $id;
+    protected $yoyo_id;
 
     protected $componentName;
 
@@ -37,7 +37,7 @@ abstract class Component
 
     public function __construct(string $id, string $name)
     {
-        $this->id = $id;
+        $this->yoyo_id = $id;
 
         $this->componentName = $name;
 
@@ -100,7 +100,7 @@ abstract class Component
 
     public function getComponentId()
     {
-        return $this->id;
+        return $this->yoyo_id;
     }
 
     public function parameters($array = [])
@@ -216,4 +216,18 @@ abstract class Component
 
         throw new ComponentMethodNotFound($this->getName(), $property);
     }
+
+    public function forgetComputed($key = null)
+    {
+        if (is_null($key)) {
+           $this->computedPropertyCache = [];
+           return;
+        }
+
+        $keys = is_array($key) ? $key : func_get_args();
+
+        foreach ($keys as $keyName) {
+            unset($this->computedPropertyCache[$keyName]);
+        }
+    }    
 }
