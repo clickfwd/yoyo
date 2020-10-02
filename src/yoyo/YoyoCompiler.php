@@ -321,7 +321,6 @@ class YoyoCompiler
                 // Adding refresh trigger to prevent default click trigger
                 'on' => 'refresh',
                 'target' => 'this',
-                'include' => "#{$componentId} *",
                 'vars' => $variables,
             ], $this->attributes
         );

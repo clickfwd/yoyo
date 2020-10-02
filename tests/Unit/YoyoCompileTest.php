@@ -12,8 +12,7 @@ test('component uses hardcoded id attribute', function () {
 
     expect($html)
         ->toContain('id="test"')
-        ->toContain(hxattr('vars', encode_vars([yoprefix_value('id') => 'test'])))
-        ->toContain(hxattr('include', '#test *'));
+        ->toContain(hxattr('vars', encode_vars([yoprefix_value('id') => 'test'])));
 });
 
 test('component name attribute matches name', function () {
