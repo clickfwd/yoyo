@@ -70,14 +70,12 @@ test('can add additional extensions', function () {
         ->toMatch('/'.hxattr('ext', 'yoyo, new-ext').'/');
 });
 
-test('adds encoding attribute to root form with file inputs', function() {
+test('adds encoding attribute to root form with file inputs', function () {
     expect(compile_html('foo', '<form><input type="file"/></form>'))
         ->toMatch('/'.hxattr('encoding', 'multipart\/form-data').'/');
-
 });
 
-test('adds encoding attribute to child forms with file inputs', function() {
+test('adds encoding attribute to child forms with file inputs', function () {
     expect(compile_html('foo', '<div><form><input type="file"/></form></div>'))
         ->toMatch('/'.hxattr('encoding', 'multipart\/form-data').'/');
-
 });

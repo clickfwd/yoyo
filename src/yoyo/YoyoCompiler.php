@@ -19,6 +19,18 @@ class YoyoCompiler
 
     private $idCounter = 1;
 
+    /**
+     * These will automatically receive a `method` attribute
+     * if any yoyo attribute is found on the tag.
+     */
+    private $reactiveTags = [
+        'a',
+        'button',
+        'input',
+        'select',
+        'textarea',
+    ];
+
     public const HTMX_METHOD_ATTRIBUTES = [
         'boost',
         'delete',
@@ -58,6 +70,8 @@ class YoyoCompiler
 
     public const YOYO_PREFIX = 'yoyo';
 
+    public const YOYO_PREFIX_FINDER = 'yoyo-finder';
+
     public const HTMX_PREFIX = 'hx';
 
     public function __construct($componentId, $name, $variables, $attributes, $spinning)
@@ -79,13 +93,15 @@ class YoyoCompiler
             return $html;
         }
 
-        // For each yoyo: attribute found, add new yoyo attribute that can be
+        // For each yoyo: attribute found, add new yoyo-wind attribute that can be
         // used by XPath to find the elements which cannot be found when using
         // colons in attribute names
 
         $prefix = self::YOYO_PREFIX;
 
-        $html = preg_replace('/yoyo:(.*)="(.*)"/', "$prefix $prefix:\$1=\"\$2\"", $html);
+        $prefix_finder = self::YOYO_PREFIX_FINDER;
+
+        $html = preg_replace('/'.$prefix.':(.*)="(.*)"/', "$prefix_finder $prefix:\$1=\"\$2\"", $html);
 
         $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
 
@@ -121,6 +137,10 @@ class YoyoCompiler
 
         $this->addComponentChildrenAttributes($dom);
 
+        // Cleanup
+
+        $node->removeAttribute(self::YOYO_PREFIX_FINDER);
+
         $doOuterHtmlSwap = ! $this->elementHasAttributeWithValue($node, self::hxprefix('swap'), 'innerHTML');
 
         if ($this->spinning && ! $doOuterHtmlSwap) {
@@ -141,6 +161,8 @@ class YoyoCompiler
         }
 
         $element->setAttribute(self::YOYO_PREFIX, '');
+
+        $element->setAttribute(self::YOYO_PREFIX_FINDER, '');
 
         // Discard generated component ID and use hardcoded one if found
         $id = $element->getAttribute('id');
@@ -207,7 +229,7 @@ class YoyoCompiler
     {
         $xpath = new DOMXPath($dom);
 
-        $elements = $xpath->query('//*[@'.self::YOYO_PREFIX.']');
+        $elements = $xpath->query('//*[@'.self::YOYO_PREFIX.']|//*[@'.self::YOYO_PREFIX_FINDER.']');
 
         foreach ($elements as $key => $element) {
             // Skip the component root because it's processed separately
@@ -215,17 +237,19 @@ class YoyoCompiler
                 continue;
             }
 
-            $element->removeAttribute('yoyo');
-
             $this->addMethodAttribute($element);
-
-            $this->checkForIdAttribute($element);
 
             foreach (self::YOYO_ATTRIBUTES as $attr) {
                 if ($value = $element->getAttribute(self::yoprefix($attr))) {
                     $this->remapAndReplaceAttribute($element, $attr, $value);
                 }
             }
+
+            // Cleanup
+
+            $element->removeAttribute(self::YOYO_PREFIX);
+
+            $element->removeAttribute(self::YOYO_PREFIX_FINDER);
         }
     }
 
@@ -260,7 +284,7 @@ class YoyoCompiler
             if ($inputs->item(0)) {
                 $element->setAttribute(self::yoprefix('encoding'), 'multipart/form-data');
             }
-                        
+
             // If the form tag doesn't have a method set, set POST by default
 
             foreach ($element->attributes as $attr) {
@@ -303,11 +327,19 @@ class YoyoCompiler
 
                 $element->setAttribute(self::hxprefix($attr), $value);
 
+                // Add an ID attribute for elements that trigger requests
+
+                $this->checkForIdAttribute($element);
+
                 return;
             }
         }
 
-        $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
+        // Make element reactive if it has the yoyo attribute, or if it's a clickable element
+
+        if ($element->hasAttribute(self::YOYO_PREFIX) || in_array($element->tagName, $this->reactiveTags)) {
+            $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
+        }
     }
 
     private function getComponentAttributes($componentId): array
