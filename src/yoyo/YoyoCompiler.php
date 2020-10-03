@@ -223,6 +223,12 @@ class YoyoCompiler
                 $this->remapAndReplaceAttribute($element, $attr, $value);
             }
         }
+
+        // Add initial data
+        $element->setAttribute(self::yoprefix('initial-data'), htmlspecialchars(json_encode([            
+            'name' => $this->name,
+            // 'actions' => $this->getComponentActionsArray(),
+        ])));
     }
 
     private function addComponentChildrenAttributes($dom)
