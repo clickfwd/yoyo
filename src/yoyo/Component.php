@@ -220,8 +220,9 @@ abstract class Component
     public function forgetComputed($key = null)
     {
         if (is_null($key)) {
-           $this->computedPropertyCache = [];
-           return;
+            $this->computedPropertyCache = [];
+
+            return;
         }
 
         $keys = is_array($key) ? $key : func_get_args();
@@ -229,5 +230,5 @@ abstract class Component
         foreach ($keys as $keyName) {
             unset($this->computedPropertyCache[$keyName]);
         }
-    }    
+    }
 }

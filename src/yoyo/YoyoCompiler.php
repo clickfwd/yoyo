@@ -21,7 +21,6 @@ class YoyoCompiler
 
     /**
      * These will automatically receive a `method` attribute
-     * if any yoyo attribute is found on the tag
      */
     private $reactiveTags = [
         'a',
@@ -138,7 +137,6 @@ class YoyoCompiler
         $this->addComponentChildrenAttributes($dom);
 
         // Cleanup
-        
         $node->removeAttribute(self::YOYO_PREFIX_FINDER);
 
         $doOuterHtmlSwap = ! $this->elementHasAttributeWithValue($node, self::hxprefix('swap'), 'innerHTML');
@@ -252,7 +250,9 @@ class YoyoCompiler
             }
 
             // Cleanup
-            
+
+            $element->removeAttribute(self::YOYO_PREFIX);
+
             $element->removeAttribute(self::YOYO_PREFIX_FINDER);
         }
     }
@@ -288,7 +288,7 @@ class YoyoCompiler
             if ($inputs->item(0)) {
                 $element->setAttribute(self::yoprefix('encoding'), 'multipart/form-data');
             }
-                        
+
             // If the form tag doesn't have a method set, set POST by default
 
             foreach ($element->attributes as $attr) {
@@ -340,7 +340,6 @@ class YoyoCompiler
         }
 
         // Make element reactive if it has the yoyo attribute, or if it's a clickable element
-        
         if ($element->hasAttribute(self::YOYO_PREFIX) || in_array($element->tagName,$this->reactiveTags)) {
             $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
         }
