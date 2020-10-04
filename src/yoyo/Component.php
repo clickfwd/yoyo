@@ -26,6 +26,8 @@ abstract class Component
 
     protected $queryString = [];
 
+    protected $listeners = [];
+
     protected $computedPropertyCache = [];
 
     private static $excludePublicMethods = [
@@ -96,6 +98,22 @@ abstract class Component
     public function getQueryString()
     {
         return $this->queryString;
+    }
+
+    public function getListeners()
+    {
+        $listeners = [];
+
+        foreach ($this->listeners as $key => $value )
+        {
+            if (is_numeric($key)) {
+                $listeners[$value] = $value;
+            } else {
+                $listeners[$key] = $value;
+            }
+        }
+
+        return $listeners;
     }
 
     public function getComponentId()

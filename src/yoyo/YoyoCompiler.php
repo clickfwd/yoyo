@@ -17,6 +17,8 @@ class YoyoCompiler
 
     private $spinning;
 
+    private $listeners;
+
     private $idCounter = 1;
 
     /**
@@ -86,6 +88,13 @@ class YoyoCompiler
         $this->spinning = $spinning;
     }
 
+    public function listeners($listeners = [])
+    {
+        $this->listeners = $listeners;
+
+        return $this;
+    }
+
     public function compile($html): string
     {
         if (! trim($html)) {
@@ -147,7 +156,7 @@ class YoyoCompiler
             $output = $this->getOuterHTML($dom);
         }
 
-        return $output;
+        return trim($output);
     }
 
     private function addComponentRootAttributes($element)
@@ -221,12 +230,6 @@ class YoyoCompiler
                 $this->remapAndReplaceAttribute($element, $attr, $value);
             }
         }
-
-        // Add initial data
-        $element->setAttribute(self::yoprefix('initial-data'), htmlspecialchars(json_encode([            
-            'name' => $this->name,
-            // 'actions' => $this->getComponentActionsArray(),
-        ])));
     }
 
     private function addComponentChildrenAttributes($dom)
@@ -359,6 +362,19 @@ class YoyoCompiler
                 'vars' => $variables,
             ], $this->attributes
         );
+
+        // Include component listeners in trigger attribute
+
+        if (!empty($this->listeners))
+        {
+            $listeners = array_keys($this->listeners);
+        
+            array_walk($listeners, function (& $eventName) {
+                $eventName = self::yoprefix($eventName);
+            });
+    
+            $attributes['on'] .= ','.implode(',',$listeners);
+        }
 
         return $attributes;
     }

@@ -8,9 +8,9 @@ class BrowserEventsService
 {
     use Singleton;
 
-    private $browserEvents = [];
+    private $eventQueue = [];
 
-    public const BROWSER_EVENTS_NAMESPACE = 'yoyo';
+    public const YOYO_COMPONENT_EVENTS_NAMESPACE = 'events:yoyo';
 
     public function __construct()
     {
@@ -61,15 +61,15 @@ class BrowserEventsService
 
     public function queue($name, $detail)
     {
-        $this->browserEvents[self::BROWSER_EVENTS_NAMESPACE.":$name"] = $detail;
+        $this->eventQueue[self::YOYO_COMPONENT_EVENTS_NAMESPACE.":$name"] = $detail;
     }
 
-    public function dispatchBrowserEvents()
+    public function dispatch()
     {
-        if (! empty($this->browserEvents)) {
-            $events = json_encode($this->browserEvents);
+        if (! empty($this->eventQueue)) {
+            $events = json_encode($this->eventQueue);
 
-            $this->response->header('HX-Trigger', $events);
+            $this->response->header('HX-Trigger-After-Settle', $events);
         }
     }
 }

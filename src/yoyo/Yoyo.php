@@ -163,7 +163,9 @@ class Yoyo
             $variables = $queryString->getQueryParams($defaultValues, $newValues, $queryStringKeys);
         }
 
-        $compiledHtml = $this->compile($html, $spinning, $variables);
+        $listeners = $componentManager->getListeners();
+
+        $compiledHtml = $this->compile($html, $spinning, $variables, $listeners);
 
         if ($spinning) {
             // Browser URL State
@@ -178,19 +180,21 @@ class Yoyo
 
             $eventsService = BrowserEventsService::getInstance();
 
-            $eventsService->dispatchBrowserEvents();
+            $eventsService->dispatch();
         }
 
         return (Response::getInstance())->send($compiledHtml);
     }
 
-    public function compile($html, $spinning = null, $variables = []): string
+    public function compile($html, $spinning = null, $variables = [], $listeners = []): string
     {
         $spinning = $spinning ?? self::is_spinning();
 
         $variables = array_merge($this->variables, $variables);
 
-        $output = (new YoyoCompiler($this->id, $this->name, $variables, $this->attributes, $spinning))->compile($html);
+        $output = (new YoyoCompiler($this->id, $this->name, $variables, $this->attributes, $spinning))
+                    ->listeners($listeners)
+                    ->compile($html);
 
         return $output;
     }

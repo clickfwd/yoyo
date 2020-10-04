@@ -53,6 +53,11 @@ class ComponentManager
         return $this->component->getQueryString();
     }
 
+    public function getListeners()
+    {
+        return $this->component->getListeners();
+    }
+
     public function process($action, $variables, $attributes): string
     {
         if ($this->isAnonymousComponent()) {
@@ -74,10 +79,18 @@ class ComponentManager
 
     private function processDynamicComponent($action, $variables = [], $attributes = []): string
     {
-        $class = get_class($this->component);
+        $class = get_class($this->component);        
 
         if (! method_exists($this->component, $action)) {
-            throw new ComponentMethodNotFound($class, $action);
+            // If action is an event listener, re-route it to the listener method
+            $listeners = $this->component->getListeners();
+
+            if (!empty($listeners[$action])) {
+                $action = $listeners[$action];
+            }
+            else {
+                throw new ComponentMethodNotFound($class, $action);
+            }
         }
 
         $excludedActions = ClassHelpers::getPublicMethodsBaseClass($this->component, ['render']);
