@@ -7,6 +7,17 @@ use ReflectionMethod;
 
 class ClassHelpers
 {
+    public static function getDefaultPublicVars($instance)
+    {
+        $class = new ReflectionClass(get_class($instance));
+
+        $names = self::getPublicProperties($instance);
+
+        $values = $class->getDefaultProperties();
+
+        return array_intersect_key($values, array_flip($names));
+    }
+
     public static function getPublicVars($instance)
     {
         $publicProperties = self::getPublicProperties($instance);

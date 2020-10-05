@@ -143,24 +143,20 @@ class Yoyo
 
     public function output($spinning = false): string
     {
+        $variables = [];
+        
         $componentManager = new ComponentManager($this->request, $this->id, $this->name, $spinning);
 
         $html = $componentManager->process($this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
 
-        $defaultValues = $componentManager->getDefaultPropertyValues();
+        $defaultValues = $componentManager->getDefaultPublicVars();
 
-        $newValues = $componentManager->getPublicPropertyValues();
-
-        $queryStringKeys = $componentManager->getQueryString();
-
-        $variables = [];
-
-        // Automatically add GET request variables to the component for sub-sequent requests
-
-        if ($spinning) {
-            $queryString = new QueryString($defaultValues, $newValues, $queryStringKeys);
-
-            $variables = $queryString->getQueryParams($defaultValues, $newValues, $queryStringKeys);
+        $newValues = $componentManager->getPublicVars();
+        
+        // Automatically include in request public properties, or request variables in the case of anonymous components
+        
+        if ($this->request->method() == 'GET') {
+            $variables = array_merge($defaultValues, $newValues);
         }
 
         $listeners = $componentManager->getListeners();
@@ -168,6 +164,11 @@ class Yoyo
         $compiledHtml = $this->compile($html, $spinning, $variables, $listeners);
 
         if ($spinning) {
+
+            $queryStringKeys = $componentManager->getQueryString();
+
+            $queryString = new QueryString($defaultValues, $newValues, $queryStringKeys);
+
             // Browser URL State
 
             $urlStateManager = new UrlStateManagerService();

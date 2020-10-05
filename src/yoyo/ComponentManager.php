@@ -28,7 +28,16 @@ class ComponentManager
         $this->component = self::makeComponentInstance($id, $name);
     }
 
-    public function getPublicPropertyValues()
+    public function getDefaultPublicVars()
+    {
+        return ClassHelpers::getDefaultPublicVars($this->component);
+        
+        // $reflection = new ReflectionClass($this->component);
+
+        // return $reflection->getDefaultProperties();
+    }
+    
+    public function getPublicVars()
     {
         if ($this->isAnonymousComponent()) {
             return $this->request->method() == 'GET'
@@ -37,13 +46,6 @@ class ComponentManager
         }
 
         return ClassHelpers::getPublicVars($this->component);
-    }
-
-    public function getDefaultPropertyValues()
-    {
-        $reflection = new ReflectionClass($this->component);
-
-        return $reflection->getDefaultProperties();
     }
 
     public function getQueryString()
