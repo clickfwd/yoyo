@@ -154,10 +154,8 @@ class Yoyo
         $newValues = $componentManager->getPublicVars();
         
         // Automatically include in request public properties, or request variables in the case of anonymous components
-        
-        if ($this->request->method() == 'GET') {
-            $variables = array_merge($defaultValues, $newValues);
-        }
+
+        $variables = array_merge($defaultValues, $newValues);
 
         $listeners = $componentManager->getListeners();
 

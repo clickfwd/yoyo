@@ -216,10 +216,17 @@ class YoyoCompiler
 
             $attributes['vars'] = array_merge($attributes['vars'], $vars);
         }
+        
+        // Automatically add component public vars to the request only if it's not a POST request
 
-        $attributes['vars'] = YoyoHelpers::encode_vars($attributes['vars']);
+        if (! $element->hasAttribute(self::hxprefix('post')))
+        {
+            $attributes['vars'] = array_merge($attributes['vars'], $this->variables);
+        }
 
         // Add all attributes
+
+        $attributes['vars'] = YoyoHelpers::encode_vars($attributes['vars']);
 
         foreach ($attributes as $attr => $value) {
             if (! $value) {
@@ -350,8 +357,6 @@ class YoyoCompiler
 
     private function getComponentAttributes($componentId): array
     {
-        $variables = array_merge([self::yoprefix_value('id')=>$componentId], $this->variables);
-
         $attributes = array_merge(
             array_fill_keys(self::YOYO_ATTRIBUTES, ''),
             [
@@ -359,7 +364,7 @@ class YoyoCompiler
                 // Adding refresh trigger to prevent default click trigger
                 'on' => 'refresh',
                 'target' => 'this',
-                'vars' => $variables,
+                'vars' => [self::yoprefix_value('id') => $componentId],
             ], $this->attributes
         );
 
