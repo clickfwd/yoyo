@@ -10,8 +10,6 @@ class BrowserEventsService
 
     private $eventQueue = [];
 
-    public const YOYO_COMPONENT_EVENTS_NAMESPACE = 'events:yoyo';
-
     public function __construct()
     {
         $this->request = Request::getInstance();
@@ -19,57 +17,50 @@ class BrowserEventsService
         $this->response = Response::getInstance();
     }
 
-    public function emit($eventName, $payload = [])
+    public function emit($event, ...$params)
     {
-        $this->queue($eventName, ['params' => $payload]);
+        $this->queue($event, $params);
     }
 
-    public function emitTo($target, $eventName, $payload = [])
+    public function emitTo($target, $event, ...$params)
     {
-        $detail = [
-            'params' => $payload,
-        ];
+        $selector = null;
+        $component = null;
 
         if (in_array($target[0], ['.', '#'])) {
-            $detail['selector'] = $target;
+            $selector = $target;
         } else {
-            $detail['component'] = $target;
+            $component = $target;
         }
 
-        $this->queue($eventName, $detail);
+        $this->queue($event, $params, $selector, $component);
     }
 
-    public function emitSelf($eventName, $payload = [])
+    public function emitSelf($event, ...$params)
     {
         if ($targetId = $this->request->target()) {
-            $this->emitTo("#{$targetId}", $eventName, $payload);
+            $this->emitTo("#{$targetId}", $event, $params);
         }
     }
 
-    public function emitUp($eventName, $payload = [])
+    public function emitUp($event, ...$params)
     {
         if ($targetId = $this->request->target()) {
-            $detail = [
-                'params' => $payload,
-                'selector' => "#{$targetId}",
-                'parentsOnly' => true,
-            ];
-
-            $this->queue($eventName, $detail);
+            $this->queue($event, $params, "#{$targetId}", $component = null, $parentsOnly = true);
         }
     }
 
-    public function queue($name, $detail)
+    public function queue($event, $params, $selector = null, $component = null, $parentsOnly = null)
     {
-        $this->eventQueue[self::YOYO_COMPONENT_EVENTS_NAMESPACE.":$name"] = $detail;
+        $params = $params[0];
+
+        $payload = array_filter(compact('event','params','selector','component','parentsOnly'));
+        
+        $this->eventQueue[] = $payload;
     }
 
     public function dispatch()
     {
-        if (! empty($this->eventQueue)) {
-            $events = json_encode($this->eventQueue);
-
-            $this->response->header('HX-Trigger-After-Settle', $events);
-        }
+        $this->response->header('Yoyo-Emit', json_encode($this->eventQueue));
     }
 }

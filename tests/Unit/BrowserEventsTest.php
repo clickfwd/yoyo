@@ -28,7 +28,7 @@ test('emitted browser event', function () {
 
     $headers = headers();
 
-    expect($headers)->toHaveKey('HX-Trigger');
+    expect($headers)->toHaveKey('Yoyo-Emit');
 
-    expect($headers['HX-Trigger'])->toEqual('{"yoyo:counter:updated":{"params":{"count":1}}}');
+    expect($headers['Yoyo-Emit'])->toEqual('[{"event":"counter:updated","params":[{"count":1}]}]');
 })->group('headers');

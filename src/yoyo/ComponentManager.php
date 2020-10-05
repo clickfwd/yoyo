@@ -11,24 +11,28 @@ use ReflectionClass;
 
 class ComponentManager
 {
+    private $request;
+
     private $component;
 
     private static $dynamicComponents = [];
 
     private static $anonymousComponents = [];
 
-    public function __construct($id, $name, $spinning)
+    public function __construct($request, $id, $name, $spinning)
     {
+        $this->request = $request;
+
         $this->spinning = $spinning;
 
         $this->component = self::makeComponentInstance($id, $name);
     }
 
-    public function getPublicPropertyValues($request)
+    public function getPublicPropertyValues()
     {
         if ($this->isAnonymousComponent()) {
-            return $request->method() == 'GET'
-                        ? $request->except(['component', YoyoCompiler::yoprefix('id')])
+            return $this->request->method() == 'GET'
+                        ? $this->request->except(['component', YoyoCompiler::yoprefix('id')])
                         : [];
         }
 
@@ -42,11 +46,11 @@ class ComponentManager
         return $reflection->getDefaultProperties();
     }
 
-    public function getQueryString($request)
+    public function getQueryString()
     {
         if ($this->isAnonymousComponent()) {
-            return $request->method() == 'GET'
-                    ? array_keys($request->except(['component', YoyoCompiler::yoprefix('id')]))
+            return $this->request->method() == 'GET'
+                    ? array_keys($this->request->except(['component', YoyoCompiler::yoprefix('id')]))
                     : [];
         }
 
@@ -79,6 +83,8 @@ class ComponentManager
 
     private function processDynamicComponent($action, $variables = [], $attributes = []): string
     {
+        $isEventListenerAction = false;
+        
         $class = get_class($this->component);        
 
         if (! method_exists($this->component, $action)) {
@@ -86,6 +92,11 @@ class ComponentManager
             $listeners = $this->component->getListeners();
 
             if (!empty($listeners[$action])) {
+        
+                $eventParams = $this->request->input('eventParams', []);
+
+                $isEventListenerAction = true;
+        
                 $action = $listeners[$action];
             }
             else {
@@ -105,7 +116,11 @@ class ComponentManager
                 ->mount();
 
         if ($action !== 'render') {
-            $actionResponse = $this->component->$action();
+            if ($isEventListenerAction) {
+                $actionResponse = call_user_func_array(array($this->component, $action), $eventParams);
+            } else {
+                $actionResponse = $this->component->$action();
+            }
 
             $type = gettype($actionResponse);
 

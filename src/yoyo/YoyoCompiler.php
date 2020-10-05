@@ -88,7 +88,7 @@ class YoyoCompiler
         $this->spinning = $spinning;
     }
 
-    public function listeners($listeners = [])
+    public function addComponentListeners($listeners = [])
     {
         $this->listeners = $listeners;
 

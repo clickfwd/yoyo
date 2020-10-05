@@ -143,15 +143,15 @@ class Yoyo
 
     public function output($spinning = false): string
     {
-        $componentManager = new ComponentManager($this->id, $this->name, $spinning);
+        $componentManager = new ComponentManager($this->request, $this->id, $this->name, $spinning);
 
         $html = $componentManager->process($this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
 
         $defaultValues = $componentManager->getDefaultPropertyValues();
 
-        $newValues = $componentManager->getPublicPropertyValues($this->request);
+        $newValues = $componentManager->getPublicPropertyValues();
 
-        $queryStringKeys = $componentManager->getQueryString($this->request);
+        $queryStringKeys = $componentManager->getQueryString();
 
         $variables = [];
 
@@ -193,7 +193,7 @@ class Yoyo
         $variables = array_merge($this->variables, $variables);
 
         $output = (new YoyoCompiler($this->id, $this->name, $variables, $this->attributes, $spinning))
-                    ->listeners($listeners)
+                    ->addComponentListeners($listeners)
                     ->compile($html);
 
         return $output;

@@ -6,23 +6,23 @@ use Clickfwd\Yoyo\Services\BrowserEventsService;
 
 trait BrowserEvents
 {
-    public function emit($eventName, $payload = [])
+    public function emit($event, ...$params)
     {
-        (BrowserEventsService::getInstance())->emit($eventName, $payload);
+        (BrowserEventsService::getInstance())->emit($event, $params);
     }
 
-    public function emitTo($target, $eventName, $payload = [])
+    public function emitTo($target, $event, ...$params)
     {
-        (BrowserEventsService::getInstance())->emitTo($target, $eventName, $payload);
+        (BrowserEventsService::getInstance())->emitTo($target, $event, $params);
     }
 
-    public function emitSelf($eventName, $payload = [])
+    public function emitSelf($event, ...$params)
     {
-        (BrowserEventsService::getInstance())->emitSelf($eventName, $payload);
+        (BrowserEventsService::getInstance())->emitSelf($event, $params);
     }
 
-    public function emitUp($eventName, $payload = [])
+    public function emitUp($event, ...$params)
     {
-        (BrowserEventsService::getInstance())->emitUp($eventName, $payload);
+        (BrowserEventsService::getInstance())->emitUp($event, $params);
     }
 }

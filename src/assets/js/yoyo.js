@@ -14,8 +14,8 @@
 			url: null,
 			bootstrap(evt) {
 				const elt = evt.target
-				const componentElt = elt.closest('[yoyo\\:name]')
-				const componentName = componentElt.getAttribute('yoyo:name')
+				const componentElt = getComponentElt(elt)
+				const componentName = getComponentName(componentElt)
 
 				if (evt.detail.path === document.location.href) {
 					evt.detail.path = 'render'
@@ -27,17 +27,48 @@
 				] = `${componentName}/${action}`
 				evt.detail.path = YoyoFactory.url
 			},
-			triggerServerEmittedEvent(eventName, detail) {
-				let elements
-				const selector = detail.selector
-				const component = detail.component
-				const parentsOnly = detail.parentsOnly
-				if (!selector && !component) {
-					Yoyo.trigger(document, eventName, detail)
-					return
-				}
+			serverComponentEventMiddleware(evt) {
+				const componentElt = getComponentElt(evt.detail.target)
+				const componentName = getComponentName(componentElt)
+				const eventAttr = componentElt.getAttribute(
+					'yoyo:transient-event'
+				)
 
-				if (selector) {
+				if (!eventAttr) return
+
+				const eventData = JSON.parse(eventAttr)
+
+				if (eventData) {
+					evt.detail.parameters[
+						'component'
+					] = `${componentName}/${eventData.name}`
+
+					evt.detail.parameters = {
+						...evt.detail.parameters,
+						...{ eventParams: JSON.stringify(eventData.params) },
+					}
+				}
+			},
+			processEmitHeader(xhr) {
+				if (xhr.getAllResponseHeaders().match(/Yoyo-Emit:/i)) {
+					let events = JSON.parse(xhr.getResponseHeader('Yoyo-Emit'))
+					clearComponentEventCache()
+					events.forEach((event) => {
+						this.triggerServerEmittedEvent(event)
+					})
+				}
+			},
+			triggerServerEmittedEvent(event) {
+				const eventName = event.event
+				const params = event.params
+				const selector = event.selector || null
+				const component = event.component || null
+				const parentsOnly = event.parentsOnly || null
+				let elements
+
+				if (!selector && !component) {
+					elements = getAllComponentsElt()
+				} else if (selector) {
 					if (parentsOnly) {
 						elements = getParentComponents(selector)
 					} else {
@@ -49,39 +80,65 @@
 					)
 				}
 
-				;(elements || []).forEach((elt) => {
-					// ServerEventName doesn't need the `yoyo` namespace prefix
-					const serverEventName = eventName.split('yoyo:').slice(1).join()
-					YoyoFactory.addServerEventTransient(elt, serverEventName, detail.params)
-					Yoyo.trigger(elt, eventName, detail);
-				})
+				if (elements) {
+					elements.forEach((elt) => {
+						if (shouldTriggerComponentEvent(elt.id)) {
+							this.addServerEventTransient(elt, eventName, params)
+							Yoyo.trigger(elt, `yoyo:${eventName}`)
+						}
+					})
+				}
 			},
-			addServerEventTransient(elt, eventName, params) {
-				elt.setAttribute('yoyo:transient-event', JSON.stringify({name: eventName, params: params}));
+			addServerEventTransient(elt, event, params) {
+				// Check if component is listening for the event
+				let componentListeningFor = elt
+					.getAttribute('hx-trigger')
+					.split(',')
+					.filter((name) => name.trim())
+
+				if (componentListeningFor.indexOf(`yoyo:${event}`) === -1) {
+					return
+				}
+
+				elt.setAttribute(
+					'yoyo:transient-event',
+					JSON.stringify({ name: event, params: params })
+				)
 			},
 			removeServerEventTransient(elt) {
 				elt.removeAttribute('yoyo:transient-event')
 			},
-			processServerEvent(evt) {
-				const componentElt = Yoyo.closest(
-					evt.detail.elt,
-					'[yoyo\\:transient-event]'
-				)
-				
-				if (!componentElt) {
-					return;
-				}
+		}
 
-				const eventData = JSON.parse(componentElt.getAttribute('yoyo:transient-event'))
+		/**
+		 * Track elements with triggered events to only trigger the first one
+		 * if multiple emits are found for the same element
+		 */
+		var componentEventCache = []
 
-				if (eventData) {
-					const eventVars = eventData.params;
+		function shouldTriggerComponentEvent(id) {
+			if (componentEventCache.indexOf(id) === -1) {
+				componentEventCache.push(id)
+				return true
+			}
 
-					evt.detail.parameters['component'] = `counter/${eventData.name}`
+			return false
+		}
 
-					evt.detail.parameters = {...evt.detail.parameters, ...eventVars}
-				}
-			},
+		function clearComponentEventCache() {
+			componentEventCache = []
+		}
+
+		function getComponentElt(elt) {
+			return elt.closest('[yoyo\\:name]')
+		}
+
+		function getAllComponentsElt() {
+			return document.querySelectorAll('[yoyo\\:name]')
+		}
+
+		function getComponentName(elt) {
+			return elt.getAttribute('yoyo:name')
 		}
 
 		function decodeHTMLEntities(text) {
@@ -91,15 +148,13 @@
 		}
 
 		function getParentComponents(selector) {
-			let parent = document
-				.querySelector(selector)
-				.parentElement.closest('[yoyo\\:name]')
+			let parent = getComponentElt(document.querySelector(selector))
 
 			let ancestors = []
 
 			while (parent) {
 				ancestors.push(parent)
-				parent = parent.parentElement.closest('[yoyo\\:name]')
+				parent = getComponentElt(parent.parentElement)
 			}
 
 			return ancestors
@@ -111,12 +166,11 @@
 
 Yoyo.defineExtension('yoyo', {
 	onEvent: function (name, evt) {
-
 		if (name === 'htmx:configRequest') {
-			if (evt.target) {
-				YoyoFactory.bootstrap(evt)
-				YoyoFactory.processServerEvent(evt)
-			}
+			if (!evt.target) return
+
+			YoyoFactory.bootstrap(evt)
+			YoyoFactory.serverComponentEventMiddleware(evt)
 		}
 
 		if (name === 'htmx:beforeRequest') {
@@ -127,21 +181,15 @@ Yoyo.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterRequest') {
-			if (!evt.target) return;
+			if (!evt.target) return
 
 			YoyoFactory.removeServerEventTransient(evt.target)
 		}
 
-		// Process Yoyo server-emitted events targeted at Yoyo components
+		if (name === 'htmx:afterSettle') {
+			if (!evt.target) return
 
-		const eventParts = name.split(':')
-
-		// Using `events:yoyo` namespace so Yoyo can trigger the events by itself
-		// and target Yoyo components listening on the `yoyo` namespace
-
-		if (`${eventParts[0]}:${eventParts[1]}` === 'events:yoyo') {
-			const eventName = eventParts.slice(1).join(':')
-			YoyoFactory.triggerServerEmittedEvent(eventName, evt.detail)
+			YoyoFactory.processEmitHeader(evt.detail.xhr)
 		}
 	},
 })
