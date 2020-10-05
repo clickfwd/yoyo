@@ -31,10 +31,6 @@ class ComponentManager
     public function getDefaultPublicVars()
     {
         return ClassHelpers::getDefaultPublicVars($this->component);
-        
-        // $reflection = new ReflectionClass($this->component);
-
-        // return $reflection->getDefaultProperties();
     }
     
     public function getPublicVars()
