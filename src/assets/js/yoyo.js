@@ -49,12 +49,26 @@
 					}
 				}
 			},
-			processEmitHeader(xhr) {
+			processComponentEmitHeader(xhr) {
 				if (xhr.getAllResponseHeaders().match(/Yoyo-Emit:/i)) {
 					let events = JSON.parse(xhr.getResponseHeader('Yoyo-Emit'))
 					clearComponentEventCache()
 					events.forEach((event) => {
 						this.triggerServerEmittedEvent(event)
+					})
+				}
+			},
+			processBrowserEventHeader(xhr) {
+				if (xhr.getAllResponseHeaders().match(/Yoyo-Browser-Event:/i)) {
+					let events = JSON.parse(
+						xhr.getResponseHeader('Yoyo-Browser-Event')
+					)
+					events.forEach((event) => {
+						window.dispatchEvent(
+							new CustomEvent(event.event, {
+								detail: event.params,
+							})
+						)
 					})
 				}
 			},
@@ -186,10 +200,16 @@ Yoyo.defineExtension('yoyo', {
 			YoyoFactory.removeServerEventTransient(evt.target)
 		}
 
+		if (name === 'htmx:beforeSwap') {
+			if (!evt.target) return
+
+			YoyoFactory.processBrowserEventHeader(evt.detail.xhr)
+		}
+
 		if (name === 'htmx:afterSettle') {
 			if (!evt.target) return
 
-			YoyoFactory.processEmitHeader(evt.detail.xhr)
+			YoyoFactory.processComponentEmitHeader(evt.detail.xhr)
 		}
 	},
 })

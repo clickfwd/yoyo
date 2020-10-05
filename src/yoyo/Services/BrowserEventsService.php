@@ -10,6 +10,8 @@ class BrowserEventsService
 
     private $eventQueue = [];
 
+    private $browserEventQueue = [];
+
     public function __construct()
     {
         $this->request = Request::getInstance();
@@ -59,8 +61,15 @@ class BrowserEventsService
         $this->eventQueue[] = $payload;
     }
 
+    public function dispatchBrowserEvent($event, $params = []) {
+        $this->browserEventQueue[] = compact('event','params');
+    }
+
     public function dispatch()
     {
         $this->response->header('Yoyo-Emit', json_encode($this->eventQueue));
+
+        $this->response->header('Yoyo-Browser-Event', json_encode($this->browserEventQueue));
     }
+
 }

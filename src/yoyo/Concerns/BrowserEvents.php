@@ -25,4 +25,9 @@ trait BrowserEvents
     {
         (BrowserEventsService::getInstance())->emitUp($event, $params);
     }
+
+    public function dispatchBrowserEvent($event, $params = [])
+    {
+        (BrowserEventsService::getInstance())->dispatchBrowserEvent($event, $params);
+    }
 }
