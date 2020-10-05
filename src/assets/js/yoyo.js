@@ -45,7 +45,11 @@
 
 					evt.detail.parameters = {
 						...evt.detail.parameters,
-						...{ eventParams: JSON.stringify(eventData.params) },
+						...{
+							eventParams: eventData.params
+								? JSON.stringify(eventData.params)
+								: [],
+						},
 					}
 				}
 			},
@@ -54,7 +58,7 @@
 					let events = JSON.parse(xhr.getResponseHeader('Yoyo-Emit'))
 					clearComponentEventCache()
 					events.forEach((event) => {
-						this.triggerServerEmittedEvent(event)
+						triggerServerEmittedEvent(event)
 					})
 				}
 			},
@@ -72,61 +76,13 @@
 					})
 				}
 			},
-			triggerServerEmittedEvent(event) {
-				const eventName = event.event
-				const params = event.params
-				const selector = event.selector || null
-				const component = event.component || null
-				const parentsOnly = event.parentsOnly || null
-				let elements
-
-				if (!selector && !component) {
-					elements = getAllComponentsElt()
-				} else if (selector) {
-					if (parentsOnly) {
-						elements = getParentComponents(selector)
-					} else {
-						elements = document.querySelectorAll(selector)
-					}
-				} else if (component) {
-					elements = document.querySelectorAll(
-						`[yoyo\\:name="${component}"]`
-					)
-				}
-
-				if (elements) {
-					elements.forEach((elt) => {
-						if (shouldTriggerComponentEvent(elt.id)) {
-							this.addServerEventTransient(elt, eventName, params)
-							Yoyo.trigger(elt, `yoyo:${eventName}`)
-						}
-					})
-				}
-			},
-			addServerEventTransient(elt, event, params) {
-				// Check if component is listening for the event
-				let componentListeningFor = elt
-					.getAttribute('hx-trigger')
-					.split(',')
-					.filter((name) => name.trim())
-
-				if (componentListeningFor.indexOf(`yoyo:${event}`) === -1) {
-					return
-				}
-
-				elt.setAttribute(
-					'yoyo:transient-event',
-					JSON.stringify({ name: event, params: params })
-				)
-			},
-			removeServerEventTransient(elt) {
-				elt.removeAttribute('yoyo:transient-event')
+			afterRequestActions(elt) {
+				removeServerEventTransient(elt)
 			},
 		}
 
 		/**
-		 * Track elements with triggered events to only trigger the first one
-		 * if multiple emits are found for the same element
+		 * Track elements receiving multiple emitted events to only trigger the first one
 		 */
 		var componentEventCache = []
 
@@ -174,6 +130,59 @@
 			return ancestors
 		}
 
+		function addServerEventTransient(elt, event, params) {
+			// Check if component is listening for the event
+			let componentListeningFor = elt
+				.getAttribute('hx-trigger')
+				.split(',')
+				.filter((name) => name.trim())
+
+			if (componentListeningFor.indexOf(`yoyo:${event}`) === -1) {
+				return
+			}
+
+			elt.setAttribute(
+				'yoyo:transient-event',
+				JSON.stringify({ name: event, params: params })
+			)
+		}
+
+		function triggerServerEmittedEvent(event) {
+			const eventName = event.event
+			const params = event.params
+			const selector = event.selector || null
+			const component = event.component || null
+			const parentsOnly = event.parentsOnly || null
+			let elements
+
+			if (!selector && !component) {
+				elements = getAllComponentsElt()
+			} else if (selector) {
+				if (parentsOnly) {
+					elements = getParentComponents(selector)
+				} else {
+					elements = document.querySelectorAll(selector)
+				}
+			} else if (component) {
+				elements = document.querySelectorAll(
+					`[yoyo\\:name="${component}"]`
+				)
+			}
+
+			if (elements) {
+				elements.forEach((elt) => {
+					if (shouldTriggerComponentEvent(elt.id)) {
+						addServerEventTransient(elt, eventName, params)
+						Yoyo.trigger(elt, `yoyo:${eventName}`)
+					}
+				})
+			}
+		}
+
+		function removeServerEventTransient(elt) {
+			elt.removeAttribute('yoyo:transient-event')
+		}
+
 		return YoyoFactory
 	})()
 })
@@ -197,7 +206,7 @@ Yoyo.defineExtension('yoyo', {
 		if (name === 'htmx:afterRequest') {
 			if (!evt.target) return
 
-			YoyoFactory.removeServerEventTransient(evt.target)
+			YoyoFactory.afterRequestActions(evt.target)
 		}
 
 		if (name === 'htmx:beforeSwap') {
