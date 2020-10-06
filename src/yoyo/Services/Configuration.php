@@ -50,8 +50,8 @@ class Configuration
         <?php endif; ?>
         <script src="<?php echo self::scriptsPath(); ?>/yoyo.js"></script>
         <script>
-        Yoyo.config.defaultSwapStyle = "<?php echo self::swap(); ?>";
-        YoyoFactory.url = '<?php echo self::url(); ?>';
+        YoyoEngine.config.defaultSwapStyle = "<?php echo self::swap(); ?>";
+        Yoyo.url = '<?php echo self::url(); ?>';
         </script>
         <?php
     }

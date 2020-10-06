@@ -52,11 +52,6 @@ class Counter extends Component
     {
         $this->count++;
     }
-
-    public function decrement()
-    {
-        $this->count--;
-    }
 }
 ```
 
@@ -67,8 +62,6 @@ class Counter extends Component
 
 <div>
 
-	<button yoyo:get="decrement">-</button>
-	
 	<button yoyo:get="increment">+</button>
 	
 	<span><?php echo $count; ?></span>
@@ -497,93 +490,114 @@ class Posts extends Component
 
 ## Events
 
-Events are a great way to communicate between Yoyo components in the same page, where one component can listen to events fired by another component.
+Events are a great way to establish communication between Yoyo components on the same page, where one or more components can listen to events fired by another component.
 
-A component is not limited to listening to events from Yoyo. These are server emitted events that are made available in the global Javascript scope. So in fact, Yoyo can send events and listen to Javascript events from anything that lives on the the same page.
+Events can be fired from component methods and templates using a variety of emit methods.
 
-To listen for events in Yoyo components use the `yoyo:on` directive.
+All emit methods accept any number of arguments that allow sending data (string, number, array) to listeners.
 
-There are a couple of ways to fire events in Yoyo. 
+### Emitting an Event to All Yoyo Components
 
-### From a Component Method
+From a component method.
 
 ```php
 public function increment()
 {
 	$this->count++;
-	
-	// The first argument is the event name
-	// The second (optional) argument is an array of data to send with the event.
-	
-	$this->emit('counter:updated', ['count' => $this->count]);
+		
+	$this->emit('counter-updated', $count);
 }
 ```
 
-### From the Template
-
-All the emit methods are available as closures in the template.
+From a template
 
 ```php
-<?php $this->emit('counter:updated', ['count' => $count]) ; ?>
+<?php $this->emit('counter-updated', $count) ; ?>
 ```
 
-### Using Javascript
-
-When triggering Javascript notifications to Yoyo components, any data passed in the `params` key in the second argument will be automatically bound to the component's public property of the same name.
-
-```js
-Yoyo.trigger(window, 'counter:updated', { params: { count: count} });
-```
-
-### Passing Data with Events
-
-When a Yoyo component is listening to an event that includes parameters, these will be automatically included in the request.
-
-### Scoping Events
-
-#### Scoping To Parent Listeners
+### Emitting an Event to Parent Components
 
 When dealing with nested components you can emit events to parents and not children or sibling components.
 
 ```php
-$this->emitUp('postWascreated');
+$this->emitUp('postWascreated', $arg1, $arg2);
 ```
 
-#### Scoping To Components By Name
+### Emitting an Event to a Specific Component
 
-Sometimes you may only want to emit an event to other components of the same type.
+When you need to emit an event to a specific component using the component name (e.g. `cart`).
 
 ```php
-$this->emitTo('cart', 'productAddedToCart');
+$this->emitTo('cart', 'productAddedToCart', $arg1, $arg2);
 ```
 
-This method also works with CSS selectors when using a ID or CSS class.
+#### Emitting an Event to Itself
+
+When you need to emit an event on the same component.
 
 ```php
-$this->emitTo('#cart', 'productAddedToCart');
+$this->emitSelf('productAddedToCart', $arg1, $arg2);
 ```
 
-#### Scoping To Self
+### Listening for Events
 
-Sometimes you may only want to emit an event on the component that fired the event.
+To register listeners in Yoyo, use the `$listeners` protected property of the component.
+
+Listeners are a key->value pair where the key is the event to listen for, and the value is the method to call on the component. If the event and method are the same, you can leave out the key.
 
 ```php
-$this->emitSelf('productAddedToCart');
+class CounterBoard extends Component {
+
+	public $message;
+
+	protected $listeners = ['counter-updated' => 'showNewCount'];
+
+	protected function showNewCount($count)
+	{
+		$this->message = "The new count is: $count";
+	}
+}
 ```
 
 ### Listening For Events In JavaScript
 
+Yoyo allows registering event listeners for component emitted events:
+
 ```js
 <script>
-Yoyo.on(window,'productAddedToCart', (event) => {
-	alert('A product was added to the card with ID:' + event.detail.params.productId;
+Yoyo.on('productAddedToCart', id => {
+	alert('A product was added to the cart with ID:' + id
 });
 </script>
 ```
 
-The parameters are the target, eventName, and the event Object respectively.
-
 With this feature you can control toasters, alerts, modals, etc. directly from a component action on the server by emitting the event and listening for it on the browser.
+
+### Dispatching Browser Events
+
+In addition to allowing components to communicate with each other, you can also send browser window events directly from a component method or template:
+
+```php
+// passing single value
+$this->dispatchBrowserEvent('counter-updated', $count);
+
+// Passing an array
+$this->dispatchBrowserEvent('counter-updated', ['count' => $count]);
+```
+
+And listen for the event anywhere on the page:
+
+```js
+<script>
+window.addEventListener('counter-updated', event => {
+	// Reading a single value
+	alert('Counter is now: ' + event.detail);
+
+	// Reading from an array
+	alert('Counter is now: ' + event.detail.count);
+})
+</script>
+```
 
 ## Using Blade
 

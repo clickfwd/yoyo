@@ -2,16 +2,24 @@
 	if (typeof define === 'function' && define.amd) {
 		define([], factory)
 	} else {
-		global.YoyoFactory = factory()
+		global.Yoyo = factory()
 	}
 })(typeof self !== 'undefined' ? self : this, function () {
 	return (function () {
 		'use strict'
 
-		window.Yoyo = window.htmx
+		window.YoyoEngine = window.htmx
 
-		var YoyoFactory = {
+		var Yoyo = {
 			url: null,
+			on(name, callback) {
+				YoyoEngine.on(window, `yoyo:${name}`, (event) => {
+					delete event.detail.elt
+					callback(
+						event.detail.length > 1 ? event.detail : event.detail[0]
+					)
+				})
+			},
 			bootstrap(evt) {
 				const elt = evt.target
 				const yoyoElt = getYoyoElt(elt)
@@ -23,7 +31,7 @@
 
 				const action = '' + evt.detail.path
 				evt.detail.parameters['component'] = `${yoyoName}/${action}`
-				evt.detail.path = YoyoFactory.url
+				evt.detail.path = Yoyo.url
 			},
 			serverYoyoEventMiddleware(evt) {
 				const yoyoElt = getYoyoElt(evt.detail.target)
@@ -169,7 +177,7 @@
 				elements.forEach((elt) => {
 					if (shouldTriggerYoyoEvent(elt.id)) {
 						addServerEventTransient(elt, eventName, params)
-						Yoyo.trigger(elt, `yoyo:${eventName}`)
+						YoyoEngine.trigger(elt, `yoyo:${eventName}`, params)
 					}
 				})
 			}
@@ -179,21 +187,21 @@
 			elt.removeAttribute('yoyo:transient-event')
 		}
 
-		return YoyoFactory
+		return Yoyo
 	})()
 })
 
-Yoyo.defineExtension('yoyo', {
+YoyoEngine.defineExtension('yoyo', {
 	onEvent: function (name, evt) {
 		if (name === 'htmx:configRequest') {
 			if (!evt.target) return
 
-			YoyoFactory.bootstrap(evt)
-			YoyoFactory.serverYoyoEventMiddleware(evt)
+			Yoyo.bootstrap(evt)
+			Yoyo.serverYoyoEventMiddleware(evt)
 		}
 
 		if (name === 'htmx:beforeRequest') {
-			if (!YoyoFactory.url) {
+			if (!Yoyo.url) {
 				console.error('The yoyo URL needs to be defined')
 				evt.preventDefault()
 			}
@@ -202,19 +210,19 @@ Yoyo.defineExtension('yoyo', {
 		if (name === 'htmx:afterRequest') {
 			if (!evt.target) return
 
-			YoyoFactory.afterRequestActions(evt.target)
+			Yoyo.afterRequestActions(evt.target)
 		}
 
 		if (name === 'htmx:beforeSwap') {
 			if (!evt.target) return
 
-			YoyoFactory.processBrowserEventHeader(evt.detail.xhr)
+			Yoyo.processBrowserEventHeader(evt.detail.xhr)
 		}
 
 		if (name === 'htmx:afterSettle') {
 			if (!evt.target) return
 
-			YoyoFactory.processYoyoEmitHeader(evt.detail.xhr)
+			Yoyo.processYoyoEmitHeader(evt.detail.xhr)
 		}
 	},
 })

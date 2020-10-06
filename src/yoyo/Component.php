@@ -104,8 +104,7 @@ abstract class Component
     {
         $listeners = [];
 
-        foreach ($this->listeners as $key => $value )
-        {
+        foreach ($this->listeners as $key => $value) {
             if (is_numeric($key)) {
                 $listeners[$value] = $value;
             } else {
@@ -124,6 +123,11 @@ abstract class Component
     public function parameters($array = [])
     {
         return $this->buildParametersForView($array);
+    }
+
+    public function callListener($action, $params)
+    {
+        return call_user_func_array([$this, $action], $params);
     }
 
     public function render()

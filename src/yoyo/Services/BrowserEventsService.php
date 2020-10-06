@@ -56,13 +56,14 @@ class BrowserEventsService
     {
         $params = $params[0];
 
-        $payload = array_filter(compact('event','params','selector','component','ancestorsOnly'));
-        
+        $payload = array_filter(compact('event', 'params', 'selector', 'component', 'ancestorsOnly'));
+
         $this->eventQueue[] = $payload;
     }
 
-    public function dispatchBrowserEvent($event, $params = []) {
-        $this->browserEventQueue[] = compact('event','params');
+    public function dispatchBrowserEvent($event, $params = [])
+    {
+        $this->browserEventQueue[] = compact('event', 'params');
     }
 
     public function dispatch()
@@ -71,5 +72,4 @@ class BrowserEventsService
 
         $this->response->header('Yoyo-Browser-Event', json_encode($this->browserEventQueue));
     }
-
 }

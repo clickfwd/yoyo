@@ -7,7 +7,6 @@ use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use Clickfwd\Yoyo\Exceptions\FailedToRegisterComponent;
 use Clickfwd\Yoyo\Exceptions\NonPublicComponentMethodCall;
 use Clickfwd\Yoyo\Services\Configuration;
-use ReflectionClass;
 
 class ComponentManager
 {
@@ -32,7 +31,7 @@ class ComponentManager
     {
         return ClassHelpers::getDefaultPublicVars($this->component);
     }
-    
+
     public function getPublicVars()
     {
         if ($this->isAnonymousComponent()) {
@@ -82,29 +81,28 @@ class ComponentManager
     private function processDynamicComponent($action, $variables = [], $attributes = []): string
     {
         $isEventListenerAction = false;
-        
-        $class = get_class($this->component);        
+
+        $class = get_class($this->component);
 
         if (! method_exists($this->component, $action)) {
             // If action is an event listener, re-route it to the listener method
             $listeners = $this->component->getListeners();
 
-            if (!empty($listeners[$action])) {
-        
+            if (! empty($listeners[$action])) {
                 $eventParams = $this->request->input('eventParams', []);
 
                 $isEventListenerAction = true;
-        
+
                 $action = $listeners[$action];
-            }
-            else {
+            } else {
                 throw new ComponentMethodNotFound($class, $action);
             }
         }
 
         $excludedActions = ClassHelpers::getPublicMethodsBaseClass($this->component, ['render']);
 
-        if (in_array($action, $excludedActions) || ClassHelpers::methodIsPrivate($this->component, $action)) {
+        if (in_array($action, $excludedActions) ||
+            (! $isEventListenerAction && ClassHelpers::methodIsPrivate($this->component, $action))) {
             throw new NonPublicComponentMethodCall($class, $action);
         }
 
@@ -115,7 +113,7 @@ class ComponentManager
 
         if ($action !== 'render') {
             if ($isEventListenerAction) {
-                $actionResponse = call_user_func_array(array($this->component, $action), $eventParams);
+                $actionResponse = $this->component->callListener($action, $eventParams);
             } else {
                 $actionResponse = $this->component->$action();
             }

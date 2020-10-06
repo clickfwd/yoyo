@@ -144,7 +144,7 @@ class Yoyo
     public function output($spinning = false): string
     {
         $variables = [];
-        
+
         $componentManager = new ComponentManager($this->request, $this->id, $this->name, $spinning);
 
         $html = $componentManager->process($this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
@@ -152,7 +152,7 @@ class Yoyo
         $defaultValues = $componentManager->getDefaultPublicVars();
 
         $newValues = $componentManager->getPublicVars();
-        
+
         // Automatically include in request public properties, or request variables in the case of anonymous components
 
         $variables = array_merge($defaultValues, $newValues);
@@ -162,7 +162,6 @@ class Yoyo
         $compiledHtml = $this->compile($html, $spinning, $variables, $listeners);
 
         if ($spinning) {
-
             $queryStringKeys = $componentManager->getQueryString();
 
             $queryString = new QueryString($defaultValues, $newValues, $queryStringKeys);

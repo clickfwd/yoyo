@@ -22,7 +22,7 @@ class YoyoCompiler
     private $idCounter = 1;
 
     /**
-     * These will automatically receive a `method` attribute
+     * These will automatically receive a `method` attribute.
      */
     private $reactiveTags = [
         'a',
@@ -216,11 +216,10 @@ class YoyoCompiler
 
             $attributes['vars'] = array_merge($attributes['vars'], $vars);
         }
-        
+
         // Automatically add component public vars to the request only if it's not a POST request
 
-        if (! $element->hasAttribute(self::hxprefix('post')))
-        {
+        if (! $element->hasAttribute(self::hxprefix('post'))) {
             $attributes['vars'] = array_merge($attributes['vars'], $this->variables);
         }
 
@@ -350,7 +349,7 @@ class YoyoCompiler
         }
 
         // Make element reactive if it has the yoyo attribute, or if it's a clickable element
-        if ($element->hasAttribute(self::YOYO_PREFIX) || in_array($element->tagName,$this->reactiveTags)) {
+        if ($element->hasAttribute(self::YOYO_PREFIX) || in_array($element->tagName, $this->reactiveTags)) {
             $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
         }
     }
@@ -370,15 +369,14 @@ class YoyoCompiler
 
         // Include component listeners in trigger attribute
 
-        if (!empty($this->listeners))
-        {
+        if (! empty($this->listeners)) {
             $listeners = array_keys($this->listeners);
-        
-            array_walk($listeners, function (& $eventName) {
+
+            array_walk($listeners, function (&$eventName) {
                 $eventName = self::yoprefix($eventName);
             });
-    
-            $attributes['on'] .= ','.implode(',',$listeners);
+
+            $attributes['on'] .= ','.implode(',', $listeners);
         }
 
         return $attributes;

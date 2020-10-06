@@ -36,7 +36,7 @@ test('component class not found', function () {
 test('counter component render', function () {
     $vars = encode_vars([
         yoprefix_value('id') => 'counter',
-        'count' => 0
+        'count' => 0,
     ]);
 
     expect(render('counter'))->toContain(hxattr('vars', $vars));
