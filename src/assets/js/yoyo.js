@@ -14,25 +14,21 @@
 			url: null,
 			bootstrap(evt) {
 				const elt = evt.target
-				const componentElt = getComponentElt(elt)
-				const componentName = getComponentName(componentElt)
+				const yoyoElt = getYoyoElt(elt)
+				const yoyoName = getYoyoName(yoyoElt)
 
 				if (evt.detail.path === document.location.href) {
 					evt.detail.path = 'render'
 				}
 
 				const action = '' + evt.detail.path
-				evt.detail.parameters[
-					'component'
-				] = `${componentName}/${action}`
+				evt.detail.parameters['component'] = `${yoyoName}/${action}`
 				evt.detail.path = YoyoFactory.url
 			},
-			serverComponentEventMiddleware(evt) {
-				const componentElt = getComponentElt(evt.detail.target)
-				const componentName = getComponentName(componentElt)
-				const eventAttr = componentElt.getAttribute(
-					'yoyo:transient-event'
-				)
+			serverYoyoEventMiddleware(evt) {
+				const yoyoElt = getYoyoElt(evt.detail.target)
+				const yoyoName = getYoyoName(yoyoElt)
+				const eventAttr = yoyoElt.getAttribute('yoyo:transient-event')
 
 				if (!eventAttr) return
 
@@ -41,7 +37,7 @@
 				if (eventData) {
 					evt.detail.parameters[
 						'component'
-					] = `${componentName}/${eventData.name}`
+					] = `${yoyoName}/${eventData.name}`
 
 					evt.detail.parameters = {
 						...evt.detail.parameters,
@@ -53,10 +49,10 @@
 					}
 				}
 			},
-			processComponentEmitHeader(xhr) {
+			processYoyoEmitHeader(xhr) {
 				if (xhr.getAllResponseHeaders().match(/Yoyo-Emit:/i)) {
 					let events = JSON.parse(xhr.getResponseHeader('Yoyo-Emit'))
-					clearComponentEventCache()
+					clearYoyoEventCache()
 					events.forEach((event) => {
 						triggerServerEmittedEvent(event)
 					})
@@ -84,30 +80,30 @@
 		/**
 		 * Track elements receiving multiple emitted events to only trigger the first one
 		 */
-		var componentEventCache = []
+		var yoyoEventCache = []
 
-		function shouldTriggerComponentEvent(id) {
-			if (componentEventCache.indexOf(id) === -1) {
-				componentEventCache.push(id)
+		function shouldTriggerYoyoEvent(id) {
+			if (yoyoEventCache.indexOf(id) === -1) {
+				yoyoEventCache.push(id)
 				return true
 			}
 
 			return false
 		}
 
-		function clearComponentEventCache() {
-			componentEventCache = []
+		function clearYoyoEventCache() {
+			yoyoEventCache = []
 		}
 
-		function getComponentElt(elt) {
+		function getYoyoElt(elt) {
 			return elt.closest('[yoyo\\:name]')
 		}
 
-		function getAllComponentsElt() {
+		function getAllYoyoElts() {
 			return document.querySelectorAll('[yoyo\\:name]')
 		}
 
-		function getComponentName(elt) {
+		function getYoyoName(elt) {
 			return elt.getAttribute('yoyo:name')
 		}
 
@@ -117,21 +113,21 @@
 			return textArea.value
 		}
 
-		function getParentComponents(selector) {
-			let parent = getComponentElt(document.querySelector(selector))
+		function getAncestorYoyoElts(selector) {
+			let ancestor = getYoyoElt(document.querySelector(selector))
 
 			let ancestors = []
 
-			while (parent) {
-				ancestors.push(parent)
-				parent = getComponentElt(parent.parentElement)
+			while (ancestor) {
+				ancestors.push(ancestor)
+				ancestor = getYoyoElt(ancestor.parentElement)
 			}
 
 			return ancestors
 		}
 
 		function addServerEventTransient(elt, event, params) {
-			// Check if component is listening for the event
+			// Check if Yoyo component is listening for the event
 			let componentListeningFor = elt
 				.getAttribute('hx-trigger')
 				.split(',')
@@ -151,27 +147,27 @@
 			const eventName = event.event
 			const params = event.params
 			const selector = event.selector || null
-			const component = event.component || null
-			const parentsOnly = event.parentsOnly || null
+			const yoyoName = event.component || null
+			const ancestorsOnly = event.ancestorsOnly || null
 			let elements
 
-			if (!selector && !component) {
-				elements = getAllComponentsElt()
+			if (!selector && !yoyoName) {
+				elements = getAllYoyoElts()
 			} else if (selector) {
-				if (parentsOnly) {
-					elements = getParentComponents(selector)
+				if (ancestorsOnly) {
+					elements = getAncestorYoyoElts(selector)
 				} else {
 					elements = document.querySelectorAll(selector)
 				}
-			} else if (component) {
+			} else if (yoyoName) {
 				elements = document.querySelectorAll(
-					`[yoyo\\:name="${component}"]`
+					`[yoyo\\:name="${yoyoName}"]`
 				)
 			}
 
 			if (elements) {
 				elements.forEach((elt) => {
-					if (shouldTriggerComponentEvent(elt.id)) {
+					if (shouldTriggerYoyoEvent(elt.id)) {
 						addServerEventTransient(elt, eventName, params)
 						Yoyo.trigger(elt, `yoyo:${eventName}`)
 					}
@@ -193,7 +189,7 @@ Yoyo.defineExtension('yoyo', {
 			if (!evt.target) return
 
 			YoyoFactory.bootstrap(evt)
-			YoyoFactory.serverComponentEventMiddleware(evt)
+			YoyoFactory.serverYoyoEventMiddleware(evt)
 		}
 
 		if (name === 'htmx:beforeRequest') {
@@ -218,7 +214,7 @@ Yoyo.defineExtension('yoyo', {
 		if (name === 'htmx:afterSettle') {
 			if (!evt.target) return
 
-			YoyoFactory.processComponentEmitHeader(evt.detail.xhr)
+			YoyoFactory.processYoyoEmitHeader(evt.detail.xhr)
 		}
 	},
 })

@@ -48,15 +48,15 @@ class BrowserEventsService
     public function emitUp($event, ...$params)
     {
         if ($targetId = $this->request->target()) {
-            $this->queue($event, $params, "#{$targetId}", $component = null, $parentsOnly = true);
+            $this->queue($event, $params, "#{$targetId}", $component = null, $ancestorsOnly = true);
         }
     }
 
-    public function queue($event, $params, $selector = null, $component = null, $parentsOnly = null)
+    public function queue($event, $params, $selector = null, $component = null, $ancestorsOnly = null)
     {
         $params = $params[0];
 
-        $payload = array_filter(compact('event','params','selector','component','parentsOnly'));
+        $payload = array_filter(compact('event','params','selector','component','ancestorsOnly'));
         
         $this->eventQueue[] = $payload;
     }
