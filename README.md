@@ -598,6 +598,21 @@ window.addEventListener('counter-updated', event => {
 })
 </script>
 ```
+## Redirecting
+
+Sometimes you may want to redirect the user to a different page after performing an action within a Yoyo component.
+
+```php
+class Registration extends Component
+{
+    public function register()
+    {
+		// Create the user 
+
+		return $this->redirect('/welcome');
+    }
+}
+```
 
 ## Using Blade
 

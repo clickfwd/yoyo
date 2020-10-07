@@ -39,12 +39,16 @@ class ClassHelpers
     {
         $class = new ReflectionClass(get_class($instance));
 
+        $className = $class->getName();
+
         $properties = $class->getProperties(ReflectionMethod::IS_PUBLIC);
 
         $publicProperties = [];
 
-        foreach ($properties as $row) {
-            $publicProperties[] = $row->name;
+        foreach ($properties as $prop) {
+            if ($prop->class == $className) {
+                $publicProperties[] = $prop->name;
+            }
         }
 
         return $publicProperties;
@@ -52,11 +56,11 @@ class ClassHelpers
 
     public static function getPublicMethods($instance, $exceptions = [])
     {
-        $class_tmp = new ReflectionClass(get_class($instance));
+        $class = new ReflectionClass(get_class($instance));
 
-        $className = $class_tmp->getName();
+        $className = $class->getName();
 
-        $methods = $class_tmp->getMethods(ReflectionMethod::IS_PUBLIC);
+        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method) {
             if ($method->class == $className && ! in_array($method->name, $exceptions)) {

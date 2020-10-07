@@ -3,6 +3,7 @@
 namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Concerns\BrowserEvents;
+use Clickfwd\Yoyo\Concerns\Redirector;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
 use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
@@ -13,6 +14,7 @@ use ReflectionMethod;
 abstract class Component
 {
     use BrowserEvents;
+    use Redirector;
 
     protected $yoyo_id;
 

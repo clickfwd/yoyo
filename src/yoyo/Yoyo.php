@@ -7,6 +7,7 @@ use Clickfwd\Yoyo\Exceptions\IncompleteComponentParamInRequest;
 use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
 use Clickfwd\Yoyo\Services\BrowserEventsService;
 use Clickfwd\Yoyo\Services\Configuration;
+use Clickfwd\Yoyo\Services\PageRedirectService;
 use Clickfwd\Yoyo\Services\Request;
 use Clickfwd\Yoyo\Services\Response;
 use Clickfwd\Yoyo\Services\UrlStateManagerService;
@@ -179,6 +180,10 @@ class Yoyo
             $eventsService = BrowserEventsService::getInstance();
 
             $eventsService->dispatch();
+
+            // Browser Redirect
+
+            (PageRedirectService::getInstance())->redirect($componentManager->getComponentInstance()->redirectTo);
         }
 
         return (Response::getInstance())->send($compiledHtml);

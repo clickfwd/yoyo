@@ -33,31 +33,18 @@
 				evt.detail.parameters['component'] = `${yoyoName}/${action}`
 				evt.detail.path = Yoyo.url
 			},
-			serverYoyoEventMiddleware(evt) {
-				const yoyoElt = getYoyoElt(evt.detail.target)
-				const yoyoName = getYoyoName(yoyoElt)
-				const eventAttr = yoyoElt.getAttribute('yoyo:transient-event')
-
-				if (!eventAttr) return
-
-				const eventData = JSON.parse(eventAttr)
-
-				if (eventData) {
-					evt.detail.parameters[
-						'component'
-					] = `${yoyoName}/${eventData.name}`
-
-					evt.detail.parameters = {
-						...evt.detail.parameters,
-						...{
-							eventParams: eventData.params
-								? JSON.stringify(eventData.params)
-								: [],
-						},
+			yoyoRequestMiddleware(evt) {
+				eventsMiddleware(evt)
+			},
+			processRedirectHeader(xhr) {
+				if (xhr.getAllResponseHeaders().match(/Yoyo-Redirect:/i)) {
+					const url = xhr.getResponseHeader('Yoyo-Redirect')
+					if (url) {
+						window.location = url
 					}
 				}
 			},
-			processYoyoEmitHeader(xhr) {
+			processEmitHeader(xhr) {
 				if (xhr.getAllResponseHeaders().match(/Yoyo-Emit:/i)) {
 					let events = JSON.parse(xhr.getResponseHeader('Yoyo-Emit'))
 					clearYoyoEventCache()
@@ -134,6 +121,31 @@
 			return ancestors
 		}
 
+		function eventsMiddleware(evt) {
+			const yoyoElt = getYoyoElt(evt.detail.target)
+			const yoyoName = getYoyoName(yoyoElt)
+			const eventAttr = yoyoElt.getAttribute('yoyo:transient-event')
+
+			if (!eventAttr) return
+
+			const eventData = JSON.parse(eventAttr)
+
+			if (eventData) {
+				evt.detail.parameters[
+					'component'
+				] = `${yoyoName}/${eventData.name}`
+
+				evt.detail.parameters = {
+					...evt.detail.parameters,
+					...{
+						eventParams: eventData.params
+							? JSON.stringify(eventData.params)
+							: [],
+					},
+				}
+			}
+		}
+
 		function addServerEventTransient(elt, event, params) {
 			// Check if Yoyo component is listening for the event
 			let componentListeningFor = elt
@@ -197,7 +209,7 @@ YoyoEngine.defineExtension('yoyo', {
 			if (!evt.target) return
 
 			Yoyo.bootstrap(evt)
-			Yoyo.serverYoyoEventMiddleware(evt)
+			Yoyo.yoyoRequestMiddleware(evt)
 		}
 
 		if (name === 'htmx:beforeRequest') {
@@ -222,7 +234,8 @@ YoyoEngine.defineExtension('yoyo', {
 		if (name === 'htmx:afterSettle') {
 			if (!evt.target) return
 
-			Yoyo.processYoyoEmitHeader(evt.detail.xhr)
+			Yoyo.processRedirectHeader(evt.detail.xhr)
+			Yoyo.processEmitHeader(evt.detail.xhr)
 		}
 	},
 })
