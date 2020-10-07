@@ -16,7 +16,7 @@
 
 ## Introduction
 
-Yoyo is a PHP framework you can use on any project to create rich dynamic interfaces using server-rendered HTML.
+Yoyo is a full-stack PHP framework that you can use on any project to create rich dynamic interfaces using server-rendered HTML.
 
 With Yoyo, you create reactive components that are seamlessly updated without the need to write any Javascript code.
 
