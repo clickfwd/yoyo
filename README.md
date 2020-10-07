@@ -608,9 +608,9 @@ class Registration extends Component
 {
     public function register()
     {
-		// Create the user 
+	// Create the user 
 
-		return $this->redirect('/welcome');
+	$this->redirect('/welcome');
     }
 }
 ```
