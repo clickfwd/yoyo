@@ -12,6 +12,11 @@
 
 		var Yoyo = {
 			url: null,
+			config(options) {
+				Object.keys(options).forEach((key) => {
+					YoyoEngine.config[key] = options[key]
+				})
+			},
 			on(name, callback) {
 				YoyoEngine.on(window, `yoyo:${name}`, (event) => {
 					delete event.detail.elt
