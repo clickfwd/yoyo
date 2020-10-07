@@ -9,6 +9,7 @@
 - [Actions](#actions)
 - [Computed Properties](#computed-properties)
 - [Events](#events)
+- [Redirecting](#redirecting)
 - [Query String](#query-string)
 - [Using Blade](#using-blade)
 - [Using Twig](#using-twig)
