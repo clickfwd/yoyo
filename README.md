@@ -1,6 +1,15 @@
 # Yoyo
 
-- [Introduction](#introduction)
+Yoyo is a full-stack PHP framework that you can use on any project to create rich dynamic interfaces using server-rendered HTML.
+
+With Yoyo, you create reactive components that are seamlessly updated without the need to write any Javascript code.
+
+Yoyo ships with a simple templating system, and  offers out-of-the-box support for [Blade](https://laravel.com/docs/8.x/blade), without having to use Laravel, and [Twig](https://twig.symfony.com/).
+
+Inspired by [Laravel Livewire](https://laravel-livewire.com/) and [Sprig](https://putyourlightson.com/plugins/sprig), and using [htmx](https://htmx.org/).
+
+🚀  Look at the [Yoyo Demo App](https://app.getyoyo.dev) to get a better idea of what you can build with Yoyo. It showcases many different types of Yoyo components.
+
 - [How it Works](#how-it-works)
 - [Installation](#installation)
 - [Creating Components](#creating-components)
@@ -14,16 +23,6 @@
 - [Using Blade](#using-blade)
 - [Using Twig](#using-twig)
 - [License](#license)
-
-## Introduction
-
-Yoyo is a full-stack PHP framework that you can use on any project to create rich dynamic interfaces using server-rendered HTML.
-
-With Yoyo, you create reactive components that are seamlessly updated without the need to write any Javascript code.
-
-Yoyo ships with a simple templating system, and  offers out-of-the-box support for [Blade](https://laravel.com/docs/8.x/blade), without having to use Laravel, and [Twig](https://twig.symfony.com/).
-
-Inspired by [Laravel Livewire](https://laravel-livewire.com/) and [Sprig](https://putyourlightson.com/plugins/sprig), and using [htmx](https://htmx.org/).
 
 ## How it Works
 
