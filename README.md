@@ -8,7 +8,14 @@ Yoyo ships with a simple templating system, and  offers out-of-the-box support f
 
 Inspired by [Laravel Livewire](https://laravel-livewire.com/) and [Sprig](https://putyourlightson.com/plugins/sprig), and using [htmx](https://htmx.org/).
 
-🚀  Look at the [Yoyo Demo App](https://app.getyoyo.dev) to get a better idea of what you can build with Yoyo. It showcases many different types of Yoyo components.
+## 🚀 Yoyo Demo Apps  
+
+Check out the [Yoyo Demo App](https://app.getyoyo.dev) to get a better idea of what you can build with Yoyo. It showcases many different types of Yoyo components. You can also clone and install the demo apps:
+
+- [Yoyo App with built-in templating](https://github.com/clickfwd/yoyo-app)
+- [Yoyo Blade App](https://github.com/clickfwd/yoyo-blade-app)
+
+## Documentation 
 
 - [How it Works](#how-it-works)
 - [Installation](#installation)
