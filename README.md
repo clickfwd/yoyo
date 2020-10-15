@@ -14,6 +14,7 @@ Check out the [Yoyo Demo App](https://app.getyoyo.dev) to get a better idea of w
 
 - [Yoyo App with built-in templating](https://github.com/clickfwd/yoyo-app)
 - [Yoyo Blade App](https://github.com/clickfwd/yoyo-blade-app)
+- [Yoyo Twig App](https://github.com/clickfwd/yoyo-twig-app)
 
 ## Documentation 
 
