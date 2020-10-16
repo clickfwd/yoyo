@@ -141,7 +141,7 @@
 		}
 
 		function eventsMiddleware(evt) {
-			const yoyoElt = getYoyoElt(evt.detail.target)
+			const yoyoElt = getYoyoElt(evt.detail.elt)
 			const yoyoName = getYoyoName(yoyoElt)
 			const eventAttr = yoyoElt.getAttribute('yoyo:transient-event')
 
