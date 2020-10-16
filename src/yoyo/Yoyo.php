@@ -158,6 +158,8 @@ class Yoyo
 
         $variables = array_merge($defaultValues, $newValues);
 
+        $variables = array_filter($variables, 'strlen');
+
         $listeners = $componentManager->getListeners();
 
         $compiledHtml = $this->compile($html, $spinning, $variables, $listeners);

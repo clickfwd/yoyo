@@ -12,6 +12,9 @@ use function Tests\render;
 use function Tests\response;
 use function Tests\update;
 use function Tests\yoprefix_value;
+use function Tests\mockYoyoGetRequest;
+use function Tests\resetYoyoRequest;
+use function Tests\yoyo_update;
 
 beforeAll(function () {
     $yoyo = new Yoyo();
@@ -20,6 +23,7 @@ beforeAll(function () {
       'namespace' => 'Tests\\App\\Yoyo\\',
     ]);
 
+    require_once __DIR__.'/../app/Yoyo/ActionArguments.php';
     require_once __DIR__.'/../app/Yoyo/Counter.php';
     require_once __DIR__.'/../app/Yoyo/ComputedProperty.php';
     require_once __DIR__.'/../app/Yoyo/ComputedPropertyCache.php';
@@ -76,4 +80,16 @@ test('component computed property', function () {
 test('component computed property cache', function () {
     $output = render('computed-property-cache');
     expect(htmlformat($output))->toEqual(response('computed-property-cache'));
+});
+
+test('action parameters passed to component method arguments', function () {
+    mockYoyoGetRequest('http://example.com/', 'action-arguments/someAction', '', [
+        'actionArgs' => "'1','foo'"
+    ]);
+
+    $output = yoyo_update();
+
+    resetYoyoRequest();
+
+    expect(htmlformat($output))->toEqual(response('action-arguments'));
 });

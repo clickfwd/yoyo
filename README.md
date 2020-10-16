@@ -438,13 +438,42 @@ All components automatically listen for the `refresh` event and trigger the `ren
 
 ### Passing Data to Actions
 
-You can include additional data to send to the component on update requests using the `yoyo:vars` directive which accepts a separated list of `key:<expression>` values.
+You can include additional data to send to the server con component update requests using the `yoyo:vars` directive which accepts a separated list of `key:<expression>` values.
 
-```
-<button yoyo:on="click" yoyo:get="helpful" yoyo:vars="id:100">Found Helpful</button>
+```html
+<button yoyo:on="click" yoyo:get="helpful" yoyo:vars="reviewId:100">Found Helpful</button>
 ```
 
-Yoyo will automatically track and send component public properties and input values with every request. The `yoyo:vars` directive allows including additional parameters.
+Yoyo will automatically track and send component public properties and input values with every request. 
+
+```php
+class Review extends Component {
+
+	public $reviewId;
+
+	public function helpful()
+	{
+		// access reviewId via $this->reviewId
+	}
+}
+```
+
+You can also pass extra parameters to an action as arguments using an expression, without having to define them as public properties in the component:
+
+```html
+<button yoyo:get="addToCart(<?php echo $productId; ?>, '<?php echo $style; ?>')">
+    Add Todo
+</button>
+```
+
+Extra parameters passed to an action are to the component method as regular arguments:
+
+```php
+public function addToCart($productId, $style)
+{
+    // ...
+}
+```
 
 ## Computed Properties
 

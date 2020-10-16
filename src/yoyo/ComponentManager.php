@@ -113,9 +113,11 @@ class ComponentManager
 
         if ($action !== 'render') {
             if ($isEventListenerAction) {
-                $actionResponse = $this->component->callListener($action, $eventParams);
+                $actionResponse = $this->component->callActionWithArguments($action, $eventParams);
             } else {
-                $actionResponse = $this->component->$action();
+                $actionArguments = $this->parseActionArguments();
+
+                $actionResponse = $this->component->callActionWithArguments($action, $actionArguments);
             }
 
             $type = gettype($actionResponse);
@@ -136,6 +138,22 @@ class ComponentManager
         }
 
         return $view;
+    }
+
+    private function parseActionArguments()
+    {
+        $args = [];
+
+        $stringArgs = $this->request->input('actionArgs');
+
+        foreach (explode(',', $stringArgs) as $arg) {
+            $arg = trim(str_replace(['"', "'"], '', $arg));
+            if (strlen($arg)) {
+                $args[] = is_numeric($arg) ? (int) $arg : $arg;
+            }
+        }
+
+        return $args;
     }
 
     private function processAnonymousComponent($variables = [], $attributes = []): string

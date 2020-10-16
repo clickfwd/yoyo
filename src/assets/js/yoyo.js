@@ -34,7 +34,8 @@
 					evt.detail.path = 'render'
 				}
 
-				const action = '' + evt.detail.path
+				const action = getActionAndParseArguments(evt.detail)
+
 				evt.detail.parameters['component'] = `${yoyoName}/${action}`
 				evt.detail.path = Yoyo.url
 			},
@@ -81,6 +82,19 @@
 		 * Track elements receiving multiple emitted events to only trigger the first one
 		 */
 		var yoyoEventCache = []
+
+		function getActionAndParseArguments(detail) {
+			let path = detail.path
+			const match = path.match(/(.*)\((.*)\)/)
+
+			if (match) {
+				path = match[1]
+				detail.parameters['actionArgs'] = match[2]
+			}
+
+			const action = '' + path
+			return action
+		}
 
 		function shouldTriggerYoyoEvent(id) {
 			if (yoyoEventCache.indexOf(id) === -1) {

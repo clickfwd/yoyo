@@ -34,11 +34,11 @@ function yoyo_update()
     return (new Yoyo())->update();
 }
 
-function mockYoyoGetRequest($url, $component, $target = '')
+function mockYoyoGetRequest($url, $component, $target = '', $parameters = [])
 {
-    $request = [
+    $request = array_merge([
         'component' => $component,
-    ];
+    ], $parameters);
 
     $server = [
         'REQUEST_METHOD' => 'GET',
@@ -50,6 +50,11 @@ function mockYoyoGetRequest($url, $component, $target = '')
     $requestService = Request::mock($request, $server);
 
     return $requestService;
+}
+
+function resetYoyoRequest()
+{
+    Request::reset();
 }
 
 function headers()

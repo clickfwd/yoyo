@@ -32,7 +32,7 @@ class Configuration
 
     public static function scriptsPath()
     {
-        return rtrim(self::$options['scriptsPath'],'/');
+        return rtrim(self::$options['scriptsPath'], '/');
     }
 
     public static function swap()

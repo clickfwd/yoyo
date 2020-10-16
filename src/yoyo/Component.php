@@ -127,9 +127,9 @@ abstract class Component
         return $this->buildParametersForView($array);
     }
 
-    public function callListener($action, $params)
+    public function callActionWithArguments($action, $args)
     {
-        return call_user_func_array([$this, $action], $params);
+        return call_user_func_array([$this, $action], $args);
     }
 
     public function render()

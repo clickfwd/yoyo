@@ -27,6 +27,15 @@ class Request
         return static::$instance;
     }
 
+    public static function reset()
+    {
+        $_REQUEST = [];
+
+        $_SERVER = [];
+
+        static::$instance = new self();
+    }
+
     public function all()
     {
         return array_map(function ($value) {
