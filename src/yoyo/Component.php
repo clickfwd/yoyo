@@ -20,6 +20,8 @@ abstract class Component
 
     protected $componentName;
 
+    protected $componentAction;
+
     protected $variables;
 
     protected $request;
@@ -129,6 +131,8 @@ abstract class Component
 
     public function callActionWithArguments($action, $args)
     {
+        $this->componentAction = $action;
+
         return call_user_func_array([$this, $action], $args);
     }
 

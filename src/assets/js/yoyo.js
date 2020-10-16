@@ -196,7 +196,7 @@
 				if (ancestorsOnly) {
 					elements = getAncestorYoyoElts(selector)
 				} else {
-					elements = document.querySelectorAll(selector)
+					elements = [getYoyoElt(document.querySelector(selector))]
 				}
 			} else if (yoyoName) {
 				elements = document.querySelectorAll(
@@ -238,10 +238,22 @@ YoyoEngine.defineExtension('yoyo', {
 			}
 		}
 
-		if (name === 'htmx:afterRequest') {
-			if (!evt.target) return
+		if (name === 'htmx:afterOnLoad') {
+			if (!evt.target) {
+				return
+			}
 
-			Yoyo.afterRequestActions(evt.target)
+			setTimeout(() => {
+				Yoyo.afterRequestActions(evt.target)
+			}, 125)
+
+			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
+			// so we run those actions here
+			if (evt.target !== evt.detail.target) {
+				Yoyo.processEmitHeader(evt.detail.xhr)
+				Yoyo.processBrowserEventHeader(evt.detail.xhr)
+				Yoyo.processRedirectHeader(evt.detail.xhr)
+			}
 		}
 
 		if (name === 'htmx:beforeSwap') {
@@ -253,8 +265,8 @@ YoyoEngine.defineExtension('yoyo', {
 		if (name === 'htmx:afterSettle') {
 			if (!evt.target) return
 
-			Yoyo.processRedirectHeader(evt.detail.xhr)
 			Yoyo.processEmitHeader(evt.detail.xhr)
+			Yoyo.processRedirectHeader(evt.detail.xhr)
 		}
 	},
 })

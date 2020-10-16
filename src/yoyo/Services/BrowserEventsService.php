@@ -40,21 +40,21 @@ class BrowserEventsService
 
     public function emitSelf($event, ...$params)
     {
-        if ($targetId = $this->request->target()) {
+        if ($targetId = $this->request->triggerId()) {
             $this->emitTo("#{$targetId}", $event, $params);
         }
     }
 
     public function emitUp($event, ...$params)
     {
-        if ($targetId = $this->request->target()) {
+        if ($targetId = $this->request->triggerId()) {
             $this->queue($event, $params, "#{$targetId}", $component = null, $ancestorsOnly = true);
         }
     }
 
     public function queue($event, $params, $selector = null, $component = null, $ancestorsOnly = null)
     {
-        $params = $params[0];
+        $params = array_filter($params[0]);
 
         $payload = array_filter(compact('event', 'params', 'selector', 'component', 'ancestorsOnly'));
 
@@ -63,6 +63,8 @@ class BrowserEventsService
 
     public function dispatchBrowserEvent($event, $params = [])
     {
+        $params = array_filter($params);
+
         $this->browserEventQueue[] = compact('event', 'params');
     }
 

@@ -120,8 +120,8 @@ class Request
         unset($this->server['HTTP_HX_REQUEST']);
     }
 
-    public function target()
+    public function triggerId()
     {
-        return $this->server['HTTP_HX_TARGET'] ?? null;
+        return $this->server['HTTP_HX_TRIGGER'];
     }
 }
