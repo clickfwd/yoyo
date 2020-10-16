@@ -20,6 +20,7 @@ Check out the [Yoyo Demo App](https://app.getyoyo.dev) to get a better idea of w
 
 - [How it Works](#how-it-works)
 - [Installation](#installation)
+- [Updating](#updating)
 - [Creating Components](#creating-components)
 - [Rendering Components](#rendering-components)
 - [Properties](#properties)
@@ -86,6 +87,10 @@ Yes, it's that simple!
 ```bash
 composer require clickfwd/yoyo
 ```
+
+## Updating
+
+After performing the usual `composer update`, remember to also update the `yoyo.js` script per the [Load Assets](#load-assets) instructions.
 
 ### Configure Yoyo
 
