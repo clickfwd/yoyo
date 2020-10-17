@@ -480,6 +480,23 @@ public function addToCart($productId, $style)
 }
 ```
 
+### Actions Without a Response
+
+Sometimes you may want to use a component action only to make changes to a database and trigger events, without rendering a response. You can use the component `end` method for this:
+
+```php
+public function savePost() 
+{
+	// Store the post to the database
+
+	// Send event to the browser to close modal, or trigger a notification
+	$this->emitSelf('PostSaved');
+
+	// End the action and skip template rendering
+	$this->end();
+}
+```
+
 ## Computed Properties
 
 ```php
