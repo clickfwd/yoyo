@@ -18,7 +18,7 @@
 				})
 			},
 			on(name, callback) {
-				YoyoEngine.on(window, `yoyo:${name}`, (event) => {
+				YoyoEngine.on(window, name, (event) => {
 					delete event.detail.elt
 					callback(
 						event.detail.length > 1 ? event.detail : event.detail[0]
@@ -172,7 +172,7 @@
 				.split(',')
 				.filter((name) => name.trim())
 
-			if (componentListeningFor.indexOf(`yoyo:${event}`) === -1) {
+			if (componentListeningFor.indexOf(event) === -1) {
 				return
 			}
 
@@ -212,13 +212,7 @@
 							eventName,
 							params
 						)
-						YoyoEngine.trigger(elt, `yoyo:${eventName}`, params)
-						elt.dispatchEvent(
-							new CustomEvent(eventName, {
-								bubbles: true,
-								detail: params,
-							})
-						)
+						YoyoEngine.trigger(elt, eventName, params)
 					}
 				})
 			}

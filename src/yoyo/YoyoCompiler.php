@@ -372,10 +372,6 @@ class YoyoCompiler
         if (! empty($this->listeners)) {
             $listeners = array_keys($this->listeners);
 
-            array_walk($listeners, function (&$eventName) {
-                $eventName = self::yoprefix($eventName);
-            });
-
             $attributes['on'] .= ','.implode(',', $listeners);
         }
 
