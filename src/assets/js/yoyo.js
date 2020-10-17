@@ -263,7 +263,10 @@ YoyoEngine.defineExtension('yoyo', {
 
 			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
 			// so we run those actions here
-			if (evt.target !== evt.detail.target) {
+			if (
+				evt.target !== evt.detail.target ||
+				evt.detail.xhr.status == 204
+			) {
 				Yoyo.processEmitHeader(evt.detail.xhr)
 				Yoyo.processBrowserEventHeader(evt.detail.xhr)
 				Yoyo.processRedirectHeader(evt.detail.xhr)

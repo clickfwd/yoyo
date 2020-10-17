@@ -8,6 +8,7 @@ use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
 use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
 use Clickfwd\Yoyo\Services\Request;
+use Clickfwd\Yoyo\Services\Response;
 use Closure;
 use ReflectionMethod;
 
@@ -32,6 +33,8 @@ abstract class Component
 
     protected $listeners = [];
 
+    protected $noResponse = false;
+
     protected $computedPropertyCache = [];
 
     private static $excludePublicMethods = [
@@ -48,6 +51,8 @@ abstract class Component
         $this->componentName = $name;
 
         $this->request = Request::getInstance();
+
+        $this->response = Response::getInstance();
     }
 
     public function spinning(bool $spinning)
@@ -138,7 +143,20 @@ abstract class Component
 
     public function render()
     {
-        return $this->view($this->componentName);
+        if (! $this->noResponse)
+        {
+            return $this->view($this->componentName);
+        }
+
+        // No Content
+        $this->response->status(204);
+
+        return null;
+    }
+
+    public function end()
+    {
+        $this->noResponse = true;
     }
 
     protected function view($template, $vars = []): ViewInterface

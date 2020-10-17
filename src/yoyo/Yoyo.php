@@ -142,7 +142,7 @@ class Yoyo
         return [$name, $action];
     }
 
-    public function output($spinning = false): string
+    public function output($spinning = false)
     {
         $variables = [];
 

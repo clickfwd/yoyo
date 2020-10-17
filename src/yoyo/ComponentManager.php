@@ -131,6 +131,10 @@ class ComponentManager
 
         $view = $this->component->render();
 
+        if (is_null($view)) {
+            return '';
+        }
+        
         // For string based templates
 
         if (is_string($view)) {

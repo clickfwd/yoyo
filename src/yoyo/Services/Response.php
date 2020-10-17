@@ -10,9 +10,18 @@ class Response
 
     private $headers = [];
 
+    private $status = 200;
+
     public function header($name, $value)
     {
         $this->headers[$name] = $value;
+
+        return $this;
+    }
+
+    public function status($code) 
+    {
+        $this->status = $code;
 
         return $this;
     }
@@ -23,7 +32,9 @@ class Response
             header("$key: $value");
         }
 
-        return $content;
+        http_response_code($this->status);
+        
+        return $content ?: null;
     }
 
     public function getHeaders()
