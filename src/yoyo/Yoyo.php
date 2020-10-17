@@ -158,7 +158,7 @@ class Yoyo
 
         $variables = array_merge($defaultValues, $newValues);
 
-        $variables = array_filter($variables, 'strlen');
+        $variables = YoyoHelpers::removeEmptyValues($variables);
 
         $listeners = $componentManager->getListeners();
 

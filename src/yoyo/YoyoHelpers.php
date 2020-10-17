@@ -76,4 +76,22 @@ class YoyoHelpers
 
         return $randomString;
     }
+
+    public static function removeEmptyValues(array &$array)
+    {
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                $value = self::removeEmptyValues($value);
+            }
+
+            if (is_array($value) && empty($value)) {
+                unset($array[$key]);
+            }
+
+            if (is_string($value) && !strlen($value)) {
+                unset($array[$key]);
+            }
+        }
+        return $array;
+    }
 }
