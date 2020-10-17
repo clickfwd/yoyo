@@ -224,6 +224,20 @@
 
 YoyoEngine.defineExtension('yoyo', {
 	onEvent: function (name, evt) {
+		if (name === 'htmx:processedNode') {
+			// For requests targeting a specific ID, create and append to body if not present
+			const targetId = evt.srcElement.getAttribute('hx-target')
+			if (
+				targetId &&
+				targetId[0] == '#' &&
+				document.querySelector(targetId) === null
+			) {
+				let targetDiv = document.createElement('div')
+				targetDiv.setAttribute('id', targetId.replace('#', ''))
+				document.body.appendChild(targetDiv)
+			}
+		}
+
 		if (name === 'htmx:configRequest') {
 			if (!evt.target) return
 
