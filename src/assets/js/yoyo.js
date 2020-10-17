@@ -196,7 +196,7 @@
 				if (ancestorsOnly) {
 					elements = getAncestorYoyoElts(selector)
 				} else {
-					elements = [getYoyoElt(document.querySelector(selector))]
+					elements = [document.querySelector(selector)]
 				}
 			} else if (yoyoName) {
 				elements = document.querySelectorAll(
@@ -207,8 +207,18 @@
 			if (elements) {
 				elements.forEach((elt) => {
 					if (shouldTriggerYoyoEvent(elt.id)) {
-						addServerEventTransient(elt, eventName, params)
+						addServerEventTransient(
+							getYoyoElt(elt),
+							eventName,
+							params
+						)
 						YoyoEngine.trigger(elt, `yoyo:${eventName}`, params)
+						elt.dispatchEvent(
+							new CustomEvent(eventName, {
+								bubbles: true,
+								detail: params,
+							})
+						)
 					}
 				})
 			}
