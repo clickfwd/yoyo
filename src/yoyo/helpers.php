@@ -10,9 +10,24 @@ if (! function_exists('yoyo_render')) {
 }
 
 if (! function_exists('yoyo_scripts')) {
-    function yoyo_scripts(): void
+    function yoyo_scripts($return = false)
     {
-        Clickfwd\Yoyo\Services\Configuration::scripts();
+        $output = Clickfwd\Yoyo\Services\Configuration::scripts();
+        if ($return) {
+            return $output;
+        }
+        echo $output;
+    }
+}
+
+if (! function_exists('yoyo_styles')) {
+    function yoyo_styles($return = false)
+    {
+        $output = Clickfwd\Yoyo\Services\Configuration::styles();
+        if ($return) {
+            return $output;
+        }
+        echo $output;
     }
 }
 

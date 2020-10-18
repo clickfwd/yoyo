@@ -40,25 +40,57 @@ class Configuration
         return self::$options['defaultSwap'] ?? 'outerHTML';
     }
 
-    public static function scripts(): void
+    public static function scripts($return = false) 
     {
-        ?>
-        <?php if (empty(self::$options['htmx'])):?>
-        <script src="https://unpkg.com/htmx.org@<?php echo self::$htmx; ?>/dist/htmx.js"></script>
-        <?php else: ?>
-        <script src="<?php echo self::$options['htmx']; ?>"></script>
-        <?php endif; ?>
-        <script src="<?php echo self::scriptsPath(); ?>/yoyo.js"></script>
-        <script>
-        Yoyo.url = '<?php echo self::url(); ?>';
-        Yoyo.config({
-            defaultSwapStyle: '<?php echo self::swap(); ?>',
-            indicatorClass:	'yoyo-indicator',
-            requestClass:	'yoyo-request',
-            settlingClass:	'yoyo-settling',
-            swappingClass:	'yoyo-swapping'
-        });
-        </script>
-        <?php
+        return self::minify(self::javascriptAssets());
+    }
+
+    public static function styles() 
+    {
+        return self::minify(self::cssAssets());
+    }    
+
+    public static function javascriptAssets(): string
+    {
+        if (empty(self::$options['htmx'])) {
+            $htmxSrc = 'https://unpkg.com/htmx.org@'.self::$htmx.'/dist/htmx.js';
+        }
+        else {
+            $htmxSrc = self::$options['htmx'];
+        }
+        $scriptsPath = self::scriptsPath();
+        $yoyoUrl = self::url();
+        $defaultSwap = self::swap();
+        
+        return <<<HTML
+<script src="{$htmxSrc}"></script>
+<script src="{$scriptsPath}/yoyo.js"></script>
+<script>
+Yoyo.url = '{$yoyoUrl}';
+Yoyo.config({
+    defaultSwapStyle: '{$defaultSwap}',
+    indicatorClass:	'yoyo-indicator',
+    requestClass:	'yoyo-request',
+    settlingClass:	'yoyo-settling',
+    swappingClass:	'yoyo-swapping'
+});
+</script>
+HTML;
+    }
+
+    public static function cssAssets() 
+    {
+        return <<<HTML
+<style>
+    [yoyo\:loading], [yoyo\:loading\.delay] {
+        display: none;
+    }
+</style>
+HTML;
+    }
+
+    protected static function minify($string)
+    {
+        return preg_replace('~(\v|\t|\s{2,})~m', '', $string);
     }
 }
