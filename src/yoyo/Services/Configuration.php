@@ -82,7 +82,7 @@ HTML;
     {
         return <<<HTML
 <style>
-    [yoyo\:loading], [yoyo\:loading\.delay] {
+    [yoyo\:spinning], [yoyo\:spinning\.delay] {
         display: none;
     }
 </style>

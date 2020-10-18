@@ -25,10 +25,30 @@
 					)
 				})
 			},
-			bootstrap(evt) {
+			processedNode(evt) {
+				// Dynamically create non-existent target IDs by appending them to document body
+				const targetId = evt.srcElement.getAttribute('hx-target')
+
+				if (
+					targetId &&
+					targetId[0] == '#' &&
+					document.querySelector(targetId) === null
+				) {
+					let targetDiv = document.createElement('div')
+					targetDiv.setAttribute('id', targetId.replace('#', ''))
+					document.body.appendChild(targetDiv)
+				}
+
+				if (!evt.srcElement || !isComponent(evt.srcElement)) {
+					return
+				}
+
+				initializeComponentSpinners(getComponent(evt.srcElement))
+			},
+			bootstrapRequest(evt) {
 				const elt = evt.target
-				const yoyoElt = getYoyoElt(elt)
-				const yoyoName = getYoyoName(yoyoElt)
+				let component = getComponent(elt)
+				const componentName = getComponentName(component)
 
 				if (evt.detail.path === document.location.href) {
 					evt.detail.path = 'render'
@@ -36,10 +56,15 @@
 
 				const action = getActionAndParseArguments(evt.detail)
 
-				evt.detail.parameters['component'] = `${yoyoName}/${action}`
+				evt.detail.parameters[
+					'component'
+				] = `${componentName}/${action}`
 				evt.detail.path = Yoyo.url
+
+				// Make request info available to other events
+				component.__yoyo_action = action
 			},
-			yoyoRequestMiddleware(evt) {
+			middleware(evt) {
 				eventsMiddleware(evt)
 			},
 			processRedirectHeader(xhr) {
@@ -75,13 +100,74 @@
 			},
 			afterRequestActions(elt) {
 				removeServerEventTransient(elt)
+				let component = getComponent(elt)
+				delete component.__yoyo_action
+			},
+			spinningStart(evt) {
+				let component = getComponent(evt.detail.elt)
+				const yoyoId = component.id
+
+				if (!yoyoSpinners[yoyoId]) {
+					return
+				}
+
+				let spinningElts = yoyoSpinners[yoyoId].generic || []
+
+				spinningElts = spinningElts.concat(
+					yoyoSpinners[yoyoId]?.actions[component.__yoyo_action] || []
+				)
+
+				spinningElts.forEach((directive) => {
+					const spinnerElt = directive.elt
+					if (directive.modifiers.includes('class')) {
+						let classes = directive.value.split(' ').filter(Boolean)
+
+						doAndSetCallbackOnElToUndo(
+							component,
+							directive,
+							() => directive.elt.classList.add(...classes),
+							() => spinnerElt.classList.remove(...classes)
+						)
+					} else if (directive.modifiers.includes('attr')) {
+						doAndSetCallbackOnElToUndo(
+							component,
+							directive,
+							() =>
+								directive.elt.setAttribute(
+									directive.value,
+									true
+								),
+							() => spinnerElt.removeAttribute(directive.value)
+						)
+					} else {
+						doAndSetCallbackOnElToUndo(
+							component,
+							directive,
+							() => (spinnerElt.style.display = 'inline-block'),
+							() => (spinnerElt.style.display = 'none')
+						)
+					}
+				})
+			},
+			spinningStop(evt) {
+				const component = getComponent(evt.detail.elt)
+
+				if (!component.__yoyo_on_finish_loading) {
+					return
+				}
+
+				while (component.__yoyo_on_finish_loading.length > 0) {
+					component.__yoyo_on_finish_loading.shift()()
+				}
 			},
 		}
 
 		/**
-		 * Track elements receiving multiple emitted events to only trigger the first one
+		 * Tracking for elements receiving multiple emitted events to only trigger the first one
 		 */
-		var yoyoEventCache = []
+		let yoyoEventCache = []
+
+		let yoyoSpinners = {}
 
 		function getActionAndParseArguments(detail) {
 			let path = detail.path
@@ -96,8 +182,43 @@
 			return action
 		}
 
+		function isComponent(elt) {
+			return elt.hasAttribute('yoyo:name')
+		}
+
+		function getComponent(elt) {
+			return elt.closest('[yoyo\\:name]')
+		}
+
+		function getAllcomponents() {
+			return document.querySelectorAll('[yoyo\\:name]')
+		}
+
+		function getComponentName(elt) {
+			return elt.getAttribute('yoyo:name')
+		}
+
+		function decodeHTMLEntities(text) {
+			var textArea = document.createElement('textarea')
+			textArea.innerHTML = text
+			return textArea.value
+		}
+
+		function getAncestorcomponents(selector) {
+			let ancestor = getComponent(document.querySelector(selector))
+
+			let ancestors = []
+
+			while (ancestor) {
+				ancestors.push(ancestor)
+				ancestor = getComponent(ancestor.parentElement)
+			}
+
+			return ancestors
+		}
+
 		function shouldTriggerYoyoEvent(id) {
-			if (yoyoEventCache.indexOf(id) === -1) {
+			if (!yoyoEventCache.includes(id)) {
 				yoyoEventCache.push(id)
 				return true
 			}
@@ -109,41 +230,10 @@
 			yoyoEventCache = []
 		}
 
-		function getYoyoElt(elt) {
-			return elt.closest('[yoyo\\:name]')
-		}
-
-		function getAllYoyoElts() {
-			return document.querySelectorAll('[yoyo\\:name]')
-		}
-
-		function getYoyoName(elt) {
-			return elt.getAttribute('yoyo:name')
-		}
-
-		function decodeHTMLEntities(text) {
-			var textArea = document.createElement('textarea')
-			textArea.innerHTML = text
-			return textArea.value
-		}
-
-		function getAncestorYoyoElts(selector) {
-			let ancestor = getYoyoElt(document.querySelector(selector))
-
-			let ancestors = []
-
-			while (ancestor) {
-				ancestors.push(ancestor)
-				ancestor = getYoyoElt(ancestor.parentElement)
-			}
-
-			return ancestors
-		}
-
 		function eventsMiddleware(evt) {
-			const yoyoElt = getYoyoElt(evt.detail.elt)
-			const yoyoName = getYoyoName(yoyoElt)
-			const eventAttr = yoyoElt.getAttribute('yoyo:transient-event')
+			const component = getComponent(evt.detail.elt)
+			const componentName = getComponentName(component)
+			const eventAttr = component.getAttribute('yoyo:transient-event')
 
 			if (!eventAttr) return
 
@@ -152,7 +242,7 @@
 			if (eventData) {
 				evt.detail.parameters[
 					'component'
-				] = `${yoyoName}/${eventData.name}`
+				] = `${componentName}/${eventData.name}`
 
 				evt.detail.parameters = {
 					...evt.detail.parameters,
@@ -186,21 +276,21 @@
 			const eventName = event.event
 			const params = event.params
 			const selector = event.selector || null
-			const yoyoName = event.component || null
+			const componentName = event.component || null
 			const ancestorsOnly = event.ancestorsOnly || null
 			let elements
 
-			if (!selector && !yoyoName) {
-				elements = getAllYoyoElts()
+			if (!selector && !componentName) {
+				elements = getAllcomponents()
 			} else if (selector) {
 				if (ancestorsOnly) {
-					elements = getAncestorYoyoElts(selector)
+					elements = getAncestorcomponents(selector)
 				} else {
 					elements = [document.querySelector(selector)]
 				}
-			} else if (yoyoName) {
+			} else if (componentName) {
 				elements = document.querySelectorAll(
-					`[yoyo\\:name="${yoyoName}"]`
+					`[yoyo\\:name="${componentName}"]`
 				)
 			}
 
@@ -208,7 +298,7 @@
 				elements.forEach((elt) => {
 					if (shouldTriggerYoyoEvent(elt.id)) {
 						addServerEventTransient(
-							getYoyoElt(elt),
+							getComponent(elt),
 							eventName,
 							params
 						)
@@ -222,6 +312,106 @@
 			elt.removeAttribute('yoyo:transient-event')
 		}
 
+		function initializeComponentSpinners(component) {
+			const yoyoId = component.id
+			component.__yoyo_on_finish_loading = []
+
+			walk(component, (elt) => {
+				const directive = extractModifiersAndValue(elt, 'spinning')
+				if (directive) {
+					const yoyoSpinOnAction = elt.getAttribute('yoyo:spin-on')
+					if (yoyoSpinOnAction) {
+						yoyoSpinOnAction
+							.replace(' ', '')
+							.split(',')
+							.forEach((action) => {
+								addActionSpinner(yoyoId, action, directive)
+							})
+					} else {
+						addGenericSpinner(yoyoId, directive)
+					}
+				}
+			})
+		}
+
+		function checkSpinnerInitialized(yoyoId, action) {
+			yoyoSpinners[yoyoId] = yoyoSpinners[yoyoId] || {
+				actions: {},
+				generic: [],
+			}
+			if (
+				action &&
+				yoyoSpinners?.[yoyoId]?.actions?.[action] === undefined
+			) {
+				yoyoSpinners[yoyoId].actions[action] = []
+			}
+		}
+
+		function addActionSpinner(yoyoId, action, directive) {
+			checkSpinnerInitialized(yoyoId, action)
+			yoyoSpinners[yoyoId].actions[action].push(directive)
+		}
+
+		function addGenericSpinner(yoyoId, directive) {
+			checkSpinnerInitialized(yoyoId)
+			yoyoSpinners[yoyoId].generic.push(directive)
+		}
+
+		// https://github.com/livewire/livewire
+		function doAndSetCallbackOnElToUndo(
+			el,
+			directive,
+			doCallback,
+			undoCallback
+		) {
+			if (directive.modifiers.includes('remove'))
+				[doCallback, undoCallback] = [undoCallback, doCallback]
+
+			if (directive.modifiers.includes('delay')) {
+				let timeout = setTimeout(() => {
+					doCallback()
+					el.__yoyo_on_finish_loading.push(() => undoCallback())
+				}, 200)
+
+				el.__yoyo_on_finish_loading.push(() => clearTimeout(timeout))
+			} else {
+				doCallback()
+				el.__yoyo_on_finish_loading.push(() => undoCallback())
+			}
+		}
+
+		// https://github.com/alpinejs/alpine/
+		function walk(el, callback) {
+			if (callback(el) === false) return
+
+			let node = el.firstElementChild
+
+			while (node) {
+				walk(node, callback)
+
+				node = node.nextElementSibling
+			}
+		}
+
+		function extractModifiersAndValue(elt, type) {
+			const attr = elt
+				.getAttributeNames()
+				// Filter only the Yoyo spinning directives.
+				.filter((name) => name.match(new RegExp(`yoyo:${type}`)))
+
+			if (attr.length) {
+				const name = attr[0]
+				const [ntype, ...modifiers] = name
+					.replace(new RegExp(`yoyo:${type}`), '')
+					.split('.')
+
+				const value = elt.getAttribute(name)
+				return { elt, name, value, modifiers }
+			}
+
+			return false
+		}
+
 		return Yoyo
 	})()
 })
@@ -229,24 +419,14 @@
 YoyoEngine.defineExtension('yoyo', {
 	onEvent: function (name, evt) {
 		if (name === 'htmx:processedNode') {
-			// For requests targeting a specific ID, create and append to body if not present
-			const targetId = evt.srcElement.getAttribute('hx-target')
-			if (
-				targetId &&
-				targetId[0] == '#' &&
-				document.querySelector(targetId) === null
-			) {
-				let targetDiv = document.createElement('div')
-				targetDiv.setAttribute('id', targetId.replace('#', ''))
-				document.body.appendChild(targetDiv)
-			}
+			Yoyo.processedNode(evt)
 		}
 
 		if (name === 'htmx:configRequest') {
 			if (!evt.target) return
 
-			Yoyo.bootstrap(evt)
-			Yoyo.yoyoRequestMiddleware(evt)
+			Yoyo.bootstrapRequest(evt)
+			Yoyo.middleware(evt)
 		}
 
 		if (name === 'htmx:beforeRequest') {
@@ -254,6 +434,12 @@ YoyoEngine.defineExtension('yoyo', {
 				console.error('The yoyo URL needs to be defined')
 				evt.preventDefault()
 			}
+
+			Yoyo.spinningStart(evt)
+		}
+
+		if (name === 'htmx:afterRequest') {
+			Yoyo.spinningStop(evt)
 		}
 
 		if (name === 'htmx:afterOnLoad') {
@@ -261,6 +447,7 @@ YoyoEngine.defineExtension('yoyo', {
 				return
 			}
 
+			// Timeout needed for targets outside of Yoyo component
 			setTimeout(() => {
 				Yoyo.afterRequestActions(evt.target)
 			}, 125)
@@ -268,7 +455,7 @@ YoyoEngine.defineExtension('yoyo', {
 			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
 			// so we run those actions here
 			if (
-				evt.target !== evt.detail.target ||
+				!evt.target.isSameNode(evt.detail.target) ||
 				evt.detail.xhr.status == 204
 			) {
 				Yoyo.processEmitHeader(evt.detail.xhr)
