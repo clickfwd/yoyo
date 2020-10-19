@@ -98,13 +98,20 @@
 					})
 				}
 			},
-			afterRequestActions(elt) {
-				removeServerEventTransient(elt)
+			afterOnLoadActions(elt) {
 				let component = getComponent(elt)
+
+				// Timeout needed for targets outside of Yoyo component
+				setTimeout(() => {
+					removeServerEventTransient(component)
+				}, 125)
+
+				Yoyo.spinningStop(component)
+
 				delete component.__yoyo_action
 			},
-			spinningStart(evt) {
-				let component = getComponent(evt.detail.elt)
+			spinningStart(elt) {
+				let component = getComponent(elt)
 				const yoyoId = component.id
 
 				if (!yoyoSpinners[yoyoId]) {
@@ -143,15 +150,13 @@
 						doAndSetCallbackOnElToUndo(
 							component,
 							directive,
-							() => (spinnerElt.style.display = 'inline-block'),
-							() => (spinnerElt.style.display = 'none')
+							() => spinnerElt.style.display = 'inline-block',
+							() => spinnerElt.style.display = 'none'
 						)
 					}
 				})
 			},
-			spinningStop(evt) {
-				const component = getComponent(evt.detail.elt)
-
+			spinningStop(component) {
 				if (!component.__yoyo_on_finish_loading) {
 					return
 				}
@@ -374,6 +379,7 @@
 				}, 200)
 
 				el.__yoyo_on_finish_loading.push(() => clearTimeout(timeout))
+
 			} else {
 				doCallback()
 				el.__yoyo_on_finish_loading.push(() => undoCallback())
@@ -435,11 +441,7 @@ YoyoEngine.defineExtension('yoyo', {
 				evt.preventDefault()
 			}
 
-			Yoyo.spinningStart(evt)
-		}
-
-		if (name === 'htmx:afterRequest') {
-			Yoyo.spinningStop(evt)
+			Yoyo.spinningStart(evt.detail.elt)
 		}
 
 		if (name === 'htmx:afterOnLoad') {
@@ -447,10 +449,7 @@ YoyoEngine.defineExtension('yoyo', {
 				return
 			}
 
-			// Timeout needed for targets outside of Yoyo component
-			setTimeout(() => {
-				Yoyo.afterRequestActions(evt.target)
-			}, 125)
+			Yoyo.afterOnLoadActions(evt.target)
 
 			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
 			// so we run those actions here
