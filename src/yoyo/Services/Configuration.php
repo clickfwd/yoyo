@@ -40,28 +40,27 @@ class Configuration
         return self::$options['defaultSwap'] ?? 'outerHTML';
     }
 
-    public static function scripts($return = false) 
+    public static function scripts($return = false)
     {
         return self::minify(self::javascriptAssets());
     }
 
-    public static function styles() 
+    public static function styles()
     {
         return self::minify(self::cssAssets());
-    }    
+    }
 
     public static function javascriptAssets(): string
     {
         if (empty(self::$options['htmx'])) {
             $htmxSrc = 'https://unpkg.com/htmx.org@'.self::$htmx.'/dist/htmx.js';
-        }
-        else {
+        } else {
             $htmxSrc = self::$options['htmx'];
         }
         $scriptsPath = self::scriptsPath();
         $yoyoUrl = self::url();
         $defaultSwap = self::swap();
-        
+
         return <<<HTML
 <script src="{$htmxSrc}"></script>
 <script src="{$scriptsPath}/yoyo.js"></script>
@@ -78,7 +77,7 @@ Yoyo.config({
 HTML;
     }
 
-    public static function cssAssets() 
+    public static function cssAssets()
     {
         return <<<HTML
 <style>

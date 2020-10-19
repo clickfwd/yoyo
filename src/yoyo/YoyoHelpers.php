@@ -88,10 +88,11 @@ class YoyoHelpers
                 unset($array[$key]);
             }
 
-            if (is_string($value) && !strlen($value)) {
+            if (is_string($value) && ! strlen($value)) {
                 unset($array[$key]);
             }
         }
+
         return $array;
     }
 }

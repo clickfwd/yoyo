@@ -8,12 +8,12 @@ use Clickfwd\Yoyo\Yoyo;
 use function Tests\encode_vars;
 use function Tests\htmlformat;
 use function Tests\hxattr;
+use function Tests\mockYoyoGetRequest;
 use function Tests\render;
+use function Tests\resetYoyoRequest;
 use function Tests\response;
 use function Tests\update;
 use function Tests\yoprefix_value;
-use function Tests\mockYoyoGetRequest;
-use function Tests\resetYoyoRequest;
 use function Tests\yoyo_update;
 
 beforeAll(function () {
@@ -84,7 +84,7 @@ test('component computed property cache', function () {
 
 test('action parameters passed to component method arguments', function () {
     mockYoyoGetRequest('http://example.com/', 'action-arguments/someAction', '', [
-        'actionArgs' => "'1','foo'"
+        'actionArgs' => "'1','foo'",
     ]);
 
     $output = yoyo_update();
