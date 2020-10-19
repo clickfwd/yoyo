@@ -63,8 +63,7 @@
 
 				// Make request info available to other events
 				component.__yoyo_action = action
-			},
-			middleware(evt) {
+
 				eventsMiddleware(evt)
 			},
 			processRedirectHeader(xhr) {
@@ -98,72 +97,22 @@
 					})
 				}
 			},
+			beforeRequestActions(elt) {
+				let component = getComponent(elt)
+
+				spinningStart(component)
+			},
 			afterOnLoadActions(elt) {
 				let component = getComponent(elt)
+
+				spinningStop(component)
 
 				// Timeout needed for targets outside of Yoyo component
 				setTimeout(() => {
 					removeServerEventTransient(component)
 				}, 125)
 
-				Yoyo.spinningStop(component)
-
 				delete component.__yoyo_action
-			},
-			spinningStart(elt) {
-				let component = getComponent(elt)
-				const yoyoId = component.id
-
-				if (!yoyoSpinners[yoyoId]) {
-					return
-				}
-
-				let spinningElts = yoyoSpinners[yoyoId].generic || []
-
-				spinningElts = spinningElts.concat(
-					yoyoSpinners[yoyoId]?.actions[component.__yoyo_action] || []
-				)
-
-				spinningElts.forEach((directive) => {
-					const spinnerElt = directive.elt
-					if (directive.modifiers.includes('class')) {
-						let classes = directive.value.split(' ').filter(Boolean)
-
-						doAndSetCallbackOnElToUndo(
-							component,
-							directive,
-							() => directive.elt.classList.add(...classes),
-							() => spinnerElt.classList.remove(...classes)
-						)
-					} else if (directive.modifiers.includes('attr')) {
-						doAndSetCallbackOnElToUndo(
-							component,
-							directive,
-							() =>
-								directive.elt.setAttribute(
-									directive.value,
-									true
-								),
-							() => spinnerElt.removeAttribute(directive.value)
-						)
-					} else {
-						doAndSetCallbackOnElToUndo(
-							component,
-							directive,
-							() => spinnerElt.style.display = 'inline-block',
-							() => spinnerElt.style.display = 'none'
-						)
-					}
-				})
-			},
-			spinningStop(component) {
-				if (!component.__yoyo_on_finish_loading) {
-					return
-				}
-
-				while (component.__yoyo_on_finish_loading.length > 0) {
-					component.__yoyo_on_finish_loading.shift()()
-				}
 			},
 		}
 
@@ -317,6 +266,58 @@
 			elt.removeAttribute('yoyo:transient-event')
 		}
 
+		function spinningStart(component) {
+			const yoyoId = component.id
+
+			if (!yoyoSpinners[yoyoId]) {
+				return
+			}
+
+			let spinningElts = yoyoSpinners[yoyoId].generic || []
+
+			spinningElts = spinningElts.concat(
+				yoyoSpinners[yoyoId]?.actions[component.__yoyo_action] || []
+			)
+
+			spinningElts.forEach((directive) => {
+				const spinnerElt = directive.elt
+				if (directive.modifiers.includes('class')) {
+					let classes = directive.value.split(' ').filter(Boolean)
+
+					doAndSetCallbackOnElToUndo(
+						component,
+						directive,
+						() => directive.elt.classList.add(...classes),
+						() => spinnerElt.classList.remove(...classes)
+					)
+				} else if (directive.modifiers.includes('attr')) {
+					doAndSetCallbackOnElToUndo(
+						component,
+						directive,
+						() => directive.elt.setAttribute(directive.value, true),
+						() => spinnerElt.removeAttribute(directive.value)
+					)
+				} else {
+					doAndSetCallbackOnElToUndo(
+						component,
+						directive,
+						() => (spinnerElt.style.display = 'inline-block'),
+						() => (spinnerElt.style.display = 'none')
+					)
+				}
+			})
+		}
+
+		function spinningStop(component) {
+			if (!component.__yoyo_on_finish_loading) {
+				return
+			}
+
+			while (component.__yoyo_on_finish_loading.length > 0) {
+				component.__yoyo_on_finish_loading.shift()()
+			}
+		}
+
 		function initializeComponentSpinners(component) {
 			const yoyoId = component.id
 			component.__yoyo_on_finish_loading = []
@@ -379,7 +380,6 @@
 				}, 200)
 
 				el.__yoyo_on_finish_loading.push(() => clearTimeout(timeout))
-
 			} else {
 				doCallback()
 				el.__yoyo_on_finish_loading.push(() => undoCallback())
@@ -432,7 +432,6 @@ YoyoEngine.defineExtension('yoyo', {
 			if (!evt.target) return
 
 			Yoyo.bootstrapRequest(evt)
-			Yoyo.middleware(evt)
 		}
 
 		if (name === 'htmx:beforeRequest') {
@@ -441,7 +440,7 @@ YoyoEngine.defineExtension('yoyo', {
 				evt.preventDefault()
 			}
 
-			Yoyo.spinningStart(evt.detail.elt)
+			Yoyo.beforeRequestActions(evt.detail.elt)
 		}
 
 		if (name === 'htmx:afterOnLoad') {
