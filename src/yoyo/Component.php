@@ -154,7 +154,7 @@ abstract class Component
         return null;
     }
 
-    public function end()
+    public function skipRender()
     {
         $this->noResponse = true;
     }
