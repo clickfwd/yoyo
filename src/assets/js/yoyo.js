@@ -171,9 +171,9 @@
 			return ancestors
 		}
 
-		function shouldTriggerYoyoEvent(id) {
-			if (!yoyoEventCache.includes(id)) {
-				yoyoEventCache.push(id)
+		function shouldTriggerYoyoEvent(elt) {
+			if (isComponent(elt) && !yoyoEventCache.includes(elt.id)) {
+				yoyoEventCache.push(elt.id)
 				return true
 			}
 
@@ -240,7 +240,10 @@
 				if (ancestorsOnly) {
 					elements = getAncestorcomponents(selector)
 				} else {
-					elements = [document.querySelector(selector)]
+					const elt = document.querySelector(selector)
+					if (elt) {
+						elements = [elt]
+					}
 				}
 			} else if (componentName) {
 				elements = document.querySelectorAll(
@@ -250,7 +253,7 @@
 
 			if (elements) {
 				elements.forEach((elt) => {
-					if (shouldTriggerYoyoEvent(elt.id)) {
+					if (shouldTriggerYoyoEvent(elt)) {
 						addServerEventTransient(
 							getComponent(elt),
 							eventName,
