@@ -134,7 +134,7 @@ class ComponentManager
         if (is_null($view)) {
             return '';
         }
-        
+
         // For string based templates
 
         if (is_string($view)) {

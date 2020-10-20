@@ -143,8 +143,7 @@ abstract class Component
 
     public function render()
     {
-        if (! $this->noResponse)
-        {
+        if (! $this->noResponse) {
             return $this->view($this->componentName);
         }
 

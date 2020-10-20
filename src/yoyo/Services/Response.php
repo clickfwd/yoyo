@@ -19,7 +19,7 @@ class Response
         return $this;
     }
 
-    public function status($code) 
+    public function status($code)
     {
         $this->status = $code;
 
@@ -33,7 +33,7 @@ class Response
         }
 
         http_response_code($this->status);
-        
+
         return $content ?: null;
     }
 

@@ -190,6 +190,10 @@ class YoyoCompiler
             $element->setAttribute('id', $this->componentId);
         }
 
+        if ($target = $element->getAttribute(self::yoprefix('target'))) {
+            $attributes['target'] = $target;
+        }
+
         // Add yoyo extension attribute and merge existing extensions
 
         if ($ext = $element->getAttribute(self::yoprefix('ext'))) {
