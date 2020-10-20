@@ -478,4 +478,28 @@ YoyoEngine.defineExtension('yoyo', {
 			Yoyo.processRedirectHeader(evt.detail.xhr)
 		}
 	},
+
+	// Add support for morphdom swap when using Alpine JS to be able to
+	// maintain the Alpine component state after a swap
+	isInlineSwap: function (swapStyle) {
+		return swapStyle === 'morphdom'
+	},
+	handleSwap: function (swapStyle, target, fragment) {
+		if (typeof morphdom === 'undefined') {
+			return false
+		}
+		
+		if (swapStyle === 'morphdom') {
+			morphdom(target, fragment.outerHTML, {
+				onBeforeElUpdated: (from, to) => {
+					// From Livewire - deal with Alpine component updates
+					if (from.__x) {
+						window.Alpine.clone(from.__x, to)
+					}
+				},
+			})
+
+			return [target] // let htmx handle the new content
+		}
+	},
 })
