@@ -485,11 +485,7 @@ YoyoEngine.defineExtension('yoyo', {
 		return swapStyle === 'morphdom'
 	},
 	handleSwap: function (swapStyle, target, fragment) {
-		if (typeof morphdom === 'undefined') {
-			return false
-		}
-		
-		if (swapStyle === 'morphdom') {
+		if (typeof morphdom === 'function' && swapStyle === 'morphdom') {
 			morphdom(target, fragment.outerHTML, {
 				onBeforeElUpdated: (from, to) => {
 					// From Livewire - deal with Alpine component updates
