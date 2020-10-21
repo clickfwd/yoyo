@@ -29,6 +29,7 @@ Check out the [Yoyo Demo App](https://app.getyoyo.dev) to get a better idea of w
 - [Events](#events)
 - [Redirecting](#redirecting)
 - [Query String](#query-string)
+- [Loading States](#loading-states)
 - [Using Blade](#using-blade)
 - [Using Twig](#using-twig)
 - [License](#license)
