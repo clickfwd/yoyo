@@ -278,7 +278,7 @@ When you compare this search example to the counter example at the beginning, yo
 
 There are two instances when components are rendered. On page load, and on component updates.
 
-### Rendering on page load
+### Rendering on Page Load
 
 To render any component on page load within your templates, use the `yoyo_render` function and pass the component name as the first parameter.
 
@@ -545,6 +545,111 @@ class Posts extends Component
 	
 	protected $queryString = ['page'];
 }
+```
+
+## Loading States
+
+Updating Yoyo components requires an Ajax request to the server and depending on what the component does, the response time will vary. The `yoyo:spinning` directive allows you to do all sorts of cool things when a component is updating to provide a visual indicator to end-users.
+
+### Toggling Elements During Loading States
+
+To show an element at the start of a Yoyo update request and hide it again when the update is complete:
+
+```html
+<div>
+    <button yoyo:post="submit">Submit</button>
+
+    <div yoyo:spinning>
+        Processing your submission...
+    </div>
+</div>
+```
+
+Yoyo adds some CSS to the page to automatically hide the element with the `yoyo:spinning` directive.
+
+To hide a visible element while the component is updating you can add the `remove` modifier:
+
+```html
+<div>
+    <button yoyo:post="submit">Submit</button>
+
+    <div yoyo:spinning.remove>
+        Text hidden while updating ...
+    </div>
+</div>
+```
+
+## Delaying Loading States
+
+Some actions may update quickly and showing a loading state in these cases may be more of a distraction. The `delay` modifier ensures that the loading state changes are applied only after 200ms if the component hasn't finished updating.
+
+```html
+<div>
+    <button yoyo:post="submit">Submit</button>
+
+    <div yoyo:spinning.delay>
+        Processing your submission...
+    </div>
+</div>
+```
+
+### Targeting Specific Actions
+
+If you need to toggle different indicators for different component actions, you can add the `yoyo:spin-on` directive and pass a comma separated list of action names. For example:
+
+```html
+<div>
+	<button yoyo:get="edit">Edit</button>
+
+	<button yoyo:get="like">Like</button>
+
+    <div yoyo:spinning yoyo:spin-on="edit">
+        Show for edit action
+    </div>
+
+    <div yoyo:spinning yoyo:spin-on="like">
+        Show for like action
+    </div>
+
+    <div yoyo:spinning yoyo:spin-on="edit, like">
+        Show for edit and like actions
+    </div>
+
+</div>
+```
+
+## Toggling Element CSS Classes
+
+Instead of toggling the visibility of an element you can also add specific CSS classes while the component updates. Use the `class` modifier and include the space-separated class names as the attribute value:
+
+```html
+<div>
+    <button yoyo:post="submit" yoyo:spinning.class="text-gray-300">
+		Submit
+	</button>
+</div>
+```
+
+You can also remove specific class names by adding the `remove` modifier:
+
+```html
+<div>
+    <button yoyo:post="submit" yoyo:spinning.class.remove="bg-blue-200" class="bg-blue-200">
+		Submit
+	</button>
+</div>
+```
+
+## Toggling Element Attributes
+
+Similar to CSS class toggling, you can also add or remove attributes while the component is updating.
+
+```html
+<div>
+    <button yoyo:post="submit" yoyo:spinning.attr="disabled">
+		Submit
+	</button>
+</div>
 ```
 
 ## Events
