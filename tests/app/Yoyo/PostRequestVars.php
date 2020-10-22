@@ -8,5 +8,7 @@ class PostRequestVars extends Component
 {
     public $foo;
 
-    public function save() {}
+    public function save()
+    {
+    }
 }

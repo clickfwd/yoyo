@@ -96,15 +96,15 @@ test('action parameters passed to component method arguments', function () {
     expect(htmlformat($output))->toEqual(response('action-arguments'));
 });
 
-test('Null properties not added as vars to component root', function() {
+test('Null properties not added as vars to component root', function () {
     require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
-    
+
     $vars = encode_vars([yoprefix_value('id') => 'post-request-vars']);
 
     expect(render('post-request-vars'))->toContain(hxattr('vars', $vars));
 })->group('component-root-vars');
 
-test('posted vars are not added to component root', function() {
+test('posted vars are not added to component root', function () {
     require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
 
     $vars = encode_vars([yoprefix_value('id') => 'post-request-vars']);
@@ -112,7 +112,7 @@ test('posted vars are not added to component root', function() {
     mockYoyoPostRequest('http://example.com/', 'post-request-vars/save', '', [
         'foo' => 'bar',
     ]);
-    
+
     expect(yoyo_update())->toContain(hxattr('vars', $vars));
 
     resetYoyoRequest();

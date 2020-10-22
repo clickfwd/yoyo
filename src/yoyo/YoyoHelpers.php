@@ -92,7 +92,7 @@ class YoyoHelpers
                 unset($array[$key]);
             }
         }
-        
+
         return $array;
     }
 }
