@@ -52,6 +52,24 @@ function mockYoyoGetRequest($url, $component, $target = '', $parameters = [])
     return $requestService;
 }
 
+function mockYoyoPostRequest($url, $component, $target = '', $parameters = [])
+{
+    $request = array_merge([
+        'component' => $component,
+    ], $parameters);
+
+    $server = [
+        'REQUEST_METHOD' => 'POST',
+        'HTTP_HX_REQUEST' => true,
+        'HTTP_HX_CURRENT_URL' => $url,
+        'HTTP_HX_TARGET' => $target,
+    ];
+
+    $requestService = Request::mock($request, $server);
+
+    return $requestService;
+}
+
 function resetYoyoRequest()
 {
     Request::reset();

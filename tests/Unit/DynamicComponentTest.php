@@ -9,6 +9,7 @@ use function Tests\encode_vars;
 use function Tests\htmlformat;
 use function Tests\hxattr;
 use function Tests\mockYoyoGetRequest;
+use function Tests\mockYoyoPostRequest;
 use function Tests\render;
 use function Tests\resetYoyoRequest;
 use function Tests\response;
@@ -23,7 +24,6 @@ beforeAll(function () {
       'namespace' => 'Tests\\App\\Yoyo\\',
     ]);
 
-    require_once __DIR__.'/../app/Yoyo/ActionArguments.php';
     require_once __DIR__.'/../app/Yoyo/Counter.php';
     require_once __DIR__.'/../app/Yoyo/ComputedProperty.php';
     require_once __DIR__.'/../app/Yoyo/ComputedPropertyCache.php';
@@ -83,6 +83,8 @@ test('component computed property cache', function () {
 });
 
 test('action parameters passed to component method arguments', function () {
+    require_once __DIR__.'/../app/Yoyo/ActionArguments.php';
+
     mockYoyoGetRequest('http://example.com/', 'action-arguments/someAction', '', [
         'actionArgs' => "'1','foo'",
     ]);
@@ -93,3 +95,25 @@ test('action parameters passed to component method arguments', function () {
 
     expect(htmlformat($output))->toEqual(response('action-arguments'));
 });
+
+test('Null properties not added as vars to component root', function() {
+    require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
+    
+    $vars = encode_vars([yoprefix_value('id') => 'post-request-vars']);
+
+    expect(render('post-request-vars'))->toContain(hxattr('vars', $vars));
+})->group('component-root-vars');
+
+test('posted vars are not added to component root', function() {
+    require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
+
+    $vars = encode_vars([yoprefix_value('id') => 'post-request-vars']);
+
+    mockYoyoPostRequest('http://example.com/', 'post-request-vars/save', '', [
+        'foo' => 'bar',
+    ]);
+    
+    expect(yoyo_update())->toContain(hxattr('vars', $vars));
+
+    resetYoyoRequest();
+})->group('component-root-vars');
