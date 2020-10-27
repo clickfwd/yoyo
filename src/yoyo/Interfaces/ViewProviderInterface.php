@@ -2,7 +2,7 @@
 
 namespace Clickfwd\Yoyo\Interfaces;
 
-interface View
+interface ViewProviderInterface
 {
     public function __construct($view);
 

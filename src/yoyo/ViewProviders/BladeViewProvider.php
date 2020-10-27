@@ -2,9 +2,9 @@
 
 namespace Clickfwd\Yoyo\ViewProviders;
 
-use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
+use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
-class BladeViewProvider implements ViewInterface
+class BladeViewProvider implements ViewProviderInterface
 {
     private $view;
 
@@ -31,7 +31,7 @@ class BladeViewProvider implements ViewInterface
         $this->engine->stopYoyoRendering();
     }
 
-    public function render($template, $vars = []): ViewInterface
+    public function render($template, $vars = []): ViewProviderInterface
     {
         $this->template = $template;
 
@@ -42,7 +42,7 @@ class BladeViewProvider implements ViewInterface
 
     public function makeFromString($content, $vars = []): string
     {
-        $view = $this->view->make((new \Clickfwd\Yoyo\Blade\CreateBladeViewFromString)($content));
+        $view = $this->view->make((new \Clickfwd\Yoyo\Blade\CreateBladeViewFromString)($this->view, $content));
 
         return $view->with($vars)->render();
     }

@@ -2,12 +2,10 @@
 
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
-use Clickfwd\Yoyo\View;
-use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
-use Clickfwd\Yoyo\Yoyo;
 use function Tests\encode_vars;
 use function Tests\htmlformat;
 use function Tests\hxattr;
+use function Tests\initYoyo;
 use function Tests\mockYoyoGetRequest;
 use function Tests\mockYoyoPostRequest;
 use function Tests\render;
@@ -18,19 +16,7 @@ use function Tests\yoprefix_value;
 use function Tests\yoyo_update;
 
 beforeAll(function () {
-    $yoyo = new Yoyo();
-
-    $yoyo->configure([
-      'namespace' => 'Tests\\App\\Yoyo\\',
-    ]);
-
-    require_once __DIR__.'/../app/Yoyo/Counter.php';
-    require_once __DIR__.'/../app/Yoyo/ComputedProperty.php';
-    require_once __DIR__.'/../app/Yoyo/ComputedPropertyCache.php';
-
-    $view = new YoyoViewProvider(new View(__DIR__.'/../app/resources/views/yoyo'));
-
-    $yoyo->setViewProvider($view);
+    $yoyo = initYoyo(['Counter', 'ComputedProperty', 'ComputedPropertyCache']);
 });
 
 test('component class not found', function () {

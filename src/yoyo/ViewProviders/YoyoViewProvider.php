@@ -2,9 +2,9 @@
 
 namespace Clickfwd\Yoyo\ViewProviders;
 
-use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
+use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
-class YoyoViewProvider implements ViewInterface
+class YoyoViewProvider implements ViewProviderInterface
 {
     private $view;
 
@@ -27,7 +27,7 @@ class YoyoViewProvider implements ViewInterface
         //
     }
 
-    public function render($template, $vars = []): ViewInterface
+    public function render($template, $vars = []): ViewProviderInterface
     {
         $this->template = $template;
 

@@ -1,24 +1,12 @@
 <?php
 
-use Clickfwd\Yoyo\View;
-use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
-use Clickfwd\Yoyo\Yoyo;
 use function Tests\headers;
+use function Tests\initYoyo;
 use function Tests\mockYoyoGetRequest;
 use function Tests\yoyo_update;
 
 beforeAll(function () {
-    $yoyo = new Yoyo();
-
-    $yoyo->configure([
-        'namespace' => 'Tests\\App\\Yoyo\\',
-    ]);
-
-    require_once __DIR__.'/../app/Yoyo/Counter.php';
-
-    $view = new YoyoViewProvider(new View(__DIR__.'/../app/resources/views/yoyo'));
-
-    $yoyo->setViewProvider($view);
+    $yoyo = initYoyo(['Counter']);
 });
 
 test('pushed new URL state', function () {

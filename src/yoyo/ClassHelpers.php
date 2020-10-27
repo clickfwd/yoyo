@@ -94,4 +94,11 @@ class ClassHelpers
 
         return ! $reflection->isPublic();
     }
+
+    public static function classImplementsInterface($name, $instance)
+    {
+        $class = new ReflectionClass($name);
+
+        return in_array($instance, $class->getInterfaceNames());
+    }
 }

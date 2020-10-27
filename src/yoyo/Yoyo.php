@@ -4,7 +4,7 @@ namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Concerns\Singleton;
 use Clickfwd\Yoyo\Exceptions\IncompleteComponentParamInRequest;
-use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
+use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
 use Clickfwd\Yoyo\Services\BrowserEventsService;
 use Clickfwd\Yoyo\Services\Configuration;
 use Clickfwd\Yoyo\Services\PageRedirectService;
@@ -16,19 +16,21 @@ class Yoyo
 {
     use Singleton;
 
-    private $request;
+    private $action;
 
-    private static $view;
+    private $attributes = [];
+
+    private static $componentResolver;
 
     private $id;
 
     private $name;
 
-    private $action;
+    private $request;
 
     private $variables = [];
 
-    private $attributes = [];
+    private static $viewProviders = [];
 
     public function __construct()
     {
@@ -44,14 +46,66 @@ class Yoyo
         Configuration::getInstance($options);
     }
 
-    public function setViewProvider(ViewInterface $view): void
+    public function getComponentId($attributes): string
     {
-        self::$view = $view;
+        if (isset($attributes['id'])) {
+            $id = $attributes['id'];
+        } else {
+            $id = $this->request->input(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
+        }
+
+        return $id;
     }
 
-    public static function getViewProvider()
+    private function getComponentResolver()
     {
-        return self::$view;
+        $resolverName = $this->variables[YoyoCompiler::yoprefix('resolver')]
+                            ?? $this->request->input(YoyoCompiler::yoprefix('resolver'));
+
+        $componentSource = $this->variables[YoyoCompiler::yoprefix('source')]
+                            ?? $this->request->input(YoyoCompiler::yoprefix('source'));
+
+        if ($componentSource) {
+            $this->variables[YoyoCompiler::yoprefix('source')] = $componentSource;
+        }
+
+        if ($resolverName && isset(self::$componentResolver[$resolverName])) {
+            return new self::$componentResolver[$resolverName]($this->id, $this->name, $this->variables, self::$viewProviders);
+        }
+
+        return new ComponentResolver($this->id, $this->name, $this->variables, self::$viewProviders);
+    }
+
+    public function registerViewProvider(...$params)
+    {
+        $viewProvider = array_pop($params);
+
+        if (! empty($params)) {
+            self::$viewProviders[$params] = $viewProvider;
+        }
+
+        self::$viewProviders['default'] = $viewProvider;
+    }
+
+    public function registerViewProviders($providers)
+    {
+        foreach ($providers as $key => $provider) {
+            $this->registerViewProvider($key, $provider);
+        }
+    }
+
+    public static function getViewProvider($name = 'default')
+    {
+        return self::$viewProviders[$name]();
+    }
+
+    public function registerComponentResolver($name, $resolverClass)
+    {
+        if (! ClassHelpers::classImplementsInterface($resolverClass, ComponentResolverInterface::class)) {
+            throw new \Exception("Component resolver [$resolverClass] does not implement [ComponentResolverInterface] interface");
+        }
+
+        self::$componentResolver[$name] = $resolverClass;
     }
 
     public function registerComponents($components): void
@@ -62,17 +116,6 @@ class Yoyo
     public function registerComponent($name, $class): void
     {
         ComponentManager::registerComponent($name, $class);
-    }
-
-    public function getComponentId($attributes): string
-    {
-        if (isset($attributes['id'])) {
-            $id = $attributes['id'];
-        } else {
-            $id = $this->request->input(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
-        }
-
-        return $id;
     }
 
     public function mount($name, $variables = [], $attributes = [], $action = 'render'): self
@@ -146,13 +189,18 @@ class Yoyo
     {
         $variables = [];
 
-        $componentManager = new ComponentManager($this->request, $this->id, $this->name, $spinning);
+        $componentManager = new ComponentManager($this->request, $spinning);
 
-        $html = $componentManager->process($this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
+        $componentManager->addComponentResolver($this->getComponentResolver());
+
+        $html = $componentManager->process($this->id, $this->name, $this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
 
         $defaultValues = $componentManager->getDefaultPublicVars();
 
-        $newValues = $componentManager->getPublicVars();
+        $newValues = $componentManager->getPublicVars([
+            YoyoCompiler::yoprefix('resolver'),
+            YoyoCompiler::yoprefix('source'),
+        ]);
 
         // Automatically include in request public properties, or request variables in the case of anonymous components
 
@@ -193,7 +241,7 @@ class Yoyo
 
     public function compile($html, $spinning = null, $variables = [], $listeners = []): string
     {
-        $spinning = $spinning ?? self::is_spinning();
+        $spinning = $spinning ?? $this->is_spinning();
 
         $variables = array_merge($this->variables, $variables);
 
@@ -207,15 +255,13 @@ class Yoyo
     /**
      * Is this a request to update the component?
      */
-    public static function is_spinning(): bool
+    private function is_spinning(): bool
     {
-        $instance = self::getInstance();
-
-        $spinning = $instance->request->isYoyoRequest();
+        $spinning = $this->request->isYoyoRequest();
 
         // Stop spinning of child components when parent is refreshed
 
-        $instance->request->windUp();
+        $this->request->windUp();
 
         return $spinning;
     }

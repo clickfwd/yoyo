@@ -222,9 +222,14 @@ class YoyoCompiler
         }
 
         // Automatically add component public vars to the request only if it's not a POST request
-
+        // Otherwise, only include resolver vars
         if (! $element->hasAttribute(self::hxprefix('post'))) {
             $attributes['vars'] = array_merge($attributes['vars'], $this->variables);
+        } else {
+            $attributes['vars'] = array_merge($attributes['vars'], array_intersect_key($this->variables, array_flip([
+                self::yoprefix('resolver'),
+                self::yoprefix('source'),
+            ])));
         }
 
         // Add all attributes

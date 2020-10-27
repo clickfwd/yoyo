@@ -2,15 +2,12 @@
 
 namespace Clickfwd\Yoyo\Blade;
 
-use Clickfwd\Yoyo\Yoyo;
 use Illuminate\View\Component;
 
 class CreateBladeViewFromString extends Component
 {
-    public function __invoke($contents)
+    public function __invoke($view, $contents)
     {
-        $view = Yoyo::getViewProvider()->getProviderInstance();
-
         return $this->createBladeViewFromString($view, $contents);
     }
 

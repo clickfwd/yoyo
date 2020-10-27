@@ -1,18 +1,12 @@
 <?php
 
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
-use Clickfwd\Yoyo\View;
-use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
-use Clickfwd\Yoyo\Yoyo;
+use function Tests\initYoyo;
 use function Tests\render;
 use function Tests\update;
 
 beforeAll(function () {
-    $yoyo = new Yoyo();
-
-    $view = new YoyoViewProvider(new View(__DIR__.'/../app/resources/views/yoyo'));
-
-    $yoyo->setViewProvider($view);
+    $yoyo = initYoyo();
 });
 
 test('errors when anonymous component template not found', function () {

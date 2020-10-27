@@ -6,7 +6,8 @@ use Clickfwd\Yoyo\Concerns\BrowserEvents;
 use Clickfwd\Yoyo\Concerns\Redirector;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
-use Clickfwd\Yoyo\Interfaces\View as ViewInterface;
+use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
+use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\Services\Request;
 use Clickfwd\Yoyo\Services\Response;
 use Closure;
@@ -44,7 +45,9 @@ abstract class Component
 
     private $attributes;
 
-    public function __construct(string $id, string $name)
+    private $resolver;
+
+    public function __construct(string $id, string $name, ComponentResolverInterface $resolver)
     {
         $this->yoyo_id = $id;
 
@@ -53,6 +56,8 @@ abstract class Component
         $this->request = Request::getInstance();
 
         $this->response = Response::getInstance();
+
+        $this->resolver = $resolver;
     }
 
     public function spinning(bool $spinning)
@@ -158,9 +163,9 @@ abstract class Component
         $this->noResponse = true;
     }
 
-    protected function view($template, $vars = []): ViewInterface
+    protected function view($template, $vars = []): ViewProviderInterface
     {
-        $view = Yoyo::getViewProvider();
+        $view = $this->resolver->resolveViewProvider();
 
         if (! $view->exists($template)) {
             throw new MissingComponentTemplate($template, get_class($this));
@@ -179,13 +184,13 @@ abstract class Component
 
     public function createViewFromString($content): string
     {
-        $view = Yoyo::getViewProvider();
+        $view = $this->resolve->resolveViewProvider();
 
         $view->startYoyoRendering($this);
 
         $html = $view->makeFromString($content, $this->viewVars());
 
-        $view->endYoyoRendering();
+        $view->stopYoyoRendering();
 
         return $html;
     }

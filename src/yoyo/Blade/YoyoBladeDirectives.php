@@ -21,21 +21,21 @@ class YoyoBladeDirectives
 
     public function yoyo($expression)
     {
-        return <<<YOYO
+        return <<<yoyo
 <?php
 \$yoyo = new \Clickfwd\Yoyo\Yoyo();
-if (is_spinning()) {
+if (Yoyo\is_spinning()) {
     echo \$yoyo->mount({$expression})->refresh();
 } else {
     echo \$yoyo->mount({$expression})->render();
 }
 ?>
-YOYO;
+yoyo;
     }
 
     public function yoyo_scripts()
     {
-        return '<?php yoyo_scripts(); ?>';
+        return '<?php Yoyo\yoyo_scripts(); ?>';
     }
 
     public function spinning($expression)

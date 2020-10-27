@@ -6,25 +6,33 @@ use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use Clickfwd\Yoyo\Exceptions\FailedToRegisterComponent;
 use Clickfwd\Yoyo\Exceptions\NonPublicComponentMethodCall;
-use Clickfwd\Yoyo\Services\Configuration;
 
 class ComponentManager
 {
+    private $id;
+
+    private $name;
+
     private $request;
 
     private $component;
+
+    private $resolver;
 
     private static $dynamicComponents = [];
 
     private static $anonymousComponents = [];
 
-    public function __construct($request, $id, $name, $spinning)
+    public function __construct($request, $spinning)
     {
         $this->request = $request;
 
         $this->spinning = $spinning;
+    }
 
-        $this->component = self::makeComponentInstance($id, $name);
+    public function addComponentResolver($resolver)
+    {
+        $this->resolver = $resolver;
     }
 
     public function getDefaultPublicVars()
@@ -32,17 +40,34 @@ class ComponentManager
         return ClassHelpers::getDefaultPublicVars($this->component);
     }
 
-    public function getPublicVars()
+    public function getPublicVars($includeKeys = [])
     {
         if ($this->request->method() !== 'GET') {
-            return [];
+            return $this->getYoyoResolverVars($includeKeys);
         }
 
         if ($this->isAnonymousComponent()) {
             return $this->request->except(['component', YoyoCompiler::yoprefix('id')]);
         }
 
-        return ClassHelpers::getPublicVars($this->component);
+        $vars = ClassHelpers::getPublicVars($this->component);
+
+        $vars = array_merge($vars, $this->getYoyoResolverVars($includeKeys));
+
+        return $vars;
+    }
+
+    protected function getYoyoResolverVars($keys)
+    {
+        $vars = [];
+
+        foreach ($keys as $key) {
+            if ($value = $this->request->input($key)) {
+                $vars[$key] = $value;
+            }
+        }
+
+        return $vars;
     }
 
     public function getQueryString()
@@ -61,8 +86,10 @@ class ComponentManager
         return $this->component->getListeners();
     }
 
-    public function process($action, $variables, $attributes): string
+    public function process($id, $name, $action, $variables, $attributes): string
     {
+        $this->component = $this->makeComponentInstance();
+
         if ($this->isAnonymousComponent()) {
             return $this->processAnonymousComponent($variables, $attributes);
         }
@@ -203,48 +230,16 @@ class ComponentManager
         return $this->component;
     }
 
-    public static function makeComponentInstance($id, $name)
+    private function makeComponentInstance()
     {
-        if (isset(self::$dynamicComponents[$name])) {
-            return new self::$dynamicComponents[$name]($id, $name);
-        }
-
-        if ($instance = self::discoverDynamicComponent($id, $name)) {
+        if ($instance = $this->resolver->resolveDynamic(self::$dynamicComponents)) {
             return $instance;
         }
 
-        if (isset(self::$anonymousComponents[$name])) {
-            return new AnonymousComponent($id, $name);
-        }
-
-        if ($instance = self::discoverAnomymousComponent($id, $name)) {
+        if ($instance = $this->resolver->resolveAnonymous(self::$anonymousComponents)) {
             return $instance;
         }
 
-        throw new ComponentNotFound($name);
-    }
-
-    public static function discoverDynamicComponent($id, $name)
-    {
-        $className = YoyoHelpers::studly($name);
-
-        $class = Configuration::get('namespace').$className;
-
-        if (is_subclass_of($class, Component::class)) {
-            return new $class($id, $name);
-        }
-
-        return null;
-    }
-
-    public static function discoverAnomymousComponent($id, $name)
-    {
-        $view = Yoyo::getViewProvider();
-
-        if ($view->exists($name)) {
-            return new AnonymousComponent($id, $name);
-        }
-
-        return null;
+        throw new ComponentNotFound($this->name);
     }
 }
