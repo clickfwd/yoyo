@@ -2,7 +2,7 @@
     "name": "clickfwd/yoyo",
     "description": "Framework to build dynamic interfaces with seamless communication between frontend and backend.",
     "keywords": ["framework", "yoyo"],
-    "version": "0.2.0",
+    "version": "0.3.0",
     "license": "MIT",
     "homepage": "https://github.com/Clickfwd/yoyo",
     "support": {
