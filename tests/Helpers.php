@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use Clickfwd\Yoyo\Services\Request;
 use Clickfwd\Yoyo\Services\Response;
 use Clickfwd\Yoyo\View;
 use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
@@ -68,7 +67,7 @@ function mockYoyoGetRequest($url, $component, $target = '', $parameters = [])
         'HTTP_HX_TARGET' => $target,
     ];
 
-    $requestService = Request::mock($request, $server);
+    $requestService = Yoyo::request()->mock($request, $server);
 
     return $requestService;
 }
@@ -86,14 +85,14 @@ function mockYoyoPostRequest($url, $component, $target = '', $parameters = [])
         'HTTP_HX_TARGET' => $target,
     ];
 
-    $requestService = Request::mock($request, $server);
+    $requestService = Yoyo::request()->mock($request, $server);
 
     return $requestService;
 }
 
 function resetYoyoRequest()
 {
-    Request::reset();
+    Yoyo::request()->reset();
 }
 
 function headers()

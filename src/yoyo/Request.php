@@ -1,14 +1,11 @@
 <?php
 
-namespace Clickfwd\Yoyo\Services;
+namespace Clickfwd\Yoyo;
 
-use Clickfwd\Yoyo\Concerns\Singleton;
-use Clickfwd\Yoyo\YoyoHelpers;
+use Clickfwd\Yoyo\Interfaces\RequestInterface;
 
-class Request
+class Request implements RequestInterface
 {
-    use Singleton;
-
     public function __construct()
     {
         $this->request = $_REQUEST;
@@ -16,24 +13,20 @@ class Request
         $this->server = $_SERVER;
     }
 
-    public static function mock($request, $server)
+    public function mock($request, $server)
     {
-        $_REQUEST = $request;
+        $this->request = $request;
 
-        $_SERVER = $server;
+        $this->server = $server;
 
-        static::$instance = new self();
-
-        return static::$instance;
+        return $this;
     }
 
-    public static function reset()
+    public function reset()
     {
-        $_REQUEST = [];
+        $this->request = [];
 
-        $_SERVER = [];
-
-        static::$instance = new self();
+        $this->server = [];
     }
 
     public function all()

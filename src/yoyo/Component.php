@@ -8,7 +8,6 @@ use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
 use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
-use Clickfwd\Yoyo\Services\Request;
 use Clickfwd\Yoyo\Services\Response;
 use Closure;
 use ReflectionMethod;
@@ -53,7 +52,7 @@ abstract class Component
 
         $this->componentName = $name;
 
-        $this->request = Request::getInstance();
+        $this->request = Yoyo::request();
 
         $this->response = Response::getInstance();
 

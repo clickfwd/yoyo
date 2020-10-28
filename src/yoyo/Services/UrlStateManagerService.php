@@ -2,6 +2,8 @@
 
 namespace Clickfwd\Yoyo\Services;
 
+use Clickfwd\Yoyo\Yoyo;
+
 class UrlStateManagerService
 {
     private $request;
@@ -10,7 +12,7 @@ class UrlStateManagerService
 
     public function __construct()
     {
-        $this->request = Request::getInstance();
+        $this->request = Yoyo::request();
 
         $this->currentUrl = $this->request->fullUrl();
     }

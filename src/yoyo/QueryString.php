@@ -22,7 +22,7 @@ class QueryString
 
         $this->keys = $keys;
 
-        $this->currentUrl = (Request::getInstance())->fullUrl();
+        $this->currentUrl = Yoyo::request()->fullUrl();
     }
 
     /**

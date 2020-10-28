@@ -3,6 +3,7 @@
 namespace Clickfwd\Yoyo\Services;
 
 use Clickfwd\Yoyo\Concerns\Singleton;
+use Clickfwd\Yoyo\Yoyo;
 
 class BrowserEventsService
 {
@@ -14,7 +15,7 @@ class BrowserEventsService
 
     public function __construct()
     {
-        $this->request = Request::getInstance();
+        $this->request = Yoyo::request();
 
         $this->response = Response::getInstance();
     }

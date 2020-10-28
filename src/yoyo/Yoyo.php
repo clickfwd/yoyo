@@ -2,20 +2,17 @@
 
 namespace Clickfwd\Yoyo;
 
-use Clickfwd\Yoyo\Concerns\Singleton;
 use Clickfwd\Yoyo\Exceptions\IncompleteComponentParamInRequest;
 use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
+use Clickfwd\Yoyo\Interfaces\RequestInterface;
 use Clickfwd\Yoyo\Services\BrowserEventsService;
 use Clickfwd\Yoyo\Services\Configuration;
 use Clickfwd\Yoyo\Services\PageRedirectService;
-use Clickfwd\Yoyo\Services\Request;
 use Clickfwd\Yoyo\Services\Response;
 use Clickfwd\Yoyo\Services\UrlStateManagerService;
 
 class Yoyo
 {
-    use Singleton;
-
     private $action;
 
     private $attributes = [];
@@ -26,19 +23,28 @@ class Yoyo
 
     private $name;
 
-    private $request;
+    private static $request;
 
     private $variables = [];
 
     private static $viewProviders = [];
 
-    public function __construct()
+    private static $classBindings = [];
+
+    private static $classSingletons = [];
+
+    public function bindRequest(RequestInterface $request)
     {
-        // Need the same instance for all components to prevent nested components
-        // from inheriting the parent component ID
-        if (! $this->request) {
-            $this->request = Request::getInstance();
+        self::$request = $request;
+    }
+
+    public static function request()
+    {
+        if (! self::$request) {
+            self::$request = new Request();
         }
+
+        return self::$request;
     }
 
     public function configure($options): void
@@ -51,8 +57,11 @@ class Yoyo
         if (isset($attributes['id'])) {
             $id = $attributes['id'];
         } else {
-            $id = $this->request->input(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
+            $id = self::request()->input(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
         }
+
+        // Remove the component ID from the request so it's not passed to child components
+        self::request()->drop(YoyoCompiler::yoprefix_value('id'));
 
         return $id;
     }
@@ -60,10 +69,10 @@ class Yoyo
     private function getComponentResolver()
     {
         $resolverName = $this->variables[YoyoCompiler::yoprefix('resolver')]
-                            ?? $this->request->input(YoyoCompiler::yoprefix('resolver'));
+                            ?? self::request()->input(YoyoCompiler::yoprefix('resolver'));
 
         $componentSource = $this->variables[YoyoCompiler::yoprefix('source')]
-                            ?? $this->request->input(YoyoCompiler::yoprefix('source'));
+                            ?? self::request()->input(YoyoCompiler::yoprefix('source'));
 
         if ($componentSource) {
             $this->variables[YoyoCompiler::yoprefix('source')] = $componentSource;
@@ -126,9 +135,6 @@ class Yoyo
 
         unset($attributes['id']);
 
-        // Revove the component ID from the request so it's not passed to child components
-        $this->request->drop(YoyoCompiler::yoprefix_value('id'));
-
         $this->name = $name;
 
         $this->variables = $variables;
@@ -170,7 +176,7 @@ class Yoyo
 
     protected function parseUpdateRequest()
     {
-        $component = $this->request->input('component');
+        $component = self::request()->input('component');
 
         $parts = array_filter(explode('/', $component));
 
@@ -189,7 +195,7 @@ class Yoyo
     {
         $variables = [];
 
-        $componentManager = new ComponentManager($this->request, $spinning);
+        $componentManager = new ComponentManager(self::request(), $spinning);
 
         $componentManager->addComponentResolver($this->getComponentResolver());
 
@@ -257,11 +263,11 @@ class Yoyo
      */
     private function is_spinning(): bool
     {
-        $spinning = $this->request->isYoyoRequest();
+        $spinning = self::request()->isYoyoRequest();
 
         // Stop spinning of child components when parent is refreshed
 
-        $this->request->windUp();
+        self::request()->windUp();
 
         return $spinning;
     }

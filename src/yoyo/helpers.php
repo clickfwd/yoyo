@@ -3,7 +3,6 @@
 namespace Yoyo;
 
 use Clickfwd\Yoyo\Services\Configuration;
-use Clickfwd\Yoyo\Services\Request;
 use Clickfwd\Yoyo\Yoyo;
 
 if (! function_exists('Yoyo\yoyo_render')) {
@@ -35,7 +34,7 @@ function yoyo_styles($return = false)
 
 function is_spinning($expression = null)
 {
-    $request = Request::getInstance();
+    $request = Yoyo::request();
 
     if ($request->isYoyoRequest()) {
         if (! $expression) {
@@ -50,7 +49,7 @@ function is_spinning($expression = null)
 
 function not_spinning($expression = null)
 {
-    $request = Request::getInstance();
+    $request = Yoyo::request();
 
     if (! $request->isYoyoRequest()) {
         if (! $expression) {

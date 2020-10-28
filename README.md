@@ -812,7 +812,7 @@ use Jenssegers\Blade\Blade;
 
 define('APP_PATH', __DIR__);
 
-$yoyo = Yoyo::getInstance();
+$yoyo = new Yoyo();
 
 $yoyo->configure([
   'url' => 'yoyo',
