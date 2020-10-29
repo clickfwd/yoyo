@@ -6,6 +6,8 @@ use Clickfwd\Yoyo\Interfaces\RequestInterface;
 
 class Request implements RequestInterface
 {
+    private $dropped = [];
+
     public function __construct()
     {
         $this->request = $_REQUEST;
@@ -59,8 +61,12 @@ class Request implements RequestInterface
         return $output;
     }
 
-    public function input($key, $default = null)
+    public function get($key, $default = null)
     {
+        if (in_array($key, $this->dropped)) {
+            return $default;
+        }
+
         $value = $this->request[$key] ?? $default;
 
         if ($decoded = YoyoHelpers::test_json($value)) {
@@ -72,7 +78,7 @@ class Request implements RequestInterface
 
     public function drop($key)
     {
-        unset($this->request[$key]);
+        $this->dropped[] = $key;
     }
 
     public function method()

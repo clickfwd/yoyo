@@ -118,7 +118,7 @@ class ComponentManager
             $listeners = $this->component->getListeners();
 
             if (! empty($listeners[$action])) {
-                $eventParams = $this->request->input('eventParams', []);
+                $eventParams = $this->request->get('eventParams', []);
 
                 $isEventListenerAction = true;
 
@@ -177,7 +177,7 @@ class ComponentManager
     {
         $args = [];
 
-        $stringArgs = $this->request->input('actionArgs');
+        $stringArgs = $this->request->get('actionArgs');
 
         foreach (explode(',', $stringArgs) as $arg) {
             $arg = trim(str_replace(['"', "'"], '', $arg));

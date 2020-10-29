@@ -8,7 +8,7 @@ interface RequestInterface
 
     public function except($keys);
 
-    public function input($key, $default = null);
+    public function get($key, $default = null);
 
     public function drop($key);
 

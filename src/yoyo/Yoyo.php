@@ -176,7 +176,7 @@ class Yoyo
 
     protected function parseUpdateRequest()
     {
-        $component = self::request()->input('component');
+        $component = self::request()->get('component');
 
         $parts = array_filter(explode('/', $component));
 
