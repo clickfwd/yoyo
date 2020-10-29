@@ -57,7 +57,7 @@ class ComponentManager
         return $vars;
     }
 
-    protected function includeYoyoPrefixedVars()
+    public function includeYoyoPrefixedVars()
     {
         $vars = [];
 

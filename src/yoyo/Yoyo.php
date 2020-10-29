@@ -66,17 +66,12 @@ class Yoyo
         return $id;
     }
 
-    private function getComponentResolver()
+    private function getComponentResolver($componentManager)
     {
         $resolverName = $this->variables[YoyoCompiler::yoprefix('resolver')]
                             ?? self::request()->get(YoyoCompiler::yoprefix('resolver'));
 
-        $componentSource = $this->variables[YoyoCompiler::yoprefix('source')]
-                            ?? self::request()->get(YoyoCompiler::yoprefix('source'));
-
-        if ($componentSource) {
-            $this->variables[YoyoCompiler::yoprefix('source')] = $componentSource;
-        }
+        $this->variables = array_merge($this->variables, $componentManager->includeYoyoPrefixedVars());
 
         if ($resolverName && isset(self::$componentResolver[$resolverName])) {
             return new self::$componentResolver[$resolverName]($this->id, $this->name, $this->variables, self::$viewProviders);
@@ -197,7 +192,7 @@ class Yoyo
 
         $componentManager = new ComponentManager(self::request(), $spinning);
 
-        $componentManager->addComponentResolver($this->getComponentResolver());
+        $componentManager->addComponentResolver($this->getComponentResolver($componentManager));
 
         $html = $componentManager->process($this->id, $this->name, $this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
 
