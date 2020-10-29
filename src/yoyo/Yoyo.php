@@ -57,7 +57,7 @@ class Yoyo
         if (isset($attributes['id'])) {
             $id = $attributes['id'];
         } else {
-            $id = self::request()->input(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
+            $id = self::request()->get(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
         }
 
         // Remove the component ID from the request so it's not passed to child components
@@ -69,10 +69,10 @@ class Yoyo
     private function getComponentResolver()
     {
         $resolverName = $this->variables[YoyoCompiler::yoprefix('resolver')]
-                            ?? self::request()->input(YoyoCompiler::yoprefix('resolver'));
+                            ?? self::request()->get(YoyoCompiler::yoprefix('resolver'));
 
         $componentSource = $this->variables[YoyoCompiler::yoprefix('source')]
-                            ?? self::request()->input(YoyoCompiler::yoprefix('source'));
+                            ?? self::request()->get(YoyoCompiler::yoprefix('source'));
 
         if ($componentSource) {
             $this->variables[YoyoCompiler::yoprefix('source')] = $componentSource;
@@ -203,10 +203,7 @@ class Yoyo
 
         $defaultValues = $componentManager->getDefaultPublicVars();
 
-        $newValues = $componentManager->getPublicVars([
-            YoyoCompiler::yoprefix('resolver'),
-            YoyoCompiler::yoprefix('source'),
-        ]);
+        $newValues = $componentManager->getPublicVars();
 
         // Automatically include in request public properties, or request variables in the case of anonymous components
 

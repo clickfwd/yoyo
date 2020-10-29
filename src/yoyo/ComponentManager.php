@@ -40,10 +40,10 @@ class ComponentManager
         return ClassHelpers::getDefaultPublicVars($this->component);
     }
 
-    public function getPublicVars($includeKeys = [])
+    public function getPublicVars()
     {
         if ($this->request->method() !== 'GET') {
-            return $this->getYoyoResolverVars($includeKeys);
+            return $this->includeYoyoPrefixedVars();
         }
 
         if ($this->isAnonymousComponent()) {
@@ -52,17 +52,17 @@ class ComponentManager
 
         $vars = ClassHelpers::getPublicVars($this->component);
 
-        $vars = array_merge($vars, $this->getYoyoResolverVars($includeKeys));
+        $vars = array_merge($vars, $this->includeYoyoPrefixedVars());
 
         return $vars;
     }
 
-    protected function getYoyoResolverVars($keys)
+    protected function includeYoyoPrefixedVars()
     {
         $vars = [];
 
-        foreach ($keys as $key) {
-            if ($value = $this->request->input($key)) {
+        foreach ($this->request->all() as $key => $value) {
+            if (substr($key, 0, 5) == YoyoCompiler::yoprefix('')) {
                 $vars[$key] = $value;
             }
         }
