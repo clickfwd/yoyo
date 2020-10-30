@@ -16,6 +16,13 @@ Check out the [Yoyo Demo App](https://app.getyoyo.dev) to get a better idea of w
 - [Yoyo Blade App](https://github.com/clickfwd/yoyo-blade-app)
 - [Yoyo Twig App](https://github.com/clickfwd/yoyo-twig-app)
 
+## 🧰 Yoyo Joomla and WordPress Plugins
+
+If you want to develop with Yoyo in Joomla and WordPress, try the available plugins for these platforms. They load all the necessary assets and provide a framework to develop with Yoyo.
+
+- [Yoyo Joomla](https://github.com/clickfwd/yoyo-joomla)
+- [Yoyo WordPress](https://github.com/clickfwd/yoyo-wordpress)
+
 ## Documentation 
 
 - [How it Works](#how-it-works)
