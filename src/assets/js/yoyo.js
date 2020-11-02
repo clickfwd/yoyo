@@ -10,6 +10,14 @@
 
 		window.YoyoEngine = window.htmx
 
+		window.addEventListener('DOMContentLoaded', () => {
+			window.onpopstate = function (event) {
+				event?.state?.yoyo?.forEach((state) =>
+					restoreComponentStateFromHistory(state)
+				)
+			}
+		})
+
 		var Yoyo = {
 			url: null,
 			config(options) {
@@ -28,7 +36,6 @@
 			processedNode(evt) {
 				// Dynamically create non-existent target IDs by appending them to document body
 				const targetId = evt.srcElement.getAttribute('hx-target')
-
 				if (
 					targetId &&
 					targetId[0] == '#' &&
@@ -74,28 +81,29 @@
 					}
 				}
 			},
-			processEmitHeader(xhr) {
-				if (xhr.getAllResponseHeaders().match(/Yoyo-Emit:/i)) {
-					let events = JSON.parse(xhr.getResponseHeader('Yoyo-Emit'))
-					clearYoyoEventCache()
-					events.forEach((event) => {
-						triggerServerEmittedEvent(event)
-					})
-				}
+			processEmitEvents(events) {
+				if (!events) return
+
+				events = typeof events == 'string' ? JSON.parse(events) : events
+
+				yoyoEventCache.clear()
+
+				events.forEach((event) => {
+					triggerServerEmittedEvent(event)
+				})
 			},
-			processBrowserEventHeader(xhr) {
-				if (xhr.getAllResponseHeaders().match(/Yoyo-Browser-Event:/i)) {
-					let events = JSON.parse(
-						xhr.getResponseHeader('Yoyo-Browser-Event')
+			processBrowserEvents(events) {
+				if (!events) return
+
+				events = typeof events == 'string' ? JSON.parse(events) : events
+
+				events.forEach((event) => {
+					window.dispatchEvent(
+						new CustomEvent(event.event, {
+							detail: event.params,
+						})
 					)
-					events.forEach((event) => {
-						window.dispatchEvent(
-							new CustomEvent(event.event, {
-								detail: event.params,
-							})
-						)
-					})
-				}
+				})
 			},
 			beforeRequestActions(elt) {
 				let component = getComponent(elt)
@@ -114,12 +122,73 @@
 
 				delete component.__yoyo_action
 			},
+			afterSettleActions(evt) {
+				/// HISTORY
+
+				const xhr = evt.detail.xhr
+				const pushedUrl = xhr.getResponseHeader('HX-Push')
+
+				// At this time, browser history support only works with components
+				// changing the URL queryString
+				if (!pushedUrl) return
+
+				// At this time, browser history support only works with outerHTML swaps
+				if (!evt.detail.target?.id) return
+
+				if (evt.detail.target.__yoyo_replaying_history) return
+
+				const url =
+					pushedUrl !== null ? pushedUrl : window.location.href
+
+				const component = getComponentById(evt.detail.target.id)
+
+				component.__yoyo_effects = {
+					browserEvents: xhr.getResponseHeader('Yoyo-Browser-Event'),
+					emitEvents: xhr.getResponseHeader('Yoyo-Emit'),
+				}
+
+				if (!component) return
+
+				const componentName = getComponentName(component)
+
+				console.log(
+					`afterSettle ${componentName}:${getComponentIndex(
+						component
+					)}`
+				)
+
+				// Before pushing a component to the browser history, we need to take a snapshot
+				// of its initial rendered-HTML to store it in the current state
+				// This also works for components loaded dynamically onto the page, like modals
+				if (!componentAlreadyInCurrentHistoryState(component)) {
+					console.log(
+						`initialState ${getComponentFingerprint(component)}`
+					)
+					updateState(
+						'replaceState',
+						document.location.href,
+						component,
+						true,
+						evt.detail.target.outerHTML
+					)
+				}
+
+				if (
+					!history?.state?.yoyo ||
+					history?.state?.initialState ||
+					url !== window.location.href
+				) {
+					updateState('pushState', url, component)
+				} else {
+					updateState('replaceState', url, component)
+				}
+			},
 		}
 
 		/**
 		 * Tracking for elements receiving multiple emitted events to only trigger the first one
 		 */
-		let yoyoEventCache = []
+		let yoyoEventCache = new Set()
 
 		let yoyoSpinners = {}
 
@@ -148,14 +217,31 @@
 			return document.querySelectorAll('[yoyo\\:name]')
 		}
 
-		function getComponentName(elt) {
-			return elt.getAttribute('yoyo:name')
+		function getComponentById(componentId) {
+			return document.querySelector(`#${componentId}`)
 		}
 
-		function decodeHTMLEntities(text) {
-			var textArea = document.createElement('textarea')
-			textArea.innerHTML = text
-			return textArea.value
+		function getComponentName(component) {
+			return component.getAttribute('yoyo:name')
+		}
+
+		function getComponentFingerprint(component) {
+			return `${getComponentName(
+				component
+			)}:${getComponentIndex(component)}`
+		}
+
+		function getComponentsByName(name) {
+			return Array.from(
+				document.querySelectorAll(`[yoyo\\:name="${name}"]`)
+			)
+		}
+
+		// Index as it appears on the page relative to other same-named components
+		function getComponentIndex(component) {
+			const name = getComponentName(component)
+			const components = getComponentsByName(name)
+			return components.indexOf(component)
 		}
 
 		function getAncestorcomponents(selector) {
@@ -172,16 +258,12 @@
 		}
 
 		function shouldTriggerYoyoEvent(elt) {
-			if (isComponent(elt) && !yoyoEventCache.includes(elt.id)) {
-				yoyoEventCache.push(elt.id)
+			if (isComponent(elt) && !yoyoEventCache.has(elt.id)) {
+				yoyoEventCache.add(elt.id)
 				return true
 			}
 
 			return false
-		}
-
-		function clearYoyoEventCache() {
-			yoyoEventCache = []
 		}
 
 		function eventsMiddleware(evt) {
@@ -268,6 +350,10 @@
 		function removeServerEventTransient(elt) {
 			elt.removeAttribute('yoyo:transient-event')
 		}
+
+		/**
+		 * Component loading state spinners
+		 */
 
 		function spinningStart(component) {
 			const yoyoId = component.id
@@ -389,6 +475,120 @@
 			}
 		}
 
+		function componentAlreadyInCurrentHistoryState(component) {
+			if (!history?.state?.yoyo) return false
+
+			history.state.yoyo.forEach((state) => {
+				if (state.fingerprint == getComponentFingerprint(component)) {
+					return true
+				}
+			})
+
+			return false
+		}
+
+		/**
+		 * Component state caching for browser history
+		 */
+
+		function updateState(
+			method,
+			url,
+			component,
+			initialState,
+			originalHTML
+		) {
+			const id = component.id
+			const componentName = getComponentName(component)
+			const componentIndex = getComponentIndex(component)
+			const fingerprint = getComponentFingerprint(component)
+			const html = originalHTML ? originalHTML : component.outerHTML
+			const effects = component.__yoyo_effects || {}
+
+			const newState = {
+				url,
+				id,
+				componentName,
+				componentIndex,
+				fingerprint,
+				html,
+				effects,
+				initialState,
+			}
+
+			const stateArray =
+				method == 'pushState'
+					? [newState]
+					: replaceStateByComponentIndex(newState)
+
+			console.log(
+				`${method} ${newState.fingerprint}`,
+				'newState',
+				newState,
+				'stateArray',
+				stateArray
+			)
+
+			history[method](
+				{ yoyo: stateArray, initialState: initialState },
+				'',
+				url
+			)
+		}
+
+		function replaceStateByComponentIndex(newState) {
+			let stateArray = history?.state?.yoyo || []
+			let fingerprintFound = false
+			stateArray.map((state) => {
+				if (state.fingerprint == newState.fingerprint) {
+					fingerprintFound = true
+					return newState
+				}
+
+				return state
+			})
+
+			if (!fingerprintFound) {
+				stateArray.push(newState)
+			}
+
+			return stateArray
+		}
+
+		function restoreComponentStateFromHistory(state) {
+			const componentName = state.componentName
+			const componentsWithSameName = getComponentsByName(componentName)
+			let component = componentsWithSameName[state.componentIndex]
+
+			// If the component cannot be found by index, try a simple ID check
+			// This is needed for components dynamically added to the page, like modals
+			// and it works when the component id is pre-determined (i.e. not randomly generated)
+			if (!component) {
+				component = getComponentById(state.id)
+
+				if (!component) return
+			}
+
+			console.log(`restoreComponentStateFromHistory ${state.fingerprint}`)
+
+			var parser = new DOMParser()
+			var cached = parser.parseFromString(state.html, 'text/html').body
+				.firstElementChild
+			component.replaceWith(cached)
+
+			htmx.process(cached)
+
+			// Trigger full server refresh when coming back to the original state
+			// so server-sent events on the render/refresh method are run
+			if (state.initialState) {
+				cached.__yoyo_replaying_history = true
+				YoyoEngine.trigger(cached, 'refresh')
+			} else {
+				Yoyo.processBrowserEvents(state?.effects?.browserEvents)
+				Yoyo.processEmitEvents(state?.effects?.emitEvents)
+			}
+		}
+
 		// https://github.com/alpinejs/alpine/
 		function walk(el, callback) {
 			if (callback(el) === false) return
@@ -451,6 +651,8 @@ YoyoEngine.defineExtension('yoyo', {
 				return
 			}
 
+			const xhr = evt.detail.xhr
+
 			Yoyo.afterOnLoadActions(evt.target)
 
 			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
@@ -459,23 +661,30 @@ YoyoEngine.defineExtension('yoyo', {
 				!evt.target.isSameNode(evt.detail.target) ||
 				evt.detail.xhr.status == 204
 			) {
-				Yoyo.processEmitHeader(evt.detail.xhr)
-				Yoyo.processBrowserEventHeader(evt.detail.xhr)
-				Yoyo.processRedirectHeader(evt.detail.xhr)
+				Yoyo.processEmitEvents(xhr.getResponseHeader('Yoyo-Emit'))
+				Yoyo.processBrowserEvents(
+					xhr.getResponseHeader('Yoyo-Browser-Event')
+				)
+				Yoyo.processRedirectHeader(xhr)
 			}
 		}
 
 		if (name === 'htmx:beforeSwap') {
 			if (!evt.target) return
 
-			Yoyo.processBrowserEventHeader(evt.detail.xhr)
+			Yoyo.processBrowserEvents(
+				evt.detail.xhr.getResponseHeader('Yoyo-Browser-Event')
+			)
 		}
 
 		if (name === 'htmx:afterSettle') {
 			if (!evt.target) return
 
-			Yoyo.processEmitHeader(evt.detail.xhr)
-			Yoyo.processRedirectHeader(evt.detail.xhr)
+			const xhr = evt.detail.xhr
+
+			Yoyo.processEmitEvents(xhr.getResponseHeader('Yoyo-Emit'))
+
+			Yoyo.afterSettleActions(evt)
 		}
 	},
 

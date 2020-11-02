@@ -17,7 +17,7 @@ class Configuration
         self::$options = array_merge([
             'namespace' => 'App\\Yoyo\\',
             'defaultSwap' => 'outerHTML',
-            'historyEnabled' => true,
+            'historyEnabled' => false,
         ], $options);
     }
 
