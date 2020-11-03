@@ -69,7 +69,7 @@
 				evt.detail.path = Yoyo.url
 
 				// Make request info available to other events
-				component.__yoyo_action = action
+				componentAddYoyoData(component, { action })
 
 				eventsMiddleware(evt)
 			},
@@ -117,37 +117,38 @@
 
 				// Timeout needed for targets outside of Yoyo component
 				setTimeout(() => {
-					removeServerEventTransient(component)
+					removeEventListenerData(component)
 				}, 125)
-
-				delete component.__yoyo_action
 			},
 			afterSettleActions(evt) {
 				/// HISTORY
+				// At this time, browser history support only works with outerHTML swaps
+				const component = getComponentById(evt.detail.elt.id)
+
+				if (!component) return
+
+				componentCopyYoyoDataFromTo(evt.detail.target, component)
 
 				const xhr = evt.detail.xhr
 				const pushedUrl = xhr.getResponseHeader('HX-Push')
 
 				// At this time, browser history support only works with components
 				// changing the URL queryString
-				if (!pushedUrl) return
+				console.log('afterSettle __yoyo', component.__yoyo)
 
-				// At this time, browser history support only works with outerHTML swaps
-				if (!evt.detail.target?.id) return
-
-				if (evt.detail.target.__yoyo_replaying_history) return
+				if (!pushedUrl || component.__yoyo.replayingHistory) return
 
 				const url =
 					pushedUrl !== null ? pushedUrl : window.location.href
 
-				const component = getComponentById(evt.detail.target.id)
-
-				component.__yoyo_effects = {
-					browserEvents: xhr.getResponseHeader('Yoyo-Browser-Event'),
-					emitEvents: xhr.getResponseHeader('Yoyo-Emit'),
-				}
-
-				if (!component) return
+				componentAddYoyoData(component, {
+					effects: {
+						browserEvents: xhr.getResponseHeader(
+							'Yoyo-Browser-Event'
+						),
+						emitEvents: xhr.getResponseHeader('Yoyo-Emit'),
+					},
+				})
 
 				const componentName = getComponentName(component)
 
@@ -218,6 +219,7 @@
 		}
 
 		function getComponentById(componentId) {
+			if (!componentId) return null
 			return document.querySelector(`#${componentId}`)
 		}
 
@@ -269,31 +271,31 @@
 		function eventsMiddleware(evt) {
 			const component = getComponent(evt.detail.elt)
 			const componentName = getComponentName(component)
-			const eventAttr = component.getAttribute('yoyo:transient-event')
+			const eventData = component.__yoyo.eventListener
 
-			if (!eventAttr) return
+			if (!eventData) return
 
-			const eventData = JSON.parse(eventAttr)
+			evt.detail.parameters[
+				'component'
+			] = `${componentName}/${eventData.name}`
 
-			if (eventData) {
-				evt.detail.parameters[
-					'component'
-				] = `${componentName}/${eventData.name}`
-
-				evt.detail.parameters = {
-					...evt.detail.parameters,
-					...{
-						eventParams: eventData.params
-							? JSON.stringify(eventData.params)
-							: [],
-					},
-				}
+			evt.detail.parameters = {
+				...evt.detail.parameters,
+				...{
+					eventParams: eventData.params
+						? JSON.stringify(eventData.params)
+						: [],
+				},
 			}
 		}
 
-		function addServerEventTransient(elt, event, params) {
+		function addEmittedEventParametersToListenerComponent(
+			component,
+			event,
+			params
+		) {
 			// Check if Yoyo component is listening for the event
-			let componentListeningFor = elt
+			let componentListeningFor = component
 				.getAttribute('hx-trigger')
 				.split(',')
 				.filter((name) => name.trim())
@@ -302,10 +304,9 @@
 				return
 			}
 
-			elt.setAttribute(
-				'yoyo:transient-event',
-				JSON.stringify({ name: event, params: params })
-			)
+			componentAddYoyoData(component, {
+				eventListener: { name: event, params: params },
+			})
 		}
 
 		function triggerServerEmittedEvent(event) {
@@ -328,15 +329,13 @@
 					}
 				}
 			} else if (componentName) {
-				elements = document.querySelectorAll(
-					`[yoyo\\:name="${componentName}"]`
-				)
+				elements = getComponentsByName(componentName)
 			}
 
 			if (elements) {
 				elements.forEach((elt) => {
 					if (shouldTriggerYoyoEvent(elt)) {
-						addServerEventTransient(
+						addEmittedEventParametersToListenerComponent(
 							getComponent(elt),
 							eventName,
 							params
@@ -347,8 +346,8 @@
 			}
 		}
 
-		function removeServerEventTransient(elt) {
-			elt.removeAttribute('yoyo:transient-event')
+		function removeEventListenerData(component) {
+			delete component.__yoyo.eventListener
 		}
 
 		/**
@@ -365,7 +364,7 @@
 			let spinningElts = yoyoSpinners[yoyoId].generic || []
 
 			spinningElts = spinningElts.concat(
-				yoyoSpinners[yoyoId]?.actions[component.__yoyo_action] || []
+				yoyoSpinners[yoyoId]?.actions[component.__yoyo.action] || []
 			)
 
 			spinningElts.forEach((directive) => {
@@ -503,7 +502,7 @@
 			const componentIndex = getComponentIndex(component)
 			const fingerprint = getComponentFingerprint(component)
 			const html = originalHTML ? originalHTML : component.outerHTML
-			const effects = component.__yoyo_effects || {}
+			const effects = component.__yoyo.effects || {}
 
 			const newState = {
 				url,
@@ -574,6 +573,7 @@
 			var parser = new DOMParser()
 			var cached = parser.parseFromString(state.html, 'text/html').body
 				.firstElementChild
+
 			component.replaceWith(cached)
 
 			htmx.process(cached)
@@ -581,12 +581,22 @@
 			// Trigger full server refresh when coming back to the original state
 			// so server-sent events on the render/refresh method are run
 			if (state.initialState) {
-				cached.__yoyo_replaying_history = true
+				componentAddYoyoData(cached, { replayingHistory: true })
 				YoyoEngine.trigger(cached, 'refresh')
 			} else {
 				Yoyo.processBrowserEvents(state?.effects?.browserEvents)
 				Yoyo.processEmitEvents(state?.effects?.emitEvents)
 			}
+		}
+
+		function componentCopyYoyoDataFromTo(from, to) {
+			to.__yoyo = from?.__yoyo || {}
+		}
+
+		function componentAddYoyoData(component, data) {
+			if (!data) return
+			component.__yoyo = component?.__yoyo || {}
+			component.__yoyo = Object.assign(component.__yoyo, data)
 		}
 
 		// https://github.com/alpinejs/alpine/
@@ -647,9 +657,9 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterOnLoad') {
-			if (!evt.target) {
-				return
-			}
+			if (!evt.target) return
+
+			console.log('htmx:afterOnLoad')
 
 			const xhr = evt.detail.xhr
 
