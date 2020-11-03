@@ -110,10 +110,18 @@
 
 				spinningStart(component)
 			},
-			afterOnLoadActions(elt) {
-				let component = getComponent(elt)
+			afterOnLoadActions(evt) {
+				const component = getComponentById(evt.detail.target.id)
 
-				spinningStop(component)
+				if (!component) return
+
+				componentCopyYoyoDataFromTo(evt.detail.target, component)
+
+				// This isn't needed at this time because the CSS classes/attributes are
+				// automatically removed when a component is updated from the server
+				// however, could be useful to improve transitions in the future. It would
+				// be necessary to add back spinner classes before new HTML is swapped in
+				// spinningStop(component)
 
 				// Timeout needed for targets outside of Yoyo component
 				setTimeout(() => {
@@ -126,8 +134,6 @@
 				const component = getComponentById(evt.detail.elt.id)
 
 				if (!component) return
-
-				componentCopyYoyoDataFromTo(evt.detail.target, component)
 
 				const xhr = evt.detail.xhr
 				const pushedUrl = xhr.getResponseHeader('HX-Push')
@@ -355,17 +361,20 @@
 		 */
 
 		function spinningStart(component) {
-			const yoyoId = component.id
+			const componentId = component.id
 
-			if (!yoyoSpinners[yoyoId]) {
+			if (!yoyoSpinners[componentId]) {
 				return
 			}
 
-			let spinningElts = yoyoSpinners[yoyoId].generic || []
+			let spinningElts = yoyoSpinners[componentId].generic || []
 
 			spinningElts = spinningElts.concat(
-				yoyoSpinners[yoyoId]?.actions[component.__yoyo.action] || []
+				yoyoSpinners[componentId]?.actions[component.__yoyo.action] ||
+					[]
 			)
+
+			delete yoyoSpinners[component.id]
 
 			spinningElts.forEach((directive) => {
 				const spinnerElt = directive.elt
@@ -397,17 +406,14 @@
 		}
 
 		function spinningStop(component) {
-			if (!component.__yoyo_on_finish_loading) {
-				return
-			}
-
 			while (component.__yoyo_on_finish_loading.length > 0) {
 				component.__yoyo_on_finish_loading.shift()()
 			}
+			console.log(component.__yoyo_on_finish_loading)
 		}
 
 		function initializeComponentSpinners(component) {
-			const yoyoId = component.id
+			const componentId = component.id
 			component.__yoyo_on_finish_loading = []
 
 			walk(component, (elt) => {
@@ -419,36 +425,36 @@
 							.replace(' ', '')
 							.split(',')
 							.forEach((action) => {
-								addActionSpinner(yoyoId, action, directive)
+								addActionSpinner(componentId, action, directive)
 							})
 					} else {
-						addGenericSpinner(yoyoId, directive)
+						addGenericSpinner(componentId, directive)
 					}
 				}
 			})
 		}
 
-		function checkSpinnerInitialized(yoyoId, action) {
-			yoyoSpinners[yoyoId] = yoyoSpinners[yoyoId] || {
+		function checkSpinnerInitialized(componentId, action) {
+			yoyoSpinners[componentId] = yoyoSpinners[componentId] || {
 				actions: {},
 				generic: [],
 			}
 			if (
 				action &&
-				yoyoSpinners?.[yoyoId]?.actions?.[action] === undefined
+				yoyoSpinners?.[componentId]?.actions?.[action] === undefined
 			) {
-				yoyoSpinners[yoyoId].actions[action] = []
+				yoyoSpinners[componentId].actions[action] = []
 			}
 		}
 
-		function addActionSpinner(yoyoId, action, directive) {
-			checkSpinnerInitialized(yoyoId, action)
-			yoyoSpinners[yoyoId].actions[action].push(directive)
+		function addActionSpinner(componentId, action, directive) {
+			checkSpinnerInitialized(componentId, action)
+			yoyoSpinners[componentId].actions[action].push(directive)
 		}
 
-		function addGenericSpinner(yoyoId, directive) {
-			checkSpinnerInitialized(yoyoId)
-			yoyoSpinners[yoyoId].generic.push(directive)
+		function addGenericSpinner(componentId, directive) {
+			checkSpinnerInitialized(componentId)
+			yoyoSpinners[componentId].generic.push(directive)
 		}
 
 		// https://github.com/livewire/livewire
@@ -591,10 +597,12 @@
 
 		function componentCopyYoyoDataFromTo(from, to) {
 			to.__yoyo = from?.__yoyo || {}
+			to.__yoyo_on_finish_loading = from?.__yoyo_on_finish_loading
 		}
 
 		function componentAddYoyoData(component, data) {
 			if (!data) return
+
 			component.__yoyo = component?.__yoyo || {}
 			component.__yoyo = Object.assign(component.__yoyo, data)
 		}
@@ -657,13 +665,11 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterOnLoad') {
+			Yoyo.afterOnLoadActions(evt)
+
 			if (!evt.target) return
 
-			console.log('htmx:afterOnLoad')
-
 			const xhr = evt.detail.xhr
-
-			Yoyo.afterOnLoadActions(evt.target)
 
 			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
 			// so we run those actions here
