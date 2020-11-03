@@ -178,7 +178,7 @@ class YoyoCompiler
             $this->componentId = $id;
         }
 
-        $this->addMethodAttribute($element);
+        $this->addMethodAttribute($element, true);
 
         // Get default attributes
 
@@ -337,7 +337,7 @@ class YoyoCompiler
         $element->setAttribute(self::hxprefix($remappedAttr), $value);
     }
 
-    private function addMethodAttribute($element)
+    private function addMethodAttribute($element, $isRootNode = false)
     {
         // Look for existing method attribute, otherwise set 'get' as default
 
@@ -360,6 +360,11 @@ class YoyoCompiler
         // Make element reactive if it has the yoyo attribute, or if it's a clickable element
         if ($element->hasAttribute(self::YOYO_PREFIX) || in_array($element->tagName, $this->reactiveTags)) {
             $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
+
+            if (! $isRootNode) {
+                // Ensure re-active tags have an ID to improve swapping
+                $this->checkForIdAttribute($element);
+            }
         }
     }
 

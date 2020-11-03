@@ -53,10 +53,10 @@ class YoyoHelpers
             return $string;
         }
 
-        if (!is_string($string)) {
+        if (! is_string($string)) {
             return null;
         }
-                
+
         $decoded = json_decode($string, true);
 
         return $decoded ?? null;
