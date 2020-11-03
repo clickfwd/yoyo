@@ -138,9 +138,7 @@
 				const xhr = evt.detail.xhr
 				const pushedUrl = xhr.getResponseHeader('HX-Push')
 
-				// At this time, browser history support only works with components
-				// changing the URL queryString
-				console.log('afterSettle __yoyo', component.__yoyo)
+				// Browser history support only works with components modifing the URL queryString
 
 				if (!pushedUrl || component.__yoyo.replayingHistory) return
 
@@ -158,19 +156,10 @@
 
 				const componentName = getComponentName(component)
 
-				console.log(
-					`afterSettle ${componentName}:${getComponentIndex(
-						component
-					)}`
-				)
-
 				// Before pushing a component to the browser history, we need to take a snapshot
 				// of its initial rendered-HTML to store it in the current state
 				// This also works for components loaded dynamically onto the page, like modals
 				if (!componentAlreadyInCurrentHistoryState(component)) {
-					console.log(
-						`initialState ${getComponentFingerprint(component)}`
-					)
 					updateState(
 						'replaceState',
 						document.location.href,
@@ -409,7 +398,6 @@
 			while (component.__yoyo_on_finish_loading.length > 0) {
 				component.__yoyo_on_finish_loading.shift()()
 			}
-			console.log(component.__yoyo_on_finish_loading)
 		}
 
 		function initializeComponentSpinners(component) {
@@ -526,14 +514,6 @@
 					? [newState]
 					: replaceStateByComponentIndex(newState)
 
-			console.log(
-				`${method} ${newState.fingerprint}`,
-				'newState',
-				newState,
-				'stateArray',
-				stateArray
-			)
-
 			history[method](
 				{ yoyo: stateArray, initialState: initialState },
 				'',
@@ -573,8 +553,6 @@
 
 				if (!component) return
 			}
-
-			console.log(`restoreComponentStateFromHistory ${state.fingerprint}`)
 
 			var parser = new DOMParser()
 			var cached = parser.parseFromString(state.html, 'text/html').body
