@@ -16,7 +16,7 @@ test('pushed new URL state', function () {
 
     $headers = headers();
 
-    expect($headers)->toHaveKey('HX-Push');
+    expect($headers)->toHaveKey('Yoyo-Push');
 
-    expect($headers['HX-Push'])->toEqual('http://example.com/?count=1');
+    expect($headers['Yoyo-Push'])->toEqual('http://example.com/?count=1');
 })->group('headers');

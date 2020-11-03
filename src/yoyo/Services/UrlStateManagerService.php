@@ -30,7 +30,7 @@ class UrlStateManagerService
         $url = $parsedUrl['scheme'].'://'.$parsedUrl['host'].$parsedUrl['path'].($queryParams ? '?'.http_build_query($queryParams) : '');
 
         if ($url !== $this->currentUrl) {
-            $response->header('HX-Push', $url);
+            $response->header('Yoyo-Push', $url);
         }
     }
 }

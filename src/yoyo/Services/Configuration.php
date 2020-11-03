@@ -67,13 +67,13 @@ class Configuration
     {
         $yoyoRoute = self::get('url', '');
         $defaultSwap = self::get('defaultSwap', 'outerHTML');
-        $historyEnabled = self::get('historyEnabled', true);
+        $historyEnabled = self::get('historyEnabled', false) ? 'true' : 'false';
 
         $script = <<<HTML
         Yoyo.url = '{$yoyoRoute}';
         Yoyo.config({
             defaultSwapStyle: '{$defaultSwap}',
-            historyEnabled: '{$historyEnabled}',
+            historyEnabled: {$historyEnabled},
             indicatorClass:	'yoyo-indicator',
             requestClass:	'yoyo-request',
             settlingClass:	'yoyo-settling',

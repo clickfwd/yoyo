@@ -11,11 +11,11 @@
 		window.YoyoEngine = window.htmx
 
 		window.addEventListener('DOMContentLoaded', () => {
-			window.onpopstate = function (event) {
+			window.addEventListener('popstate', (event) => {
 				event?.state?.yoyo?.forEach((state) =>
 					restoreComponentStateFromHistory(state)
 				)
-			}
+			})
 		})
 
 		var Yoyo = {
@@ -136,11 +136,14 @@
 				if (!component) return
 
 				const xhr = evt.detail.xhr
-				const pushedUrl = xhr.getResponseHeader('HX-Push')
+				const pushedUrl = xhr.getResponseHeader('Yoyo-Push')
 
 				// Browser history support only works with components modifing the URL queryString
 
-				if (!pushedUrl || component.__yoyo.replayingHistory) return
+				if (!pushedUrl || component.__yoyo.replayingHistory) {
+					component.__yoyo.replayingHistory = false
+					return
+				}
 
 				const url =
 					pushedUrl !== null ? pushedUrl : window.location.href

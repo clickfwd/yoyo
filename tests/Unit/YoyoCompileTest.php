@@ -80,7 +80,7 @@ test('adds encoding attribute to child forms with file inputs', function () {
         ->toMatch('/'.hxattr('encoding', 'multipart\/form-data').'/');
 });
 
-test('adds trigger method and id to reactive element with yoyo tag', function () {    
+test('adds trigger method and id to reactive element with yoyo tag', function () {
     expect(compile_html('foo', '<div><button yoyo>foo</button></div>'))
         ->toMatch('/\<button hx-get="render" id="yoyo-(.*)-1">foo\<\/button\>/');
 });
