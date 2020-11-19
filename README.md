@@ -28,6 +28,7 @@ If you want to develop with Yoyo in Joomla and WordPress, try the available plug
 - [How it Works](#how-it-works)
 - [Installation](#installation)
 - [Updating](#updating)
+- [Configuring Yoyo](#configuring-yoyo)
 - [Creating Components](#creating-components)
 - [Rendering Components](#rendering-components)
 - [Properties](#properties)
@@ -100,14 +101,14 @@ composer require clickfwd/yoyo
 
 After performing the usual `composer update`, remember to also update the `yoyo.js` script per the [Load Assets](#load-assets) instructions.
 
-### Configure Yoyo
+## Configuring Yoyo
 
 It's necessary to bootstrap Yoyo with a few configuration settings. This code should run when rendering and updating components.
 
 ```php
-use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\View;
-use Clickfwd\Yoyo\ViewProviders\Yoyo as YoyoView;
+use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
+use Clickfwd\Yoyo\Yoyo;
 
 $yoyo = new Yoyo();
 
@@ -117,14 +118,12 @@ $yoyo->configure([
   'namespace' => 'App\\Yoyo\\'
 ]);
 
-// Add the native Yoyo view provider 
-// Pass the components' template directory path in the constructor
+// Register the native Yoyo view provider 
+// Pass the Yoyo components' template directory path in the constructor
 
-$view = new YoyoView(new View([
-	__DIR__.'/resources/views/yoyo',
-]));
-
-$yoyo->setViewProvider($view);
+$yoyo->registerViewProvider(function() {
+  return new YoyoViewProvider(new View(__DIR__.'/resources/views/yoyo'));
+});
 ```
 
 **'url'**
@@ -857,15 +856,17 @@ $app->bind('view', function () use ($blade) {
 
 (new YoyoServiceProvider($app))->boot();
 
-// Register Blade components
+// Optionally register Blade components
 
 $blade->compiler()->components([
     // 'button' => 'button',
 ]);
 
-// Set Blade as the view provider for Yoyo
+// Register Blade view provider for Yoyo
 
-$yoyo->setViewProvider(new BladeViewProvider($blade));
+$yoyo->registerViewProvider(function() use ($blade) {
+    return new BladeViewProvider($blade);
+});
 ```
 
 ### Load Assets
@@ -1025,7 +1026,11 @@ $twig = new \Twig\Environment($loader, [
 
 $twig->addExtension(new YoyoTwigExtension());
 
-$yoyo->setViewProvider(new TwigViewProvider($twig));
+// Register Twig view provider for Yoyo
+
+$yoyo->registerViewProvider(function() use ($twig) {
+  return new TwigViewProvider($twig);
+});
 ```
 
 ### Load Assets
