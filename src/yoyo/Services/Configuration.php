@@ -60,7 +60,7 @@ class Configuration
         <script src="{$htmxSrc}"></script>
         <script src="{$yoyoSrc}"></script>
         {$initCode}
-        HTML;
+HTML;
     }
 
     public static function javascriptInitCode($includeScriptTag = true): string
@@ -79,7 +79,7 @@ class Configuration
             settlingClass:	'yoyo-settling',
             swappingClass:	'yoyo-swapping'
         });
-        HTML;
+HTML;
 
         if ($includeScriptTag) {
             $script = "<script>{$script}</script>";
@@ -94,7 +94,7 @@ class Configuration
         [yoyo\:spinning], [yoyo\:spinning\.delay] {
             display: none;
         }
-        HTML;
+HTML;
 
         if ($includeStyleTag) {
             $style = "<style>$style</style>";
