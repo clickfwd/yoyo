@@ -16,7 +16,7 @@ trait Singleton
      * @return self
      */
     final public static function getInstance(...$params)
-    {
+    {   
         if (! isset(static::$instance)) {
             static::$instance = new static(...$params);
         }
@@ -29,7 +29,7 @@ trait Singleton
      *
      * @return void
      */
-    final private function __clone()
+    public function __clone()
     {
     }
 
@@ -38,7 +38,7 @@ trait Singleton
      *
      * @return void
      */
-    final private function __wakeup()
+    public function __wakeup()
     {
     }
 }
