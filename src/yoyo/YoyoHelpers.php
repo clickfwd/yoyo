@@ -37,7 +37,7 @@ class YoyoHelpers
 
             $key = ltrim(rtrim($key, "'"), "'");
 
-            if ($decoded = self::test_json($value[0])) {
+            if ($decoded = static::test_json($value[0])) {
                 $vars[$key] = $decoded;
             } else {
                 $vars[$key] = $value;
@@ -69,6 +69,21 @@ class YoyoHelpers
         return $str;
     }
 
+    public static function camel($str)
+    {
+        return lcfirst(static::studly($str));
+    }
+
+    public static function snake($str, $delimiter = '_')
+    {
+        if (! ctype_lower($str)) {
+            $str = preg_replace('/\\s+/u', '', ucwords($str));
+            $str = mb_strtolower(preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $str), 'UTF-8');
+        }
+
+        return $str;
+    }
+
     public static function randString($length = 8)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -85,7 +100,7 @@ class YoyoHelpers
     {
         foreach ($array as $key => &$value) {
             if (is_array($value)) {
-                $value = self::removeEmptyValues($value);
+                $value = static::removeEmptyValues($value);
             }
 
             if (is_array($value) && empty($value)) {
