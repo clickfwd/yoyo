@@ -16,7 +16,7 @@ trait Singleton
      * @return self
      */
     final public static function getInstance(...$params)
-    {   
+    {
         if (! isset(static::$instance)) {
             static::$instance = new static(...$params);
         }
