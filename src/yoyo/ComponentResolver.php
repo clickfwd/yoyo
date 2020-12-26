@@ -16,7 +16,7 @@ class ComponentResolver implements ComponentResolverInterface
 
     protected $viewProviders;
 
-    public function __construct($id, $name, $variables, $viewProviders)
+    public function __construct($id, $name, $variables, $viewProviders = [])
     {
         $this->id = $id;
 

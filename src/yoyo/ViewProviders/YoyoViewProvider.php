@@ -6,11 +6,11 @@ use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
 class YoyoViewProvider implements ViewProviderInterface
 {
-    private $view;
+    protected $view;
 
-    private $template;
+    protected $template;
 
-    private $vars;
+    protected $vars;
 
     public function __construct($view)
     {

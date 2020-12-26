@@ -6,13 +6,13 @@ use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
 class TwigViewProvider implements ViewProviderInterface
 {
-    private $view;
+    protected $view;
 
-    private $template;
+    protected $template;
 
-    private $vars;
+    protected $vars;
 
-    private $yoyoComponent;
+    protected $yoyoComponent;
 
     public static $twig_template_extension = 'twig';
 

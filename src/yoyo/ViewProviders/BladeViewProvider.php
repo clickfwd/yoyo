@@ -6,13 +6,13 @@ use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
 class BladeViewProvider implements ViewProviderInterface
 {
-    private $view;
+    protected $view;
 
-    private $template;
+    protected $template;
 
-    private $vars;
+    protected $vars;
 
-    private $engine;
+    protected $engine;
 
     public function __construct($view)
     {
