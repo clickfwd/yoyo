@@ -32,6 +32,11 @@ function yoyo_styles($return = false)
     echo $output;
 }
 
+function encode_vals($vals)
+{
+    echo \Clickfwd\Yoyo\YoyoHelpers::encode_vals($vals);
+}
+
 function is_spinning($expression = null)
 {
     $request = Yoyo::request();

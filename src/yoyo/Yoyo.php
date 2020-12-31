@@ -200,7 +200,8 @@ class Yoyo
 
         $newValues = $componentManager->getPublicVars();
 
-        // Automatically include in request public properties, or request variables in the case of anonymous components
+        // Get dynamic component public properties anonymous components vars to pass them to the compiler
+        // Any matching parameter names in yoyo:props will be automatically added to yoyo:vals
 
         $variables = array_merge($defaultValues, $newValues);
 
@@ -208,7 +209,19 @@ class Yoyo
 
         $listeners = $componentManager->getListeners();
 
-        $compiledHtml = $this->compile($html, $spinning, $variables, $listeners);
+        $componentType = $componentManager->isDynamicComponent() ? 'dynamic' : 'anonymous';
+
+        // For dynamic components, filter variables based on component props
+        
+        $props = $componentManager->getProps();
+        
+        if ($componentType == 'dynamic') {
+            $variables = array_filter($variables, function($key) use ($props) {
+                return in_array($key, $props);
+            }, ARRAY_FILTER_USE_KEY);
+        }
+
+        $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners);
 
         if ($spinning) {
             $queryStringKeys = $componentManager->getQueryString();
@@ -237,13 +250,13 @@ class Yoyo
         return (Response::getInstance())->send($compiledHtml);
     }
 
-    public function compile($html, $spinning = null, $variables = [], $listeners = []): string
+    public function compile($componentType, $html, $spinning = null, $variables = [], $listeners = []): string
     {
         $spinning = $spinning ?? $this->is_spinning();
 
         $variables = array_merge($this->variables, $variables);
 
-        $output = (new YoyoCompiler($this->id, $this->name, $variables, $this->attributes, $spinning))
+        $output = (new YoyoCompiler($componentType, $this->id, $this->name, $variables, $this->attributes, $spinning))
                     ->addComponentListeners($listeners)
                     ->compile($html);
 

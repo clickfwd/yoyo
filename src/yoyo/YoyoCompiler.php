@@ -7,24 +7,26 @@ use DOMXpath;
 
 class YoyoCompiler
 {
-    private $componentId;
+    protected $componentType;
 
-    private $name;
+    protected $componentId;
 
-    private $variables;
+    protected $name;
 
-    private $attributes;
+    protected $variables;
 
-    private $spinning;
+    protected $attributes;
 
-    private $listeners;
+    protected $spinning;
 
-    private $idCounter = 1;
+    protected $listeners;
+
+    protected $idCounter = 1;
 
     /**
      * These will automatically receive a `method` attribute.
      */
-    private $reactiveTags = [
+    protected $reactiveTags = [
         'a',
         'button',
         'input',
@@ -32,7 +34,7 @@ class YoyoCompiler
         'textarea',
     ];
 
-    public const HTMX_METHOD_ATTRIBUTES = [
+    public const HTMX_REQUEST_METHOD_ATTRIBUTES = [
         'boost',
         'delete',
         'get',
@@ -44,6 +46,7 @@ class YoyoCompiler
     ];
 
     public const YOYO_ATTRIBUTES = [
+        'boost',
         'confirm',
         'encoding',
         'ext',
@@ -58,6 +61,7 @@ class YoyoCompiler
         'swap-oob',
         'swap',
         'target',
+        'vals',
         'vars',
     ];
 
@@ -75,8 +79,10 @@ class YoyoCompiler
 
     public const HTMX_PREFIX = 'hx';
 
-    public function __construct($componentId, $name, $variables, $attributes, $spinning)
+    public function __construct($componentType, $componentId, $name, $variables, $attributes, $spinning)
     {
+        $this->componentType = $componentType;
+
         $this->componentId = $componentId;
 
         $this->name = $name;
@@ -109,7 +115,9 @@ class YoyoCompiler
 
         $prefix_finder = self::YOYO_PREFIX_FINDER;
 
-        $html = preg_replace('/'.$prefix.':(.*)="(.*)"/', "$prefix_finder $prefix:\$1=\"\$2\"", $html);
+        // U modifier needed to match children tags when there are no line breaks in the HTML code
+
+        $html = preg_replace('/'.$prefix.':(.*)="(.*)"/U', "$prefix_finder $prefix:\$1=\"\$2\"", $html);
 
         $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
 
@@ -159,7 +167,7 @@ class YoyoCompiler
         return trim($output);
     }
 
-    private function addComponentRootAttributes($element)
+    protected function addComponentRootAttributes($element)
     {
         if ($element->hasAttribute(self::yoprefix('ignore'))) {
             $element->removeAttribute(self::yoprefix('ignore'));
@@ -178,7 +186,7 @@ class YoyoCompiler
             $this->componentId = $id;
         }
 
-        $this->addMethodAttribute($element, true);
+        $this->addRequestMethodAttribute($element, true);
 
         // Get default attributes
 
@@ -211,30 +219,44 @@ class YoyoCompiler
             $attributes['on'] .= ', '.$trigger;
         }
 
-        // Vars
+        // Process variables
+        
+        if ($vars = $element->getAttribute(self::yoprefix('vals'))) {
+            $element->removeAttribute(self::yoprefix('vals'));
 
-        if ($vars = $element->getAttribute(self::yoprefix('vars'))) {
-            $element->removeAttribute(self::yoprefix('vars'));
+            $vars = YoyoHelpers::decode_vals($vars);
 
-            $vars = YoyoHelpers::decode_vars($vars);
-
-            $attributes['vars'] = array_merge($attributes['vars'], $vars);
+            $attributes['vals'] = array_merge($attributes['vals'], $vars);
         }
 
-        // Automatically add component public vars to the request only if it's not a POST request
-        // Otherwise, only include resolver vars
-        if (! $element->hasAttribute(self::hxprefix('post'))) {
-            $attributes['vars'] = array_merge($attributes['vars'], $this->variables);
+        // Process invididual variables added through yoyo:val.key
+
+        $attributes['vals'] = array_merge($attributes['vals'] ?? [], $this->parseIndividualValAttributes($element));
+
+        // Process public props
+
+        $props = $element->getAttribute(self::yoprefix('props')) ?: '';
+
+        if ($this->componentType == 'anonymous' || $props) {
+            // For anonymous components, only include props specified using yoyo:props attribute
+            $props = explode(',',str_replace(' ','',$props));
         } else {
-            $attributes['vars'] = array_merge($attributes['vars'], array_intersect_key($this->variables, array_flip([
-                self::yoprefix('resolver'),
-                self::yoprefix('source'),
-            ])));
+            // For dynamic components, only include props specified using $props property
+            $props = array_keys($this->variables);
         }
 
+        $element->removeAttribute(self::yoprefix('props'));
+
+        $props = array_flip(array_merge($props, [
+            self::yoprefix('resolver'),
+            self::yoprefix('source'),
+        ]));
+
+        $attributes['vals'] = array_merge($attributes['vals'], array_intersect_key($this->variables, $props));
+        
         // Add all attributes
 
-        $attributes['vars'] = YoyoHelpers::encode_vars($attributes['vars']);
+        $attributes['vals'] = YoyoHelpers::encode_vals($attributes['vals']);
 
         foreach ($attributes as $attr => $value) {
             if (! $value) {
@@ -247,7 +269,7 @@ class YoyoCompiler
         }
     }
 
-    private function addComponentChildrenAttributes($dom)
+    protected function addComponentChildrenAttributes($dom)
     {
         $xpath = new DOMXPath($dom);
 
@@ -259,12 +281,16 @@ class YoyoCompiler
                 continue;
             }
 
-            $this->addMethodAttribute($element);
+            $this->addRequestMethodAttribute($element);
 
             foreach (self::YOYO_ATTRIBUTES as $attr) {
                 if ($value = $element->getAttribute(self::yoprefix($attr))) {
                     $this->remapAndReplaceAttribute($element, $attr, $value);
                 }
+            }
+
+            if ($vals = $this->parseIndividualValAttributes($element)) {
+                $element->setAttribute(self::hxprefix('vals'), YoyoHelpers::encode_vals($vals));
             }
 
             // Cleanup
@@ -275,7 +301,26 @@ class YoyoCompiler
         }
     }
 
-    private function removeOnLoadEventWhenSpinning($element)
+    protected function parseIndividualValAttributes($element)
+    {
+        $attributes = [];
+
+        foreach ($element->attributes as $attr) {
+            $parts = explode('.', $attr->name);
+
+            if (count($parts) == 1 || $parts[0] !== self::yoprefix('val')) {
+                continue;
+            }
+            
+            $attributes[YoyoHelpers::camel($parts[1], '-')] = YoyoHelpers::decode_val($attr->value);
+            
+            $element->removeAttribute($attr->name);
+        }
+
+        return $attributes;
+    }
+
+    protected function removeOnLoadEventWhenSpinning($element)
     {
         if ($this->spinning && $element->hasAttribute(self::yoprefix('on'))) {
             $on = $element->getAttribute(self::yoprefix('on'));
@@ -290,7 +335,7 @@ class YoyoCompiler
         }
     }
 
-    private function addFormBehavior($element)
+    protected function addFormBehavior($element)
     {
         if ($element->tagName == 'form' && ! $element->hasAttribute(self::yoprefix('on'))) {
             $element->setAttribute(self::YOYO_PREFIX, '');
@@ -311,7 +356,7 @@ class YoyoCompiler
 
             foreach ($element->attributes as $attr) {
                 if (($parts = explode(':', $attr->name))[0] == self::YOYO_PREFIX && ! empty($parts[1])) {
-                    if (in_array($parts[1], self::HTMX_METHOD_ATTRIBUTES)) {
+                    if (in_array($parts[1], self::HTMX_REQUEST_METHOD_ATTRIBUTES)) {
                         return;
                     }
                 }
@@ -321,14 +366,14 @@ class YoyoCompiler
         }
     }
 
-    private function checkForIdAttribute($element)
+    protected function checkForIdAttribute($element)
     {
         if (! $element->hasAttribute('id')) {
             $element->setAttribute('id', $this->componentId.'-'.$this->idCounter++);
         }
     }
 
-    private function remapAndReplaceAttribute($element, $attr, $value)
+    protected function remapAndReplaceAttribute($element, $attr, $value)
     {
         $element->removeAttribute(self::yoprefix($attr));
 
@@ -337,11 +382,11 @@ class YoyoCompiler
         $element->setAttribute(self::hxprefix($remappedAttr), $value);
     }
 
-    private function addMethodAttribute($element, $isRootNode = false)
+    protected function addRequestMethodAttribute($element, $isRootNode = false)
     {
         // Look for existing method attribute, otherwise set 'get' as default
 
-        foreach (self::HTMX_METHOD_ATTRIBUTES as $attr) {
+        foreach (self::HTMX_REQUEST_METHOD_ATTRIBUTES as $attr) {
             $yoattr = self::yoprefix($attr);
 
             if ($value = $element->getAttribute($yoattr)) {
@@ -368,7 +413,7 @@ class YoyoCompiler
         }
     }
 
-    private function getComponentAttributes($componentId): array
+    protected function getComponentAttributes($componentId): array
     {
         $attributes = array_merge(
             array_fill_keys(self::YOYO_ATTRIBUTES, ''),
@@ -377,7 +422,7 @@ class YoyoCompiler
                 // Adding refresh trigger to prevent default click trigger
                 'on' => 'refresh',
                 'target' => 'this',
-                'vars' => [self::yoprefix_value('id') => $componentId],
+                'vals' => [self::yoprefix_value('id') => $componentId],
             ], $this->attributes
         );
 
@@ -407,7 +452,7 @@ class YoyoCompiler
         return self::HTMX_PREFIX.'-'.$attr;
     }
 
-    private function getComponentRootNode($dom)
+    protected function getComponentRootNode($dom)
     {
         $xpath = new DOMXPath($dom);
 
@@ -422,7 +467,7 @@ class YoyoCompiler
         return $count == 1 ? $node : false;
     }
 
-    private static function elementHasAttributeWithValue($element, $attr, $value)
+    protected static function elementHasAttributeWithValue($element, $attr, $value)
     {
         if (! $element->hasAttribute($attr)) {
             return false;
@@ -433,7 +478,7 @@ class YoyoCompiler
         return strpos($value, $string) !== false;
     }
 
-    private function getOuterHTML($dom): string
+    protected function getOuterHTML($dom): string
     {
         $output = '';
 
@@ -464,7 +509,7 @@ class YoyoCompiler
         return $output;
     }
 
-    private function getInnerHTML($dom): string
+    protected function getInnerHTML($dom): string
     {
         $output = '';
 

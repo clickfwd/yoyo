@@ -10,6 +10,8 @@ class Counter extends Component
 
     protected $queryString = ['count'];
 
+    protected $props = ['count'];
+
     public function increment()
     {
         $this->count++;

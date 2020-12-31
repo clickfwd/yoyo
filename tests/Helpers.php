@@ -32,7 +32,14 @@ function compile_html($name, $html, $spinning = false)
 {
     $yoyo = new Yoyo();
 
-    return $yoyo->mount($name)->compile($html, $spinning);
+    return $yoyo->mount($name)->compile('anonymous', $html, $spinning);
+}
+
+function compile_html_with_vars($name, $html, $vars, $spinning = false)
+{
+    $yoyo = new Yoyo();
+
+    return $yoyo->mount($name, $vars)->compile('anonymous', $html, $spinning);
 }
 
 function render($name, $variables = [], $attributes = [])
@@ -115,18 +122,22 @@ function yoprefix_value($value)
     return YoyoCompiler::yoprefix_value($value);
 }
 
-function encode_vars($vars)
+function encode_vals($vars)
 {
-    return YoyoHelpers::encode_vars($vars);
+    return YoyoHelpers::encode_vals($vars);
 }
 
 function addValue($value = '')
 {
-    if ($value) {
-        return '="'.$value.'"';
+    if (! $value) {
+        return '';
     }
 
-    return $value;
+    if (YoyoHelpers::test_json($value)) {
+        return "='".$value."'";
+    }
+
+    return '="'.$value.'"';
 }
 
 function response($filename)

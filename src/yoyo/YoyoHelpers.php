@@ -4,6 +4,29 @@ namespace Clickfwd\Yoyo;
 
 class YoyoHelpers
 {
+    public static function encode_vals(array $vars): string
+    {
+        return json_encode($vars, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+
+    public static function decode_vals(string $string): array
+    {
+        if (empty($string)) {
+            return [];
+        }
+
+        return json_decode((string) $string, true);
+    }
+
+    public static function decode_val(string $string)
+    {
+        if ($json = self::test_json($string)) {
+            return $json;
+        }
+
+        return $string === '0' ? 0 : $string;
+    }
+
     /**
      * $expresionKeys allows the output of values as javascript expression, without quotes.
      */
@@ -62,16 +85,16 @@ class YoyoHelpers
         return $decoded ?? null;
     }
 
-    public static function studly($str)
+    public static function studly($str, $delimiter = ['-', '_'])
     {
-        $str = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $str)));
+        $str = str_replace(' ', '', ucwords(str_replace($delimiter, ' ', $str)));
 
         return $str;
     }
 
-    public static function camel($str)
+    public static function camel($str, $delimiter = ['-', '_'])
     {
-        return lcfirst(static::studly($str));
+        return lcfirst(static::studly($str, $delimiter));
     }
 
     public static function snake($str, $delimiter = '_')

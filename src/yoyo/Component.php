@@ -31,6 +31,8 @@ abstract class Component
 
     protected $queryString = [];
 
+    protected $props = [];
+
     protected $listeners = [];
 
     protected $noResponse = false;
@@ -111,6 +113,11 @@ abstract class Component
     public function getQueryString()
     {
         return $this->queryString;
+    }
+
+    public function getProps()
+    {
+        return $this->props;
     }
 
     public function getListeners()

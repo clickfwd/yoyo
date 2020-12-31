@@ -81,6 +81,11 @@ class ComponentManager
         return $this->component->getQueryString();
     }
 
+    public function getProps()
+    {
+        return $this->component->getProps();
+    }
+
     public function getListeners()
     {
         return $this->component->getListeners();

@@ -5,6 +5,8 @@ use function Tests\initYoyo;
 use function Tests\render;
 use function Tests\response;
 
+uses()->group('unit-nested');
+
 beforeAll(function () {
     $yoyo = initYoyo();
 });

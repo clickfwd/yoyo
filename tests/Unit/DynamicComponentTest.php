@@ -2,7 +2,7 @@
 
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
-use function Tests\encode_vars;
+use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
 use function Tests\initYoyo;
@@ -15,6 +15,8 @@ use function Tests\update;
 use function Tests\yoprefix_value;
 use function Tests\yoyo_update;
 
+uses()->group('unit-dynamic');
+
 beforeAll(function () {
     $yoyo = initYoyo(['Counter', 'ComputedProperty', 'ComputedPropertyCache']);
 });
@@ -24,18 +26,18 @@ test('component class not found', function () {
 })->throws(ComponentNotFound::class);
 
 test('counter component render', function () {
-    $vars = encode_vars([
+    $vars = encode_vals([
         yoprefix_value('id') => 'counter',
         'count' => 0,
     ]);
 
-    expect(render('counter'))->toContain(hxattr('vars', $vars));
+    expect(render('counter'))->toContain(hxattr('vals', $vars));
 });
 
 test('counter component with default value', function () {
-    $vars = encode_vars([yoprefix_value('id')=>'counter', 'count'=>3]);
+    $vars = encode_vals([yoprefix_value('id')=>'counter', 'count'=>3]);
 
-    expect(render('counter', ['count'=>3]))->toContain(hxattr('vars', $vars));
+    expect(render('counter', ['count'=>3]))->toContain(hxattr('vals', $vars));
 });
 
 test('counter component public method', function () {
@@ -43,15 +45,15 @@ test('counter component public method', function () {
 });
 
 test('counter component increment', function () {
-    $vars = encode_vars([yoprefix_value('id')=>'counter', 'count'=>1]);
+    $vars = encode_vals([yoprefix_value('id')=>'counter', 'count'=>1]);
 
-    expect(update('counter', 'increment'))->toContain(hxattr('vars', $vars));
+    expect(update('counter', 'increment'))->toContain(hxattr('vals', $vars));
 });
 
 test('counter component decrement', function () {
-    $vars = encode_vars([yoprefix_value('id')=>'counter', 'count'=>-1]);
+    $vars = encode_vals([yoprefix_value('id')=>'counter', 'count'=>-1]);
 
-    expect(update('counter', 'decrement'))->toContain(hxattr('vars', $vars));
+    expect(update('counter', 'decrement'))->toContain(hxattr('vals', $vars));
 });
 
 test('component method not found', function () {
@@ -85,21 +87,21 @@ test('action parameters passed to component method arguments', function () {
 test('Null properties not added as vars to component root', function () {
     require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
 
-    $vars = encode_vars([yoprefix_value('id') => 'post-request-vars']);
+    $vars = encode_vals([yoprefix_value('id') => 'post-request-vars']);
 
-    expect(render('post-request-vars'))->toContain(hxattr('vars', $vars));
+    expect(render('post-request-vars'))->toContain(hxattr('vals', $vars));
 })->group('component-root-vars');
 
 test('posted vars are not added to component root', function () {
     require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
 
-    $vars = encode_vars([yoprefix_value('id') => 'post-request-vars']);
+    $vars = encode_vals([yoprefix_value('id') => 'post-request-vars']);
 
     mockYoyoPostRequest('http://example.com/', 'post-request-vars/save', '', [
         'foo' => 'bar',
     ]);
 
-    expect(yoyo_update())->toContain(hxattr('vars', $vars));
+    expect(yoyo_update())->toContain(hxattr('vals', $vars));
 
     resetYoyoRequest();
 })->group('component-root-vars');
