@@ -216,7 +216,7 @@ class Yoyo
         $props = $componentManager->getProps();
         
         if ($componentType == 'dynamic') {
-            $variables = array_filter($variables, function($key) use ($props) {
+            $variables = array_filter($variables, function ($key) use ($props) {
                 return in_array($key, $props);
             }, ARRAY_FILTER_USE_KEY);
         }

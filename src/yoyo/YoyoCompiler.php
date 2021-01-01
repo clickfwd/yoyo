@@ -239,7 +239,7 @@ class YoyoCompiler
 
         if ($this->componentType == 'anonymous' || $props) {
             // For anonymous components, only include props specified using yoyo:props attribute
-            $props = explode(',',str_replace(' ','',$props));
+            $props = explode(',', str_replace(' ', '', $props));
         } else {
             // For dynamic components, only include props specified using $props property
             $props = array_keys($this->variables);
@@ -423,7 +423,8 @@ class YoyoCompiler
                 'on' => 'refresh',
                 'target' => 'this',
                 'vals' => [self::yoprefix_value('id') => $componentId],
-            ], $this->attributes
+            ],
+            $this->attributes
         );
 
         // Include component listeners in trigger attribute
