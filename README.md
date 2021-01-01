@@ -36,6 +36,7 @@ If you want to develop with Yoyo in Joomla and WordPress, try the available plug
 - [Computed Properties](#computed-properties)
 - [Events](#events)
 - [Redirecting](#redirecting)
+- [Component Props](#component-props)
 - [Query String](#query-string)
 - [Loading States](#loading-states)
 - [Using Blade](#using-blade)
@@ -64,7 +65,9 @@ use Clickfwd\Yoyo\Component;
 
 class Counter extends Component
 {
-    public $count = 0;
+	public $count = 0;
+	
+	protected $props = ['count'];
 
     public function increment()
     {
@@ -87,7 +90,8 @@ class Counter extends Component
 </div>
 ```
 
-Yes, it's that simple! 
+Yes, it's that simple! One thing to note above is the use of the protected property `$props`. This indicates to Yoyo that the `count` variable, which is not explicitly available within the template, should be persisted and updated in every request.
+
 
 ## Installation
 
@@ -277,7 +281,7 @@ And the template:
 A couple of things to note here that are covered in more detail in other sections.
 
 1. The component class includes a `queryString` property that tells Yoyo to automatically include the queryString values in the browser URL after a component update. If you re-load the page with the `query` value in the URL, you'll automatically see the search results on the page.
-2. Yoyo will automatically assign parameters to matching public properties. This allows using `$this->query` to access the search keyword in the component and `$query` in the template.
+2. Yoyo will automatically make available component class public properties as template variables. This allows using `$this->query` to access the search keyword in the component and `$query` in the template.
 
 When you compare this search example to the counter example at the beginning, you can see that there are no action methods (i.e. increment, decrement). A component update will always default to the `render` method, unless an action is specified via one of the method attributes (i.e. yoyo:get, yoyo:post, etc.). In that case, the action method always runs before the render method.
 
@@ -450,10 +454,19 @@ All components automatically listen for the `refresh` event and trigger the `ren
 
 ### Passing Data to Actions
 
-You can include additional data to send to the server con component update requests using the `yoyo:vars` directive which accepts a separated list of `key:<expression>` values.
+You can include additional data to send to the server on component update requests using the `yoyo:vals` directive which accepts a JSON encoded list of name-value pairs.
 
 ```html
-<button yoyo:on="click" yoyo:get="helpful" yoyo:vars="reviewId:100">Found Helpful</button>
+<button yoyo:on="click" yoyo:get="helpful" yoyo:vals='{"reviewId":100}'>Found Helpful</button>
+
+<!-- Or use the encode_vals helper function to pass an array of name-value pairs -->
+<button yoyo:on="click" yoyo:get="helpful" yoyo:vals='<?php Yoyo\encode_vals(["reviewId"=> 100]); ?>'>Found Helpful</button>
+```
+
+You can also use `yoyo:val.name` for individual values. kebab-case variable names are automatically converted to camel-case.
+
+```html
+<button yoyo:on="click" yoyo:get="helpful" yoyo:val.review-id="100">Found Helpful</button>
 ```
 
 Yoyo will automatically track and send component public properties and input values with every request. 
@@ -478,7 +491,7 @@ You can also pass extra parameters to an action as arguments using an expression
 </button>
 ```
 
-Extra parameters passed to an action are to the component method as regular arguments:
+Extra parameters passed to an action are made available to the component method as regular arguments:
 
 ```php
 public function addToCart($productId, $style)
@@ -525,6 +538,47 @@ Now, you can access `$this->hello_world` from either the component's class or te
 <div>
 	<h1><?php echo $this->hello_world ;?></h1>
 	<!-- Will output "Hello World!" -->
+</div>
+```
+
+## Component Props
+
+Yoyo can persist and update variables in requests without the need to explicitly include an input element.
+
+For an anonymous component, it's possible to specify the props directly in the component root node using a comma-separated list of variable names and this allows implementing a counter without the need for a component class:
+
+```php
+<?php $count = $count ?? 0 ; ?>
+<div yoyo:props="count">
+	<button yoyo:val.count="<?php echo $count + 1; ?>">+</button> 
+    <p><?php echo $count; ?></p>
+</div>
+```
+
+By adding the `yoyo:props="count"`, Yoyo knows to automatically include the value of `count` in every request.
+
+For dynamic components, there's no need to use the `yoyo:props` attribute because we use the protected method $props in the component class with an array of variable names.
+
+```php
+class Counter extends Component
+{
+	public $count = 0;
+	
+	protected $props = ['count'];
+
+    public function increment()
+    {
+        $this->count++;
+    }
+}
+```
+
+Since the `$count` variable is also defined as a public property, it's already available in the template and the value is incremented throgh the `increment` method in the component class without having to use `yoyo:val.count`.
+
+```html
+<div>
+	<button yoyo:get="increment">+</button>
+	<span><?php echo $count; ?></span>
 </div>
 ```
 
@@ -717,7 +771,7 @@ To register listeners in Yoyo, use the `$listeners` protected property of the co
 Listeners are a key->value pair where the key is the event to listen for, and the value is the method to call on the component. If the event and method are the same, you can leave out the key.
 
 ```php
-class CounterBoard extends Component {
+class Counter extends Component {
 
 	public $message;
 
