@@ -54,9 +54,11 @@ class View
 
     public function exists($template)
     {
+        $templatePath = str_replace('.', '/', $template);
+
         foreach ($this->viewPath as $path) {
-            if (file_exists("{$path}/{$template}.php")) {
-                $this->templatePathsCache[$template] = "{$path}/{$template}.php";
+            if (file_exists("{$path}/{$templatePath}.php")) {
+                $this->templatePathsCache[$template] = "{$path}/{$templatePath}.php";
 
                 return true;
             }
