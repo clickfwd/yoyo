@@ -74,7 +74,7 @@ test('action parameters passed to component method arguments', function () {
     require_once __DIR__.'/../app/Yoyo/ActionArguments.php';
 
     mockYoyoGetRequest('http://example.com/', 'action-arguments/someAction', '', [
-        'actionArgs' => "'1','foo'",
+        'actionArgs' => [1,'foo'],
     ]);
 
     $output = yoyo_update();
