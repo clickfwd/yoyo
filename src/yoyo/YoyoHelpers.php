@@ -80,7 +80,7 @@ class YoyoHelpers
             return null;
         }
 
-        $decoded = json_decode($string, true);
+        $decoded = json_decode(stripslashes($string), true);
 
         return $decoded ?? null;
     }
