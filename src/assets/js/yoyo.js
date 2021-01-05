@@ -36,6 +36,7 @@
 			processedNode(evt) {
 				// Dynamically create non-existent target IDs by appending them to document body
 				const targetId = evt.srcElement.getAttribute('hx-target')
+
 				if (
 					targetId &&
 					targetId[0] == '#' &&
@@ -46,11 +47,24 @@
 					document.body.appendChild(targetDiv)
 				}
 
+				// Process spinners
+				let component
+
 				if (!evt.srcElement || !isComponent(evt.srcElement)) {
+					// Check if it's an innerHTML swap and use find the root node for the component
+					component = YoyoEngine.closest(
+						evt.detail.elt,
+						'[hx-swap~=innerHTML]'
+					)
+				} else {
+					component = getComponent(evt.srcElement)
+				}
+
+				if (component === undefined) {
 					return
 				}
 
-				initializeComponentSpinners(getComponent(evt.srcElement))
+				initializeComponentSpinners(component)
 			},
 			bootstrapRequest(evt) {
 				const elt = evt.target
