@@ -194,10 +194,15 @@
 		function getActionAndParseArguments(detail) {
 			let path = detail.path
 			const match = path.match(/(.*)\((.*)\)/)
-
 			if (match) {
+				let args = match[2]
+					.split(',')
+					.map((value) =>
+						value.replace(/'(.*)'/, '$1').replace(/"(.*)"/, '$1')
+					)
+
 				path = match[1]
-				detail.parameters['actionArgs'] = match[2]
+				detail.parameters['actionArgs'] = JSON.stringify(args)
 			}
 
 			const action = '' + path

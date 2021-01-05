@@ -132,7 +132,7 @@ class ComponentManager
                 throw new ComponentMethodNotFound($class, $action);
             }
         }
-
+        
         $excludedActions = ClassHelpers::getPublicMethodsBaseClass($this->component, ['render']);
 
         if (in_array($action, $excludedActions) ||
@@ -180,16 +180,7 @@ class ComponentManager
 
     private function parseActionArguments()
     {
-        $args = [];
-
-        $stringArgs = $this->request->get('actionArgs');
-
-        foreach (explode(',', $stringArgs) as $arg) {
-            $arg = trim(str_replace(['"', "'"], '', $arg));
-            if (strlen($arg)) {
-                $args[] = is_numeric($arg) ? (int) $arg : $arg;
-            }
-        }
+        $args = $this->request->get('actionArgs', []);
 
         return $args;
     }
