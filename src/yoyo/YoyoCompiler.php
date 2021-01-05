@@ -476,7 +476,7 @@ class YoyoCompiler
 
         $string = $element->getAttribute($attr);
 
-        return strpos($value, $string) !== false;
+        return strpos($string, $value) !== false;
     }
 
     protected function getOuterHTML($dom): string
