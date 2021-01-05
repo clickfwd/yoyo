@@ -88,12 +88,12 @@ class Request implements RequestInterface
 
     public function fullUrl()
     {
-        if (empty($this->request)) {
-            return null;
-        }
-
         if (isset($this->server['HTTP_HX_CURRENT_URL'])) {
             return $this->server['HTTP_HX_CURRENT_URL'];
+        }
+
+        if (empty($this->server['HTTP_HOST'])) {
+            return null;
         }
 
         $protocol = 'http';
