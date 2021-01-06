@@ -209,12 +209,12 @@
 			let path = detail.path
 			const match = path.match(/(.*)\((.*)\)/)
 			if (match) {
-				let args = match[2]
-					.split(',')
-					.map((value) =>
-						value.replace(/'(.*)'/, '$1').replace(/"(.*)"/, '$1')
-					)
-
+				let args = match[2].split(',').map((value) => {
+					const val = value
+						.replace(/'(.*)'/, '$1')
+						.replace(/"(.*)"/, '$1')
+					return isNaN(val) ? val : parseFloat(val)
+				})
 				path = match[1]
 				detail.parameters['actionArgs'] = JSON.stringify(args)
 			}
