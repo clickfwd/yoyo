@@ -10,12 +10,10 @@
 
 		window.YoyoEngine = window.htmx
 
-		window.addEventListener('DOMContentLoaded', () => {
-			window.addEventListener('popstate', (event) => {
-				event?.state?.yoyo?.forEach((state) =>
-					restoreComponentStateFromHistory(state)
-				)
-			})
+		window.addEventListener('popstate', (event) => {
+			event?.state?.yoyo?.forEach((state) =>
+				restoreComponentStateFromHistory(state)
+			)
 		})
 
 		var Yoyo = {
