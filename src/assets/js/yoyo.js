@@ -33,7 +33,7 @@
 					)
 				})
 			},
-			processedNode(evt) {
+			afterProcessNode(evt) {
 				// Dynamically create non-existent target IDs by appending them to document body
 				const targetId = evt.srcElement.getAttribute('hx-target')
 
@@ -645,8 +645,8 @@
 
 YoyoEngine.defineExtension('yoyo', {
 	onEvent: function (name, evt) {
-		if (name === 'htmx:processedNode') {
-			Yoyo.processedNode(evt)
+		if (name === 'htmx:afterProcessNode') {
+			Yoyo.afterProcessNode(evt)
 		}
 
 		if (name === 'htmx:configRequest') {
