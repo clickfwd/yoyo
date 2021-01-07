@@ -46,7 +46,7 @@ class YoyoCompiler
     ];
 
     public const YOYO_ATTRIBUTES = [
-        'boost',
+        // 'boost', // Has a conflict with component history cache
         'confirm',
         'encoding',
         'ext',
@@ -55,6 +55,7 @@ class YoyoCompiler
         'indicator',
         'on',
         'params',
+        'preserve',
         'prompt',
         'push-url',
         'select',
