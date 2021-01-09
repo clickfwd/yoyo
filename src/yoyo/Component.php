@@ -207,10 +207,6 @@ abstract class Component
 
         $vars['spinning'] = $this->spinning;
 
-        // Make Yoyo parameters closure available to view
-
-        $vars['parameters'] = $this->createVariableFromMethod(new ReflectionMethod($this, 'buildParametersForView'));
-
         $properties = ClassHelpers::getPublicVars($this);
 
         return array_merge($vars, $properties);
@@ -228,17 +224,6 @@ abstract class Component
         return new InvocableComponentVariable(function () use ($method) {
             return $this->{$method}();
         });
-    }
-
-    protected function buildParametersForView(array $array = []): string
-    {
-        $output = [];
-
-        $vars = ClassHelpers::getPublicVars($this);
-
-        $vars = array_merge($vars, $array);
-
-        return YoyoHelpers::encode_vars($vars);
     }
 
     // For Twig compatibility, because computed properties are not resolved through __get
