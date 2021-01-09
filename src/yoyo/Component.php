@@ -154,7 +154,7 @@ abstract class Component
         return call_user_func_array([$this, $action], $args);
     }
 
-    public function set($key, $value = null) 
+    public function set($key, $value = null)
     {
         if (is_array($key)) {
             $this->viewData = array_merge($this->viewData, $key);

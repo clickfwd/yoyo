@@ -118,19 +118,18 @@ class ComponentManager
 
         $class = get_class($this->component);
 
-        if (! method_exists($this->component, $action)) {
+        $listeners = $this->component->getListeners();
+
+        if (!empty($listeners[$action]) || in_array($action, $listeners)) {
             // If action is an event listener, re-route it to the listener method
-            $listeners = $this->component->getListeners();
 
-            if (! empty($listeners[$action])) {
-                $eventParams = $this->request->get('eventParams', []);
+            $action = !empty($listeners[$action]) ? $listeners[$action] : $action;
+            
+            $eventParams = $this->request->get('eventParams', []);
 
-                $isEventListenerAction = true;
-
-                $action = $listeners[$action];
-            } else {
-                throw new ComponentMethodNotFound($class, $action);
-            }
+            $isEventListenerAction = true;
+        } elseif (! method_exists($this->component, $action)) {
+            throw new ComponentMethodNotFound($class, $action);
         }
         
         $excludedActions = ClassHelpers::getPublicMethodsBaseClass($this->component, ['render']);
