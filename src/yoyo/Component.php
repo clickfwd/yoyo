@@ -43,6 +43,8 @@ abstract class Component
 
     protected $resolver;
 
+    protected $viewData = [];
+
     private static $excludePublicMethods = [
         '__construct',
         'spinning',
@@ -152,6 +154,17 @@ abstract class Component
         return call_user_func_array([$this, $action], $args);
     }
 
+    public function set($key, $value = null) 
+    {
+        if (is_array($key)) {
+            $this->viewData = array_merge($this->viewData, $key);
+        } else {
+            $this->viewData[$key] = $value;
+        }
+
+        return $this;
+    }
+
     public function render()
     {
         if (! $this->noResponse) {
@@ -209,7 +222,7 @@ abstract class Component
 
         $properties = ClassHelpers::getPublicVars($this);
 
-        return array_merge($vars, $properties);
+        return array_merge($this->viewData, $vars, $properties);
     }
 
     protected function createVariableFromMethod(ReflectionMethod $method)

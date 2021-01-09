@@ -70,6 +70,12 @@ test('component computed property cache', function () {
     expect(htmlformat($output))->toEqual(response('computed-property-cache'));
 });
 
+test('can set component view data', function () {
+    require_once __DIR__.'/../app/Yoyo/SetViewData.php';
+    expect(render('set-view-data'))->toContain('bar-baz');
+});
+
+
 test('action parameters passed to component method arguments', function () {
     require_once __DIR__.'/../app/Yoyo/ActionArguments.php';
 
