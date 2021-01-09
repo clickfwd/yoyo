@@ -30,6 +30,7 @@ If you want to develop with Yoyo in Joomla and WordPress, try [Yoyo CMS](https:/
 - [Rendering Components](#rendering-components)
 - [Properties](#properties)
 - [Actions](#actions)
+- [View Data](#view-data)
 - [Computed Properties](#computed-properties)
 - [Events](#events)
 - [Redirecting](#redirecting)
@@ -511,6 +512,30 @@ public function savePost()
 
 	// Skip template rendering
 	$this->skipRender();
+}
+```
+
+## View Data
+
+Sometimes you want to send data to a view without declaring the variable as a public property. You can do this by defining a render method in your component and passing a data array as the second argument:
+
+```php
+public function render() 
+{
+	return $this->view($this->componentName, ['foo' => 'bar']);
+}
+```
+
+Then access the $foo variable in your template.
+
+You can also send data to the component view using the `set` method in any component action. For example:
+
+```php
+public function increment()
+{
+	$this->set('foo', 'bar');
+	// or
+	$this->set(['foo' => 'bar']);
 }
 ```
 
