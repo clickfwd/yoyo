@@ -39,14 +39,14 @@ abstract class Component
 
     protected $computedPropertyCache = [];
 
+    protected $attributes;
+
+    protected $resolver;
+
     private static $excludePublicMethods = [
         '__construct',
         'spinning',
     ];
-
-    private $attributes;
-
-    private $resolver;
 
     public function __construct(string $id, string $name, ComponentResolverInterface $resolver)
     {
