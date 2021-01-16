@@ -45,7 +45,7 @@ If you want to develop with Yoyo in Joomla and WordPress, try [Yoyo CMS](https:/
 
 Yoyo components are rendered on page load and can be individually updated, without the need for page-reloads, based on user interaction and specific events.
 
-Component update requests are sent directly to a Yoyo-designated route, where it processes the request and then sends the updated component partial back to the browser.
+Component update requests are sent directly to a Yoyo-designated route, where it processes the request and then sends the updated component HTML partial back to the browser.
 
 Yoyo can update the browser URL state and trigger browser events straight from the server.
 
