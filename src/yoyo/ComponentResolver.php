@@ -35,7 +35,7 @@ class ComponentResolver implements ComponentResolverInterface
     public function resolveDynamic($registered): ?Component
     {
         if (isset($registered[$this->name])) {
-            return new $registered[$this->name]($this->id, $this->name);
+            return new $registered[$this->name]($this->id, $this->name, $this);
         }
 
         $className = YoyoHelpers::studly($this->name);
@@ -52,7 +52,7 @@ class ComponentResolver implements ComponentResolverInterface
     public function resolveAnonymous($registered): ?Component
     {
         if (isset($registered[$this->name])) {
-            return new AnonymousComponent($this->id, $this->name);
+            return new AnonymousComponent($this->id, $this->name, $this);
         }
 
         $view = $this->resolveViewProvider();
