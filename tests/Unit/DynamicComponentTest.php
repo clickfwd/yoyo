@@ -1,5 +1,6 @@
 <?php
 
+use Clickfwd\Yoyo\ComponentManager;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use function Tests\encode_vals;
@@ -111,3 +112,9 @@ test('posted vars are not added to component root', function () {
 
     resetYoyoRequest();
 })->group('component-root-vars');
+
+test('registered dynamic component is loaded', function () {
+    require_once __DIR__."/../app/Yoyo/registered.php";
+    ComponentManager::registerComponent('registered-test', \Tests\App\Yoyo\Registered::class);
+    expect(render('registered-test'))->toContain('id="registered"');
+});
