@@ -692,7 +692,9 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterSettle') {
-			if (!evt.target) return
+			// Comparing equal targets below fixes duplicate events in Safari mobile
+			// causing component cached state to be pushed twice into history
+			if (!evt.target || evt.target === evt.detail.target) return
 
 			const xhr = evt.detail.xhr
 
