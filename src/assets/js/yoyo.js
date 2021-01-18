@@ -692,9 +692,9 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterSettle') {
-			// Comparing equal targets below fixes duplicate events in Safari mobile
+			// Make sure we trigger once for the new element - this was failing in Safari mobile
 			// causing component cached state to be pushed twice into history
-			if (!evt.target || evt.target === evt.detail.target) return
+			if (!evt.target || !evt.target.isConnected) return
 
 			const xhr = evt.detail.xhr
 
