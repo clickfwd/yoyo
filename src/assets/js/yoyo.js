@@ -692,7 +692,9 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterSettle') {
-			if (!evt.target) return
+			// Make sure we trigger once for the new element - this was failing in Safari mobile
+			// causing component cached state to be pushed twice into history
+			if (!evt.target || !evt.target.isConnected) return
 
 			const xhr = evt.detail.xhr
 
