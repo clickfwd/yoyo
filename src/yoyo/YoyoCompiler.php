@@ -199,8 +199,10 @@ class YoyoCompiler
             $element->setAttribute('id', $this->componentId);
         }
 
-        if ($target = $element->getAttribute(self::yoprefix('target'))) {
-            $attributes['target'] = $target;
+        foreach (['target', 'include'] as $attr) {
+            if ($value = $element->getAttribute(self::yoprefix($attr))) {
+                $attributes[$attr] = $value;
+            }
         }
 
         // Add yoyo extension attribute and merge existing extensions
@@ -433,6 +435,7 @@ class YoyoCompiler
                 // Adding refresh trigger to prevent default click trigger
                 'on' => 'refresh',
                 'target' => 'this',
+                'include' => "#{$this->componentId} *",
                 'vals' => [self::yoprefix_value('id') => $componentId],
             ],
             $this->attributes
