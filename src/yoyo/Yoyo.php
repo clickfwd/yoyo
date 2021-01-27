@@ -141,7 +141,7 @@ class Yoyo
 
     public function action($action): self
     {
-        $this->action = $action;
+        $this->action = $action == 'refresh' ? 'render' : $action;
 
         return $this;
     }
