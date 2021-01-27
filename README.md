@@ -812,6 +812,16 @@ When you need to emit an event to a specific component using the component name 
 $this->emitTo('cart', 'productAddedToCart', $arg1, $arg2);
 ```
 
+### Emitting an Event to an Element Using a Selector
+
+The `emitTo` method also works with selectors. When a component is not found, the selector is used instead. Emitting events using selectors doesn't support passing arguments. 
+
+```php
+$this->emitTo('.cart', 'productAddedToCart');
+$this->emitTo('#cart', 'productAddedToCart');
+$this->emitTo('.post-100', 'saved');
+```
+
 #### Emitting an Event to Itself
 
 When you need to emit an event on the same component.
