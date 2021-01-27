@@ -145,15 +145,17 @@
 				// At this time, browser history support only works with outerHTML swaps
 				const component = getComponentById(evt.detail.elt.id)
 
-				if (!component || !component.yoyo) return
+				if (!component) return
 
 				const xhr = evt.detail.xhr
 				const pushedUrl = xhr.getResponseHeader('Yoyo-Push')
 
 				// Browser history support only works with components modifing the URL queryString
 
-				if (!pushedUrl || component.__yoyo.replayingHistory) {
-					component.__yoyo.replayingHistory = false
+				if (!pushedUrl || component?.__yoyo?.replayingHistory) {
+					if (component.yoyo) {
+						component.__yoyo.replayingHistory = false
+					}
 					return
 				}
 
