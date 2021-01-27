@@ -274,9 +274,10 @@
 			return ancestors
 		}
 
-		function shouldTriggerYoyoEvent(elt) {
-			if (isComponent(elt) && !yoyoEventCache.has(elt.id)) {
-				yoyoEventCache.add(elt.id)
+		function shouldTriggerYoyoEvent(elt, eventName) {
+			const key = `${elt.id}${eventName}`
+			if (isComponent(elt) && !yoyoEventCache.has(key)) {
+				yoyoEventCache.add(key)
 				return true
 			}
 
@@ -349,7 +350,7 @@
 
 			if (elements) {
 				elements.forEach((elt) => {
-					if (shouldTriggerYoyoEvent(elt)) {
+					if (shouldTriggerYoyoEvent(elt, eventName)) {
 						addEmittedEventParametersToListenerComponent(
 							getComponent(elt),
 							eventName,
