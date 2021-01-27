@@ -145,7 +145,7 @@
 				// At this time, browser history support only works with outerHTML swaps
 				const component = getComponentById(evt.detail.elt.id)
 
-				if (!component) return
+				if (!component || !component.yoyo) return
 
 				const xhr = evt.detail.xhr
 				const pushedUrl = xhr.getResponseHeader('Yoyo-Push')
@@ -275,8 +275,14 @@
 		}
 
 		function shouldTriggerYoyoEvent(elt, eventName) {
-			const key = `${elt.id}${eventName}`
-			if (isComponent(elt) && !yoyoEventCache.has(key)) {
+			let key
+			if (isComponent(elt)) {
+				key = `${elt.id}${eventName}`
+			} else if (elt.selector !== undefined) {
+				return true
+			}
+
+			if (key && !yoyoEventCache.has(key)) {
 				yoyoEventCache.add(key)
 				return true
 			}
@@ -339,16 +345,16 @@
 				if (ancestorsOnly) {
 					elements = getAncestorcomponents(selector)
 				} else {
-					const elt = document.querySelector(selector)
-					if (elt) {
-						elements = [elt]
-					}
+					elements = document.querySelectorAll(selector)
+					Array.from(elements).forEach(
+						(elt) => (elt.selector = selector)
+					)
 				}
 			} else if (componentName) {
 				elements = getComponentsByName(componentName)
 			}
 
-			if (elements) {
+			if (elements.length) {
 				elements.forEach((elt) => {
 					if (shouldTriggerYoyoEvent(elt, eventName)) {
 						addEmittedEventParametersToListenerComponent(
