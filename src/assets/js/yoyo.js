@@ -73,6 +73,9 @@
 					evt.detail.path = 'render'
 				}
 
+				// Includes the commonly-used X-Requested-With header that identifies ajax requests in many backend frameworks
+				evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest'
+
 				const action = getActionAndParseArguments(evt.detail)
 
 				evt.detail.parameters[
