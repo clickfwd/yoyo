@@ -3,7 +3,7 @@
 namespace Clickfwd\Yoyo;
 
 use DOMDocument;
-use DOMXpath;
+use DOMXPath;
 
 class YoyoCompiler
 {
@@ -497,7 +497,7 @@ class YoyoCompiler
     {
         $output = '';
 
-        $xpath = new DOMXpath($dom);
+        $xpath = new DOMXPath($dom);
 
         $elements = $xpath->query("//*[starts-with(name(@*),'hx-')]");
 
