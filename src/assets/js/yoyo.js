@@ -73,6 +73,9 @@
 					evt.detail.path = 'render'
 				}
 
+				// Includes the commonly-used X-Requested-With header that identifies ajax requests in many backend frameworks
+				evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest'
+
 				const action = getActionAndParseArguments(evt.detail)
 
 				evt.detail.parameters[
@@ -152,8 +155,10 @@
 
 				// Browser history support only works with components modifing the URL queryString
 
-				if (!pushedUrl || component.__yoyo.replayingHistory) {
-					component.__yoyo.replayingHistory = false
+				if (!pushedUrl || component?.__yoyo?.replayingHistory) {
+					if (component.yoyo) {
+						component.__yoyo.replayingHistory = false
+					}
 					return
 				}
 
@@ -274,9 +279,16 @@
 			return ancestors
 		}
 
-		function shouldTriggerYoyoEvent(elt) {
-			if (isComponent(elt) && !yoyoEventCache.has(elt.id)) {
-				yoyoEventCache.add(elt.id)
+		function shouldTriggerYoyoEvent(elt, eventName) {
+			let key
+			if (isComponent(elt)) {
+				key = `${elt.id}${eventName}`
+			} else if (elt.selector !== undefined) {
+				return true
+			}
+
+			if (key && !yoyoEventCache.has(key)) {
+				yoyoEventCache.add(key)
 				return true
 			}
 
@@ -338,18 +350,18 @@
 				if (ancestorsOnly) {
 					elements = getAncestorcomponents(selector)
 				} else {
-					const elt = document.querySelector(selector)
-					if (elt) {
-						elements = [elt]
-					}
+					elements = document.querySelectorAll(selector)
+					Array.from(elements).forEach(
+						(elt) => (elt.selector = selector)
+					)
 				}
 			} else if (componentName) {
 				elements = getComponentsByName(componentName)
 			}
 
-			if (elements) {
+			if (elements.length) {
 				elements.forEach((elt) => {
-					if (shouldTriggerYoyoEvent(elt)) {
+					if (shouldTriggerYoyoEvent(elt, eventName)) {
 						addEmittedEventParametersToListenerComponent(
 							getComponent(elt),
 							eventName,

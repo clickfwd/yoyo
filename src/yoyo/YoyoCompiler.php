@@ -3,7 +3,7 @@
 namespace Clickfwd\Yoyo;
 
 use DOMDocument;
-use DOMXpath;
+use DOMXPath;
 
 class YoyoCompiler
 {
@@ -199,8 +199,10 @@ class YoyoCompiler
             $element->setAttribute('id', $this->componentId);
         }
 
-        if ($target = $element->getAttribute(self::yoprefix('target'))) {
-            $attributes['target'] = $target;
+        foreach (['target', 'include'] as $attr) {
+            if ($value = $element->getAttribute(self::yoprefix($attr))) {
+                $attributes[$attr] = $value;
+            }
         }
 
         // Add yoyo extension attribute and merge existing extensions
@@ -385,25 +387,35 @@ class YoyoCompiler
 
     protected function addRequestMethodAttribute($element, $isRootNode = false)
     {
-        // Look for existing method attribute, otherwise set 'get' as default
+        // Skip if element already has an hx-[request] attribute (no yoyo:[request] which is processed below)
+        
+        foreach (self::HTMX_REQUEST_METHOD_ATTRIBUTES as $attr) {
+            $hxattr = self::hxprefix($attr);
+            if ($element->hasAttribute($hxattr)) {
+                return;
+            }
+        }
 
+        // Look for existing method attribute, otherwise set 'get' as default
+        
         foreach (self::HTMX_REQUEST_METHOD_ATTRIBUTES as $attr) {
             $yoattr = self::yoprefix($attr);
-
+            
             if ($value = $element->getAttribute($yoattr)) {
                 $element->removeAttribute($yoattr);
 
                 $element->setAttribute(self::hxprefix($attr), $value);
 
                 // Add an ID attribute for elements that trigger requests
-
-                $this->checkForIdAttribute($element);
+                if (! $isRootNode) {
+                    $this->checkForIdAttribute($element);
+                }
 
                 return;
             }
         }
 
-        // Make element reactive if it has the yoyo attribute, or if it's a clickable element
+        // Automatically make element reactive if it has the yoyo attribute, or if it's a clickable element
         if ($element->hasAttribute(self::YOYO_PREFIX) || in_array($element->tagName, $this->reactiveTags)) {
             $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
 
@@ -423,6 +435,7 @@ class YoyoCompiler
                 // Adding refresh trigger to prevent default click trigger
                 'on' => 'refresh',
                 'target' => 'this',
+                'include' => "#{$this->componentId} *",
                 'vals' => [self::yoprefix_value('id') => $componentId],
             ],
             $this->attributes
@@ -484,7 +497,7 @@ class YoyoCompiler
     {
         $output = '';
 
-        $xpath = new DOMXpath($dom);
+        $xpath = new DOMXPath($dom);
 
         $elements = $xpath->query("//*[starts-with(name(@*),'hx-')]");
 

@@ -239,18 +239,21 @@ abstract class Component
         });
     }
 
+    // For computed properties with arguments
     // For Twig compatibility, because computed properties are not resolved through __get
 
     public function __call(string $name, array $arguments)
     {
         $studlyProperty = YoyoHelpers::studly($name);
-
+        
         if (method_exists($this, $computedMethodName = 'get'.$studlyProperty.'Property')) {
-            if (isset($this->computedPropertyCache[$name])) {
-                return $this->computedPropertyCache[$name];
+            $key = static::makeCacheKey($name, $arguments);
+
+            if (isset($this->computedPropertyCache[$key])) {
+                return $this->computedPropertyCache[$key];
             }
 
-            return $this->computedPropertyCache[$name] = $this->$computedMethodName();
+            return $this->computedPropertyCache[$key] = call_user_func_array([$this,$computedMethodName], $arguments);
         }
 
         throw new ComponentMethodNotFound($this->getName(), $name);
@@ -284,5 +287,13 @@ abstract class Component
         foreach ($keys as $keyName) {
             unset($this->computedPropertyCache[$keyName]);
         }
+    }
+
+    public function forgetComputedWithArgs($name, ...$args) {
+        $this->forgetComputed(static::makeCacheKey($name, $args));
+    }
+
+    protected static function makeCacheKey($name, $arguments) {
+        return md5($name.json_encode($arguments));        
     }
 }

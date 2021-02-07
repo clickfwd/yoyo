@@ -551,6 +551,15 @@ class HelloWorld extends Component
 	{
 		return $message;
 	}
+
+   	// Computed Property with argument
+	public function getErrorsProperty($name)
+	{
+		return [
+			'title' => 'Please enter a title',
+			'description' => 'Please enter a description',
+		][$name] ?? null;
+	}
 }
 ```
 	
@@ -561,6 +570,31 @@ Now, you can access `$this->hello_world` from either the component's class or te
 	<h1><?php echo $this->hello_world ;?></h1>
 	<!-- Will output "Hello World!" -->
 </div>
+```
+
+Computed properties with arguments behave like normal class methods that you can call in your templates:
+
+```php
+<div>
+	<h1><?php echo $this->errors('title') ;?></h1>
+	<!-- Will output "Please enter a title" -->
+</div>
+```
+
+The output of computed properties is cached within the same component request, allowing you to perform complex tasks like querying the database and not duplicating the tasks if the property is accessed multiple times. If you need to clear the cache for a computed property:
+
+```php
+// Clear all computed properties, including those with arguments
+$this->forgetComputed();
+
+// Clear a single property
+$this->forgetComputed($property);
+
+// Clear multiple properties
+$this->forgetComputed([$property1, $property2]);
+
+// Clear a single computed property with arguments
+$this->forgetComputedWithArgs($property, $arg1, $arg2);
 ```
 
 ## Component Props
@@ -776,6 +810,16 @@ When you need to emit an event to a specific component using the component name 
 
 ```php
 $this->emitTo('cart', 'productAddedToCart', $arg1, $arg2);
+```
+
+### Emitting an Event to an Element Using a Selector
+
+The `emitTo` method also works with selectors. When a component is not found, the selector is used instead. Emitting events using selectors doesn't support passing arguments. 
+
+```php
+$this->emitTo('.cart', 'productAddedToCart');
+$this->emitTo('#cart', 'productAddedToCart');
+$this->emitTo('.post-100', 'saved');
 ```
 
 #### Emitting an Event to Itself
