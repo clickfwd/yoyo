@@ -102,6 +102,13 @@ class YoyoCompiler
         return $this;
     }
 
+    public function addComponentProps($props = [])
+    {
+        $this->props = $props;
+
+        return $this;
+    }
+
     public function compile($html): string
     {
         if (! trim($html)) {
@@ -240,24 +247,21 @@ class YoyoCompiler
 
         // Process public props
 
-        $props = $element->getAttribute(self::yoprefix('props')) ?: '';
-
-        if ($this->componentType == 'anonymous' || $props) {
-            // For anonymous components, only include props specified using yoyo:props attribute
+        if ($props = $element->getAttribute(self::yoprefix('props')) ?: []) {
             $props = explode(',', str_replace(' ', '', $props));
-        } else {
-            // For dynamic components, only include props specified using $props property
-            $props = array_keys($this->variables);
+            $element->removeAttribute(self::yoprefix('props'));
         }
 
-        $element->removeAttribute(self::yoprefix('props'));
-
-        $props = array_flip(array_merge($props, [
+        $props = array_merge($props, $this->props, [
             self::yoprefix('resolver'),
             self::yoprefix('source'),
-        ]));
-
-        $attributes['vals'] = array_merge($attributes['vals'], array_intersect_key($this->variables, $props));
+        ]);
+        
+        $variables = array_filter($this->variables, function ($key) use ($props) {
+            return in_array($key, $props);
+        }, ARRAY_FILTER_USE_KEY);
+                
+        $attributes['vals'] = array_merge($attributes['vals'], $variables);
         
         // Add all attributes
 

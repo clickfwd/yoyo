@@ -214,14 +214,8 @@ class Yoyo
         // For dynamic components, filter variables based on component props
         
         $props = $componentManager->getProps();
-        
-        if ($componentType == 'dynamic') {
-            $variables = array_filter($variables, function ($key) use ($props) {
-                return in_array($key, $props);
-            }, ARRAY_FILTER_USE_KEY);
-        }
 
-        $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners);
+        $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props);
 
         if ($spinning) {
             $queryStringKeys = $componentManager->getQueryString();
@@ -250,7 +244,7 @@ class Yoyo
         return (Response::getInstance())->send($compiledHtml);
     }
 
-    public function compile($componentType, $html, $spinning = null, $variables = [], $listeners = []): string
+    public function compile($componentType, $html, $spinning = null, $variables = [], $listeners = [], $props = []): string
     {
         $spinning = $spinning ?? $this->is_spinning();
 
@@ -258,6 +252,7 @@ class Yoyo
 
         $output = (new YoyoCompiler($componentType, $this->id, $this->name, $variables, $this->attributes, $spinning))
                     ->addComponentListeners($listeners)
+                    ->addComponentProps($props)
                     ->compile($html);
 
         return $output;
