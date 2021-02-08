@@ -143,7 +143,9 @@ class YoyoCompiler
         $elements = $xpath->query('//form');
 
         foreach ($elements as $key => $element) {
-            $this->addFormBehavior($element);
+            if (! $element->hasAttribute(self::yoprefix('ignore'))) {
+                $this->addFormBehavior($element);
+            }
         }
 
         // Prevent infinite loop with on 'load' event on root node with outerHTML swap
