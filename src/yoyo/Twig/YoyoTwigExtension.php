@@ -64,6 +64,13 @@ class YoyoTwigExtension extends AbstractExtension implements GlobalsInterface
         });
     }
 
+    private function emitToWithSelector()
+    {
+        return new TwigFunction('emitToWithSelector', function ($target, $eventName, $payload = []) {
+            (BrowserEventsService::getInstance())->emitToWithSelector($target, $eventName, $payload);
+        });
+    }    
+
     private function emitSelf()
     {
         return new TwigFunction('emitSelf', function ($eventName, $payload = []) {

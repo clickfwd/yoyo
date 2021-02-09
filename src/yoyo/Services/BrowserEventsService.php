@@ -27,16 +27,12 @@ class BrowserEventsService
 
     public function emitTo($target, $event, ...$params)
     {
-        $selector = null;
-        $component = null;
+        $this->queue($event, $params, null, $target);
+    }
 
-        if (in_array($target[0], ['.', '#'])) {
-            $selector = $target;
-        } else {
-            $component = $target;
-        }
-
-        $this->queue($event, $params, $selector, $component);
+    public function emitToWithSelector($target, $event, ...$params)
+    {
+        $this->queue($event, $params, $target);
     }
 
     public function emitSelf($event, ...$params)

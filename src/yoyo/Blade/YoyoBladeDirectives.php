@@ -60,6 +60,11 @@ yoyo;
         return "<?php \$this->emitTo({$expression}); ?>";
     }
 
+    public function emitToWithSelector($expression)
+    {
+        return "<?php \$this->emitToWithSelector({$expression}); ?>";
+    }    
+
     public function emitSelf($expression)
     {
         return "<?php \$this->emitSelf({$expression}); ?>";
