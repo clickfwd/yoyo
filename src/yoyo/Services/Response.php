@@ -32,7 +32,10 @@ class Response
             header("$key: $value");
         }
 
-        http_response_code($this->status);
+        if ($this->status == 204) {
+            http_response_code($this->status);
+            die;
+        }
 
         return $content ?: '';
     }

@@ -159,7 +159,9 @@ class Yoyo
      */
     public function refresh(): string
     {
-        return $this->output($spinning = true);
+        $output = $this->output($spinning = true);
+
+        return $output;
     }
 
     public function update(): string

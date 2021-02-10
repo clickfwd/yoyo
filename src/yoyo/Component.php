@@ -35,7 +35,7 @@ abstract class Component
 
     protected $listeners = [];
 
-    protected $noResponse = false;
+    protected $omitResponse = false;
 
     protected $computedPropertyCache = [];
 
@@ -167,19 +167,30 @@ abstract class Component
 
     public function render()
     {
-        if (! $this->noResponse) {
-            return $this->view($this->componentName);
+        if ($this->omitResponse) {
+            return null;
         }
 
-        // No Content
-        $this->response->status(204);
-
-        return null;
+        return $this->view($this->componentName);
     }
 
+    public function addSwapModifiers($modifier) 
+    {
+        $this->response->header('Yoyo-Swap-Modifier', $modifier);
+        return $this;
+    }
+    
     public function skipRender()
     {
-        $this->noResponse = true;
+        $this->response->status(204);
+        $this->omitResponse = true;
+        return $this;
+    }
+
+    public function skipRenderAndRemove()
+    {
+        $this->omitResponse = true;
+        return $this;
     }
 
     protected function view($template, $vars = []): ViewProviderInterface

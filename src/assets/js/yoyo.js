@@ -31,10 +31,8 @@
 					)
 				})
 			},
-			afterProcessNode(evt) {
+			createNonExistentIdTarget(targetId) {
 				// Dynamically create non-existent target IDs by appending them to document body
-				const targetId = evt.srcElement.getAttribute('hx-target')
-
 				if (
 					targetId &&
 					targetId[0] == '#' &&
@@ -44,8 +42,13 @@
 					targetDiv.setAttribute('id', targetId.replace('#', ''))
 					document.body.appendChild(targetDiv)
 				}
+			},
+			afterProcessNode(evt) {
+				this.createNonExistentIdTarget(
+					evt.srcElement.getAttribute('hx-target')
+				)
 
-				// Process spinners
+				// Initialize spinners
 				let component
 
 				if (!evt.srcElement || !isComponent(evt.srcElement)) {
@@ -243,7 +246,7 @@
 
 			const component = document.querySelector(`#${componentId}`)
 
-			return isComponent(component) ? component : null;
+			return isComponent(component) ? component : null
 		}
 
 		function getComponentName(component) {
@@ -356,20 +359,20 @@
 				// emitUp
 				if (propagation == 'ancestorsOnly') {
 					elements = getAncestorcomponents(selector)
-				// emitSelf
-				} else if (propagation == 'self') {					
+					// emitSelf
+				} else if (propagation == 'self') {
 					elements = [component]
-				// emitTo
+					// emitTo
 				} else {
 					elements = getComponentsByName(componentName)
 				}
-			// emitWithSelector, excludes current component to allow replication without udpating the current component twice
+				// emitWithSelector, excludes current component to allow replication without udpating the current component twice
 			} else if (selector) {
 				elements = document.querySelectorAll(selector)
-				elements = Array.from(elements).filter(element => !component.contains(element))
-				elements.forEach(
-					(elt) => (elt.selector = selector)
+				elements = Array.from(elements).filter(
+					(element) => !component.contains(element)
 				)
+				elements.forEach((elt) => (elt.selector = selector))
 			}
 
 			if (elements.length) {
@@ -692,7 +695,10 @@ YoyoEngine.defineExtension('yoyo', {
 
 			const xhr = evt.detail.xhr
 
-			Yoyo.processEmitEvents(evt.detail.elt, xhr.getResponseHeader('Yoyo-Emit'))
+			Yoyo.processEmitEvents(
+				evt.detail.elt,
+				xhr.getResponseHeader('Yoyo-Emit')
+			)
 
 			Yoyo.processBrowserEvents(
 				xhr.getResponseHeader('Yoyo-Browser-Event')
@@ -704,9 +710,28 @@ YoyoEngine.defineExtension('yoyo', {
 		if (name === 'htmx:beforeSwap') {
 			if (!evt.target) return
 
+			const modifier = evt.detail.xhr.getResponseHeader(
+				'Yoyo-Swap-Modifier'
+			)
+
+			if (modifier) {
+				const swap = evt.detail.elt.getAttribute('hx-swap')
+				evt.detail.elt.setAttribute('hx-swap', `${swap} ${modifier}`)
+			}
+
 			Yoyo.processBrowserEvents(
 				evt.detail.xhr.getResponseHeader('Yoyo-Browser-Event')
 			)
+		}
+
+		if (name === 'htmx:afterSwap') {
+			// Automatically re-spawn targets removed from the page that are used by Yoyo components
+			if (
+				!evt.detail.elt.isConnected &&
+				document.querySelector(`[hx-target="#${evt.detail.elt.id}"]`)
+			) {
+				Yoyo.createNonExistentIdTarget(`#${evt.detail.elt.id}`)
+			}
 		}
 
 		if (name === 'htmx:afterSettle') {
