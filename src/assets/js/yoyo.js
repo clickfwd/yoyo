@@ -98,7 +98,6 @@
 			},
 			processEmitEvents(elt, events) {
 				if (!events || events == '[]') return
-				console.log('... processing emit events')
 
 				events = typeof events == 'string' ? JSON.parse(events) : events
 
@@ -272,7 +271,6 @@
 
 		function getAncestorcomponents(selector) {
 			let ancestor = getComponent(document.querySelector(selector))
-
 			let ancestors = []
 
 			while (ancestor) {
@@ -280,6 +278,8 @@
 				ancestor = getComponent(ancestor.parentElement)
 			}
 
+			// Remove the current component
+			ancestors.shift()
 			return ancestors
 		}
 
@@ -689,7 +689,6 @@ YoyoEngine.defineExtension('yoyo', {
 
 		if (name === 'htmx:afterOnLoad') {
 			Yoyo.afterOnLoadActions(evt)
-			console.log(name, evt.target, evt.detail.target, evt.detail.elt);
 
 			if (!evt.target) return
 
@@ -704,19 +703,6 @@ YoyoEngine.defineExtension('yoyo', {
 				)
 				Yoyo.processRedirectHeader(xhr)
 			}
-
-			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
-			// so we run those actions here
-			// if (
-			// 	!evt.target.isSameNode(evt.detail.target) ||
-			// 	xhr.status == 204
-			// ) {
-			// 	Yoyo.processEmitEvents(evt.detail.elt, xhr.getResponseHeader('Yoyo-Emit'))
-			// 	Yoyo.processBrowserEvents(
-			// 		xhr.getResponseHeader('Yoyo-Browser-Event')
-			// 	)
-			// 	Yoyo.processRedirectHeader(xhr)
-			// }
 		}
 
 		if (name === 'htmx:beforeSwap') {
@@ -728,14 +714,11 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterSettle') {
-			console.log(name, evt.target, evt.detail.target, evt.detail.elt);
 			// Make sure we trigger once for the new element - this was failing in Safari mobile
 			// causing component cached state to be pushed twice into history
 			if (!evt.target || !evt.target.isConnected) return
 
-			const xhr = evt.detail.xhr
-			
-			Yoyo.processEmitEvents(evt.detail.elt, xhr.getResponseHeader('Yoyo-Emit'))
+			Yoyo.processEmitEvents(evt.detail.elt, evt.detail.xhr.getResponseHeader('Yoyo-Emit'))
 
 			Yoyo.afterSettleActions(evt)
 		}
