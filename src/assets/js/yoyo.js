@@ -96,15 +96,15 @@
 					}
 				}
 			},
-			processEmitEvents(events) {
-				if (!events) return
+			processEmitEvents(elt, events) {
+				if (!events || events == '[]') return
 
 				events = typeof events == 'string' ? JSON.parse(events) : events
 
 				yoyoEventCache.clear()
 
 				events.forEach((event) => {
-					triggerServerEmittedEvent(event)
+					triggerServerEmittedEvent(elt, event)
 				})
 			},
 			processBrowserEvents(events) {
@@ -227,7 +227,7 @@
 		}
 
 		function isComponent(elt) {
-			return elt.hasAttribute('yoyo:name')
+			return elt?.hasAttribute('yoyo:name')
 		}
 
 		function getComponent(elt) {
@@ -240,7 +240,10 @@
 
 		function getComponentById(componentId) {
 			if (!componentId) return null
-			return document.querySelector(`#${componentId}`)
+
+			const component = document.querySelector(`#${componentId}`)
+
+			return isComponent(component) ? component : null;
 		}
 
 		function getComponentName(component) {
@@ -268,7 +271,6 @@
 
 		function getAncestorcomponents(selector) {
 			let ancestor = getComponent(document.querySelector(selector))
-
 			let ancestors = []
 
 			while (ancestor) {
@@ -276,6 +278,8 @@
 				ancestor = getComponent(ancestor.parentElement)
 			}
 
+			// Remove the current component
+			ancestors.shift()
 			return ancestors
 		}
 
@@ -336,27 +340,36 @@
 			})
 		}
 
-		function triggerServerEmittedEvent(event) {
+		function triggerServerEmittedEvent(elt, event) {
+			const component = getComponent(elt)
 			const eventName = event.event
 			const params = event.params
 			const selector = event.selector || null
 			const componentName = event.component || null
-			const ancestorsOnly = event.ancestorsOnly || null
+			const propagation = event.propagation || null
 			let elements
 
+			// emit
 			if (!selector && !componentName) {
 				elements = getAllcomponents()
-			} else if (selector) {
-				if (ancestorsOnly) {
-					elements = getAncestorcomponents(selector)
-				} else {
-					elements = document.querySelectorAll(selector)
-					Array.from(elements).forEach(
-						(elt) => (elt.selector = selector)
-					)
-				}
 			} else if (componentName) {
-				elements = getComponentsByName(componentName)
+				// emitUp
+				if (propagation == 'ancestorsOnly') {
+					elements = getAncestorcomponents(selector)
+				// emitSelf
+				} else if (propagation == 'self') {					
+					elements = [component]
+				// emitTo
+				} else {
+					elements = getComponentsByName(componentName)
+				}
+			// emitWithSelector, excludes current component to allow replication without udpating the current component twice
+			} else if (selector) {
+				elements = document.querySelectorAll(selector)
+				elements = Array.from(elements).filter(element => !component.contains(element))
+				elements.forEach(
+					(elt) => (elt.selector = selector)
+				)
 			}
 
 			if (elements.length) {
@@ -601,7 +614,7 @@
 				YoyoEngine.trigger(cached, 'refresh')
 			} else {
 				Yoyo.processBrowserEvents(state?.effects?.browserEvents)
-				Yoyo.processEmitEvents(state?.effects?.emitEvents)
+				Yoyo.processEmitEvents(component, state?.effects?.emitEvents)
 			}
 		}
 
@@ -677,22 +690,15 @@ YoyoEngine.defineExtension('yoyo', {
 		if (name === 'htmx:afterOnLoad') {
 			Yoyo.afterOnLoadActions(evt)
 
-			if (!evt.target) return
-
 			const xhr = evt.detail.xhr
 
-			// afterSwap and afterSettle events are not triggered for targets different than the Yoyo component
-			// so we run those actions here
-			if (
-				!evt.target.isSameNode(evt.detail.target) ||
-				evt.detail.xhr.status == 204
-			) {
-				Yoyo.processEmitEvents(xhr.getResponseHeader('Yoyo-Emit'))
-				Yoyo.processBrowserEvents(
-					xhr.getResponseHeader('Yoyo-Browser-Event')
-				)
-				Yoyo.processRedirectHeader(xhr)
-			}
+			Yoyo.processEmitEvents(evt.detail.elt, xhr.getResponseHeader('Yoyo-Emit'))
+
+			Yoyo.processBrowserEvents(
+				xhr.getResponseHeader('Yoyo-Browser-Event')
+			)
+
+			Yoyo.processRedirectHeader(xhr)
 		}
 
 		if (name === 'htmx:beforeSwap') {
@@ -704,13 +710,10 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterSettle') {
+			// Push component response to history cache
 			// Make sure we trigger once for the new element - this was failing in Safari mobile
-			// causing component cached state to be pushed twice into history
+			// Causing a duplicate snapshot
 			if (!evt.target || !evt.target.isConnected) return
-
-			const xhr = evt.detail.xhr
-
-			Yoyo.processEmitEvents(xhr.getResponseHeader('Yoyo-Emit'))
 
 			Yoyo.afterSettleActions(evt)
 		}
