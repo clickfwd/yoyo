@@ -357,7 +357,7 @@
 				if (propagation == 'ancestorsOnly') {
 					elements = getAncestorcomponents(selector)
 				// emitSelf
-				} else if (propagation == 'self') {
+				} else if (propagation == 'self') {					
 					elements = [component]
 				// emitTo
 				} else {
@@ -690,19 +690,15 @@ YoyoEngine.defineExtension('yoyo', {
 		if (name === 'htmx:afterOnLoad') {
 			Yoyo.afterOnLoadActions(evt)
 
-			if (!evt.target) return
-
 			const xhr = evt.detail.xhr
 
-			// This is the end of the road for components that send back an empty response (skipRender)
-			// Trigger events/redirects here
-			if (xhr.status == 204) {
-				Yoyo.processEmitEvents(evt.detail.elt, xhr.getResponseHeader('Yoyo-Emit'))
-				Yoyo.processBrowserEvents(
-					xhr.getResponseHeader('Yoyo-Browser-Event')
-				)
-				Yoyo.processRedirectHeader(xhr)
-			}
+			Yoyo.processEmitEvents(evt.detail.elt, xhr.getResponseHeader('Yoyo-Emit'))
+
+			Yoyo.processBrowserEvents(
+				xhr.getResponseHeader('Yoyo-Browser-Event')
+			)
+
+			Yoyo.processRedirectHeader(xhr)
 		}
 
 		if (name === 'htmx:beforeSwap') {
@@ -714,11 +710,10 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:afterSettle') {
+			// Push component response to history cache
 			// Make sure we trigger once for the new element - this was failing in Safari mobile
-			// causing component cached state to be pushed twice into history
+			// Causing a duplicate snapshot
 			if (!evt.target || !evt.target.isConnected) return
-
-			Yoyo.processEmitEvents(evt.detail.elt, evt.detail.xhr.getResponseHeader('Yoyo-Emit'))
 
 			Yoyo.afterSettleActions(evt)
 		}
