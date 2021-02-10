@@ -174,15 +174,23 @@ abstract class Component
         return $this->view($this->componentName);
     }
 
+    public function addSwapModifiers($modifier) 
+    {
+        $this->response->header('Yoyo-Swap-Modifier', $modifier);
+        return $this;
+    }
+    
     public function skipRender()
     {
         $this->response->status(204);
         $this->omitResponse = true;
+        return $this;
     }
 
     public function skipRenderAndRemove()
     {
         $this->omitResponse = true;
+        return $this;
     }
 
     protected function view($template, $vars = []): ViewProviderInterface

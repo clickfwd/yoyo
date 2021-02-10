@@ -698,6 +698,15 @@ YoyoEngine.defineExtension('yoyo', {
 		if (name === 'htmx:beforeSwap') {
 			if (!evt.target) return
 
+			const modifier = evt.detail.xhr.getResponseHeader(
+				'Yoyo-Swap-Modifier'
+			)
+
+			if (modifier) {
+				const swap = evt.detail.elt.getAttribute('hx-swap')
+				evt.detail.elt.setAttribute('hx-swap', `${swap} ${modifier}`)
+			}
+
 			Yoyo.processBrowserEvents(
 				evt.detail.xhr.getResponseHeader('Yoyo-Browser-Event')
 			)
