@@ -35,7 +35,7 @@ abstract class Component
 
     protected $listeners = [];
 
-    protected $noResponse = false;
+    protected $omitResponse = false;
 
     protected $computedPropertyCache = [];
 
@@ -167,19 +167,22 @@ abstract class Component
 
     public function render()
     {
-        if (! $this->noResponse) {
-            return $this->view($this->componentName);
+        if ($this->omitResponse) {
+            return null;
         }
 
-        // No Content
-        $this->response->status(204);
-
-        return null;
+        return $this->view($this->componentName);
     }
 
     public function skipRender()
     {
-        $this->noResponse = true;
+        $this->response->status(204);
+        $this->omitResponse = true;
+    }
+
+    public function skipRenderAndRemove()
+    {
+        $this->omitResponse = true;
     }
 
     protected function view($template, $vars = []): ViewProviderInterface
