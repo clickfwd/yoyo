@@ -31,10 +31,8 @@
 					)
 				})
 			},
-			afterProcessNode(evt) {
+			createNonExistentIdTarget(targetId) {
 				// Dynamically create non-existent target IDs by appending them to document body
-				const targetId = evt.srcElement.getAttribute('hx-target')
-
 				if (
 					targetId &&
 					targetId[0] == '#' &&
@@ -44,8 +42,13 @@
 					targetDiv.setAttribute('id', targetId.replace('#', ''))
 					document.body.appendChild(targetDiv)
 				}
+			},
+			afterProcessNode(evt) {
+				this.createNonExistentIdTarget(
+					evt.srcElement.getAttribute('hx-target')
+				)
 
-				// Process spinners
+				// Initialize spinners
 				let component
 
 				if (!evt.srcElement || !isComponent(evt.srcElement)) {
@@ -710,6 +713,16 @@ YoyoEngine.defineExtension('yoyo', {
 			Yoyo.processBrowserEvents(
 				evt.detail.xhr.getResponseHeader('Yoyo-Browser-Event')
 			)
+		}
+
+		if (name === 'htmx:afterSwap') {
+			// Automatically re-spawn targets removed from the page that are used by Yoyo components
+			if (
+				!evt.detail.elt.isConnected &&
+				document.querySelector(`[hx-target="#${evt.detail.elt.id}"]`)
+			) {
+				Yoyo.createNonExistentIdTarget(`#${evt.detail.elt.id}`)
+			}
 		}
 
 		if (name === 'htmx:afterSettle') {
