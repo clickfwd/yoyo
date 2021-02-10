@@ -26,7 +26,7 @@ class Response
         return $this;
     }
 
-    public function send($content = '')
+    public function send($content = ''): string
     {
         foreach ($this->headers as $key => $value) {
             header("$key: $value");
@@ -34,7 +34,7 @@ class Response
 
         http_response_code($this->status);
 
-        return $content ?: null;
+        return $content ?: '';
     }
 
     public function getHeaders()

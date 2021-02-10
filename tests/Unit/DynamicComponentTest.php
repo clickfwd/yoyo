@@ -118,3 +118,9 @@ test('registered dynamic component is loaded', function () {
     ComponentManager::registerComponent('registered-test', \Tests\App\Yoyo\Registered::class);
     expect(render('registered-test'))->toContain('id="registered"');
 });
+
+test('skipRender method returns empty response with 204 status', function () {
+    require_once __DIR__."/../app/Yoyo/EmptyResponse.php";
+    ComponentManager::registerComponent('empty-response', \Tests\App\Yoyo\EmptyResponse::class);
+    expect(render('empty-response'))->toBeEmpty()->and(http_response_code())->toBe(204);
+});
