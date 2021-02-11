@@ -63,7 +63,7 @@ yoyo;
     public function emitToWithSelector($expression)
     {
         return "<?php \$this->emitToWithSelector({$expression}); ?>";
-    }    
+    }
 
     public function emitSelf($expression)
     {
