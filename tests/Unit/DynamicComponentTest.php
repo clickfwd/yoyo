@@ -3,6 +3,7 @@
 use Clickfwd\Yoyo\ComponentManager;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
+use Clickfwd\Yoyo\Services\Response as ResponseService;
 use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
@@ -123,4 +124,10 @@ test('skipRender method returns empty response with 204 status', function () {
     require_once __DIR__."/../app/Yoyo/EmptyResponse.php";
     ComponentManager::registerComponent('empty-response', \Tests\App\Yoyo\EmptyResponse::class);
     expect(render('empty-response'))->toBeEmpty()->and(http_response_code())->toBe(204);
+});
+
+test('skipRenderAndReplace method returns empty response with 200 status', function () {
+    require_once __DIR__."/../app/Yoyo/EmptyResponseAndRemove.php";
+    ComponentManager::registerComponent('empty-response-and-remove', \Tests\App\Yoyo\EmptyResponseAndRemove::class);
+    expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
 });

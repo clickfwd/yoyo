@@ -8,9 +8,9 @@ class Response
 {
     use Singleton;
 
-    private $headers = [];
+    protected $headers = [];
 
-    private $status = 200;
+    protected $status = 200;
 
     public function header($name, $value)
     {
@@ -33,9 +33,11 @@ class Response
         }
 
         if ($this->status == 204) {
-            http_response_code($this->status);
-            die;
+            http_response_code(204);
+            return '';
         }
+
+        http_response_code(200);
 
         return $content ?: '';
     }

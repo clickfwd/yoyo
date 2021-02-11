@@ -174,7 +174,7 @@ abstract class Component
         return $this->view($this->componentName);
     }
 
-    public function addSwapModifiers($modifier) 
+    public function addSwapModifiers($modifier)
     {
         $this->response->header('Yoyo-Swap-Modifier', $modifier);
         return $this;
@@ -189,6 +189,7 @@ abstract class Component
 
     public function skipRenderAndRemove()
     {
+        $this->response->status(200);
         $this->omitResponse = true;
         return $this;
     }
@@ -300,11 +301,13 @@ abstract class Component
         }
     }
 
-    public function forgetComputedWithArgs($name, ...$args) {
+    public function forgetComputedWithArgs($name, ...$args)
+    {
         $this->forgetComputed(static::makeCacheKey($name, $args));
     }
 
-    protected static function makeCacheKey($name, $arguments) {
-        return md5($name.json_encode($arguments));        
+    protected static function makeCacheKey($name, $arguments)
+    {
+        return md5($name.json_encode($arguments));
     }
 }
