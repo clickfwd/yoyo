@@ -18,7 +18,6 @@
 
 		var Yoyo = {
 			url: null,
-			defaultSwap: 'outerHTML',
 			config(options) {
 				Object.keys(options).forEach((key) => {
 					YoyoEngine.config[key] = options[key]
@@ -721,7 +720,8 @@ YoyoEngine.defineExtension('yoyo', {
 
 			if (modifier) {
 				const swap =
-					evt.detail.elt.getAttribute('hx-swap') || Yoyo.defaultSwap
+					evt.detail.elt.getAttribute('hx-swap') ||
+					YoyoEngine.config.defaultSwapStyle
 				evt.detail.elt.setAttribute('hx-swap', `${swap} ${modifier}`)
 			}
 
