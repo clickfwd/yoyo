@@ -20,7 +20,17 @@ use function Tests\yoyo_update;
 uses()->group('unit-dynamic');
 
 beforeAll(function () {
-    $yoyo = initYoyo(['Counter', 'ComputedProperty', 'ComputedPropertyCache']);
+    $yoyo = initYoyo([
+        'ActionArguments',
+        'ComputedProperty', 
+        'ComputedPropertyCache',
+        'Counter', 
+        'EmptyResponse',
+        'EmptyResponseAndRemove',
+        'PostRequestVars',
+        'Registered',
+        'SetViewData',
+    ]);
 });
 
 test('component class not found', function () {
@@ -73,14 +83,11 @@ test('component computed property cache', function () {
 });
 
 test('can set component view data', function () {
-    require_once __DIR__.'/../app/Yoyo/SetViewData.php';
     expect(render('set-view-data'))->toContain('bar-baz');
 });
 
 
 test('action parameters passed to component method arguments', function () {
-    require_once __DIR__.'/../app/Yoyo/ActionArguments.php';
-
     mockYoyoGetRequest('http://example.com/', 'action-arguments/someAction', '', [
         'actionArgs' => [1,'foo'],
     ]);
@@ -93,16 +100,12 @@ test('action parameters passed to component method arguments', function () {
 });
 
 test('Null properties not added as vars to component root', function () {
-    require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
-
     $vars = encode_vals([yoprefix_value('id') => 'post-request-vars']);
 
     expect(render('post-request-vars'))->toContain(hxattr('vals', $vars));
 })->group('component-root-vars');
 
 test('posted vars are not added to component root', function () {
-    require_once __DIR__.'/../app/Yoyo/PostRequestVars.php';
-
     $vars = encode_vals([yoprefix_value('id') => 'post-request-vars']);
 
     mockYoyoPostRequest('http://example.com/', 'post-request-vars/save', '', [
@@ -115,19 +118,16 @@ test('posted vars are not added to component root', function () {
 })->group('component-root-vars');
 
 test('registered dynamic component is loaded', function () {
-    require_once __DIR__."/../app/Yoyo/registered.php";
     ComponentManager::registerComponent('registered-test', \Tests\App\Yoyo\Registered::class);
     expect(render('registered-test'))->toContain('id="registered"');
 });
 
 test('skipRender method returns empty response with 204 status', function () {
-    require_once __DIR__."/../app/Yoyo/EmptyResponse.php";
     ComponentManager::registerComponent('empty-response', \Tests\App\Yoyo\EmptyResponse::class);
     expect(render('empty-response'))->toBeEmpty()->and(http_response_code())->toBe(204);
 });
 
 test('skipRenderAndReplace method returns empty response with 200 status', function () {
-    require_once __DIR__."/../app/Yoyo/EmptyResponseAndRemove.php";
     ComponentManager::registerComponent('empty-response-and-remove', \Tests\App\Yoyo\EmptyResponseAndRemove::class);
     expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
 });
