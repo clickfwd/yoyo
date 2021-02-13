@@ -314,6 +314,10 @@
 				'component'
 			] = `${componentName}/${eventData.name}`
 
+			if (eventData.params) {
+				delete eventData.params.elt
+			}
+
 			evt.detail.parameters = {
 				...evt.detail.parameters,
 				...{
