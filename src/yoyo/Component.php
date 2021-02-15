@@ -114,6 +114,11 @@ abstract class Component
         return $this->props;
     }
 
+    public function setAction($action)
+    {
+        $this->componentAction = $action;
+    }
+
     public function getListeners()
     {
         $listeners = [];
@@ -141,8 +146,6 @@ abstract class Component
 
     public function callActionWithArguments($action, $args)
     {
-        $this->componentAction = $action;
-
         return call_user_func_array([$this, $action], $args);
     }
 

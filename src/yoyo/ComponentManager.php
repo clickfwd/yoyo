@@ -120,6 +120,8 @@ class ComponentManager
 
         $listeners = $this->component->getListeners();
 
+        $this->component->setAction($action);
+
         if (!empty($listeners[$action]) || in_array($action, $listeners)) {
             // If action is an event listener, re-route it to the listener method
 
@@ -150,13 +152,9 @@ class ComponentManager
         }
 
         if ($action !== 'render') {
-            if ($isEventListenerAction) {
-                $actionResponse = $this->component->callActionWithArguments($action, $eventParams);
-            } else {
-                $actionArguments = $this->parseActionArguments();
+            $parameters = $isEventListenerAction ? $eventParams : $this->parseActionArguments();
 
-                $actionResponse = $this->component->callActionWithArguments($action, $actionArguments);
-            }
+            $actionResponse = $this->component->callActionWithArguments($action, $parameters);
 
             $type = gettype($actionResponse);
 
