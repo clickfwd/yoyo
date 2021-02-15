@@ -1,9 +1,9 @@
 <?php
 
+use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\ComponentManager;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
-use Clickfwd\Yoyo\Services\Response as ResponseService;
 use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
@@ -22,14 +22,15 @@ uses()->group('unit-dynamic');
 beforeAll(function () {
     $yoyo = initYoyo([
         'ActionArguments',
-        'ComputedProperty', 
+        'ComputedProperty',
         'ComputedPropertyCache',
-        'Counter', 
+        'Counter',
         'EmptyResponse',
         'EmptyResponseAndRemove',
         'PostRequestVars',
         'Registered',
         'SetViewData',
+        'DIClassWithRecursiveArgumentMapping',
     ]);
 });
 
@@ -130,4 +131,17 @@ test('skipRender method returns empty response with 204 status', function () {
 test('skipRenderAndReplace method returns empty response with 200 status', function () {
     ComponentManager::registerComponent('empty-response-and-remove', \Tests\App\Yoyo\EmptyResponseAndRemove::class);
     expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
+});
+
+test('dependency injection with class and recursive argument mapping', function () {
+    require_once __DIR__."/../app/classes/Comment.php";
+    require_once __DIR__."/../app/classes/Post.php";
+    
+    mockYoyoGetRequest('http://example.com/', 'di-class-with-recursive-argument-mapping', '', [
+        'id' => 100,
+    ]);
+
+    expect(render('di-class-with-recursive-argument-mapping'))->toContain('the comment title-100');
+
+    resetYoyoRequest();
 });

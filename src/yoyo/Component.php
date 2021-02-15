@@ -87,14 +87,6 @@ abstract class Component
         return $this;
     }
 
-    public function mount()
-    {
-    }
-
-    public function beforeRender()
-    {
-    }
-
     public function getName()
     {
         return $this->componentName;

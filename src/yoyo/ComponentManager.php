@@ -139,10 +139,15 @@ class ComponentManager
             throw new NonPublicComponentMethodCall($class, $action);
         }
 
-        $this->component
-                ->spinning($this->spinning)
-                ->boot($variables, $attributes)
-                ->mount();
+        $this->component->spinning($this->spinning)->boot($variables, $attributes);
+
+        $mountMethodArguments = [];
+
+        if (method_exists($this->component, 'mount')) {
+            $mountedVars = array_merge($variables, $this->request->all());
+
+            DI::call($this->component, $mountedVars, 'mount');
+        }
 
         if ($action !== 'render') {
             if ($isEventListenerAction) {
@@ -160,7 +165,9 @@ class ComponentManager
             }
         }
 
-        $this->component->beforeRender();
+        if (method_exists($this->component, 'beforeRender')) {
+            $this->component->beforeRender();
+        }
 
         $view = $this->component->render();
 
@@ -186,10 +193,7 @@ class ComponentManager
 
     private function processAnonymousComponent($variables = [], $attributes = []): string
     {
-        $this->component
-                ->spinning($this->spinning)
-                ->boot($variables, $attributes)
-                ->mount();
+        $this->component->spinning($this->spinning)->boot($variables, $attributes);
 
         $view = (string) $this->component->render();
 
