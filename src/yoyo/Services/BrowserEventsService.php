@@ -52,7 +52,7 @@ class BrowserEventsService
 
     public function queue($event, $params, $selector = null, $component = null, $propagation = null)
     {
-        $params = is_array($params[0]) ? array_filter($params[0]) : $params[0];
+        $params = $params[0];
 
         $payload = array_filter(compact('event', 'params', 'selector', 'component', 'propagation'));
 
@@ -61,8 +61,6 @@ class BrowserEventsService
 
     public function dispatchBrowserEvent($event, $params = [])
     {
-        $params = is_array($params) ? array_filter($params) : $params;
-
         $this->browserEventQueue[] = compact('event', 'params');
     }
 
