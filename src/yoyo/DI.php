@@ -39,17 +39,38 @@ class DI
         $parameters = $method->getParameters();
 
         $dependencies = static::getDependencies($parameters, $class, $variables, $defaultMethod);
-        
+
+        // Automatically include all unnamed variables as arguments at end of method call
+        $unnamed = array_filter($variables, function ($value, $key) {
+            return is_numeric($key);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        $dependencies = array_merge($dependencies, $unnamed);
+
         if (is_string($class)) {
             if (! $defaultMethod) {
                 return $reflector->newInstanceArgs($dependencies);
             } else {
                 $instance = new $class();
-                return $instance->{$defaultMethod}(... $dependencies);
+                return $instance->{$defaultMethod}(...$dependencies);
             }
         }
 
-        return call_user_func_array([$class, $defaultMethod], $dependencies);
+        return static::expose($class, $defaultMethod, $dependencies);
+    }
+
+    /**
+     * Allows running protected methods externally
+     */
+    protected static function expose($object, $method, array $args = [])
+    {
+        $fn = function () use ($object, $method, $args) {
+            return $object->$method(...$args);
+        };
+        
+        $exposed = $fn->bindTo($object, $object);
+        
+        return $exposed();
     }
 
     /**
@@ -70,7 +91,7 @@ class DI
             } elseif ($parameter->isDefaultValueAvailable()) {
                 $dependencies[] = $parameter->getDefaultValue();
             } else {
-                static::resolveNonClass($parameter, $class, $defaultMethod);
+                // static::resolveNonClass($parameter, $class, $defaultMethod);
             }
         }
     

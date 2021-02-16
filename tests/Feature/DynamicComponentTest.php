@@ -127,3 +127,6 @@ test('dependency injection with class and recursive argument mapping', function 
     resetYoyoRequest();
 });
 
+test('component executes trait lifecycle hooks', function () {
+    expect(render('component-with-trait'))->toContain('{ComponentWithTrait} saw that {mountWithFramework} was here');
+});

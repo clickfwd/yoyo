@@ -115,13 +115,13 @@ class ComponentManager
     private function processDynamicComponent($action, $variables = [], $attributes = []): string
     {
         $isEventListenerAction = false;
-
+        
         $class = get_class($this->component);
 
         $listeners = $this->component->getListeners();
 
         $this->component->setAction($action);
-
+        
         if (!empty($listeners[$action]) || in_array($action, $listeners)) {
             // If action is an event listener, re-route it to the listener method
 
@@ -143,12 +143,32 @@ class ComponentManager
 
         $this->component->spinning($this->spinning)->boot($variables, $attributes);
 
-        $mountMethodArguments = [];
+        $hookStack = [
+            'initialize' => ['initialize'],
+            'mount' => ['mount'],
+            'rendering' => ['rendering'],
+            'rendered' => ['rendered']
+        ];
 
-        if (method_exists($this->component, 'mount')) {
-            $mountedVars = array_merge($variables, $this->request->all());
+        $parameters = array_merge($variables, $this->request->all());
 
-            DI::call($this->component, $mountedVars, 'mount');
+        // Build stack of trait lifecycle hooks to run after the component hook of the same name
+        foreach (ClassHelpers::classUsesRecursive($this->component) as $trait) {
+            foreach (array_keys($hookStack) as $hook) {
+                $hookStack[$hook][] = $hook.ClassHelpers::classBasename($trait);
+            }
+        }
+
+        foreach ($hookStack['initialize'] as $method) {
+            if (method_exists($this->component, $method)) {
+                DI::call($this->component, $parameters, $method);
+            }
+        }
+
+        foreach ($hookStack['mount'] as $method) {
+            if (method_exists($this->component, $method)) {
+                DI::call($this->component, $parameters, $method);
+            }
         }
 
         if ($action !== 'render') {
@@ -163,20 +183,27 @@ class ComponentManager
             }
         }
 
-        if (method_exists($this->component, 'beforeRender')) {
-            $this->component->beforeRender();
+        foreach ($hookStack['rendering'] as $method) {
+            if (method_exists($this->component, $method)) {
+                DI::call($this->component, [], $method);
+            }
         }
 
         $view = $this->component->render();
-
+ 
         if (is_null($view)) {
             return '';
         }
 
         // For string based templates
-
         if (is_string($view)) {
-            return $this->component->createViewFromString($view);
+            $view = $this->component->createViewFromString($view);
+        }
+
+        foreach ($hookStack['rendered'] as $method) {
+            if (method_exists($this->component, $method)) {
+                $view = DI::call($this->component, [$view], $method);
+            }
         }
 
         return $view;

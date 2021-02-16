@@ -13,4 +13,3 @@ $yoyo->configure([
 $yoyo->registerViewProvider(function () {
     return new YoyoViewProvider(new View(__DIR__.'/app/resources/views/yoyo'));
 });
-

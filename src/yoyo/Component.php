@@ -146,7 +146,8 @@ abstract class Component
 
     public function callActionWithArguments($action, $args)
     {
-        return call_user_func_array([$this, $action], $args);
+        // return call_user_func_array([$this, $action], $args);
+        return DI::call($this, $args, $action);
     }
 
     public function set($key, $value = null)
