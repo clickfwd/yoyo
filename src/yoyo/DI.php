@@ -45,7 +45,7 @@ class DI
             return is_numeric($key);
         }, ARRAY_FILTER_USE_BOTH);
 
-        $dependencies = array_merge($unnamed, $dependencies);
+        $dependencies = array_merge($dependencies, $unnamed);
         
         if (is_string($class)) {
             if (! $defaultMethod) {
