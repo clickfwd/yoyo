@@ -2,7 +2,7 @@
 
 namespace Tests\App\Yoyo;
 
-use Tests\Post;
+use Tests\App\Post;
 
 use Clickfwd\Yoyo\Component;
 

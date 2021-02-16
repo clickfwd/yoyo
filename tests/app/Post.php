@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests;
+namespace Tests\App;
 
-use Tests\Comment;
+use Tests\App\Comment;
 
 class Post
 {

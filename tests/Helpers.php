@@ -3,30 +3,9 @@
 namespace Tests;
 
 use Clickfwd\Yoyo\Services\Response;
-use Clickfwd\Yoyo\View;
-use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
 use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\YoyoCompiler;
 use Clickfwd\Yoyo\YoyoHelpers;
-
-function initYoyo($components = [])
-{
-    foreach ($components as $component) {
-        require_once __DIR__."/app/Yoyo/{$component}.php";
-    }
-
-    $yoyo = new Yoyo();
-
-    $yoyo->configure([
-        'namespace' => 'Tests\\App\\Yoyo\\',
-    ]);
-
-    $yoyo->registerViewProvider(function () {
-        return new YoyoViewProvider(new View(__DIR__.'/app/resources/views/yoyo'));
-    });
-
-    return $yoyo;
-}
 
 function compile_html($name, $html, $spinning = false)
 {

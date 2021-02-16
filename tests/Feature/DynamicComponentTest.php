@@ -7,7 +7,6 @@ use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
-use function Tests\initYoyo;
 use function Tests\mockYoyoGetRequest;
 use function Tests\mockYoyoPostRequest;
 use function Tests\render;
@@ -18,21 +17,6 @@ use function Tests\yoprefix_value;
 use function Tests\yoyo_update;
 
 uses()->group('unit-dynamic');
-
-beforeAll(function () {
-    $yoyo = initYoyo([
-        'ActionArguments',
-        'ComputedProperty',
-        'ComputedPropertyCache',
-        'Counter',
-        'EmptyResponse',
-        'EmptyResponseAndRemove',
-        'PostRequestVars',
-        'Registered',
-        'SetViewData',
-        'DIClassWithRecursiveArgumentMapping',
-    ]);
-});
 
 test('component class not found', function () {
     render('random');
@@ -134,9 +118,6 @@ test('skipRenderAndReplace method returns empty response with 200 status', funct
 });
 
 test('dependency injection with class and recursive argument mapping', function () {
-    require_once __DIR__."/../app/classes/Comment.php";
-    require_once __DIR__."/../app/classes/Post.php";
-    
     mockYoyoGetRequest('http://example.com/', 'di-class-with-recursive-argument-mapping', '', [
         'id' => 100,
     ]);
@@ -145,3 +126,4 @@ test('dependency injection with class and recursive argument mapping', function 
 
     resetYoyoRequest();
 });
+

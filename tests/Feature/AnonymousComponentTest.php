@@ -2,13 +2,8 @@
 
 use Clickfwd\Yoyo\ComponentManager;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
-use function Tests\initYoyo;
 use function Tests\render;
 use function Tests\update;
-
-beforeAll(function () {
-    $yoyo = initYoyo();
-});
 
 test('errors when anonymous component template not found', function () {
     render('random');
