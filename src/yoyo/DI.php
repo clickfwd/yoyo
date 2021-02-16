@@ -39,14 +39,14 @@ class DI
         $parameters = $method->getParameters();
 
         $dependencies = static::getDependencies($parameters, $class, $variables, $defaultMethod);
-
-        // Automatically include all unnamed variables as arguments at end of method call
+        
+        // Automatically include all unnamed variables as arguments
         $unnamed = array_filter($variables, function ($value, $key) {
             return is_numeric($key);
         }, ARRAY_FILTER_USE_BOTH);
 
-        $dependencies = array_merge($dependencies, $unnamed);
-
+        $dependencies = array_merge($unnamed, $dependencies);
+        
         if (is_string($class)) {
             if (! $defaultMethod) {
                 return $reflector->newInstanceArgs($dependencies);
@@ -81,7 +81,7 @@ class DI
      */
     protected static function getDependencies($parameters, $class, $variables, $defaultMethod)
     {
-        $dependencies = array();
+        $dependencies = [];
     
         foreach ($parameters as $parameter) {
             if ($dependency = $parameter->getClass()) {

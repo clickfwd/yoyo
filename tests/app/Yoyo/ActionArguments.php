@@ -10,7 +10,7 @@ class ActionArguments extends Component
 
     protected $b;
 
-    public function someAction($a, $b)
+    public function someAction($a, $b, $c = '')
     {
         $this->a = $a;
 
