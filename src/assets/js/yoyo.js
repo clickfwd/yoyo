@@ -709,6 +709,22 @@ YoyoEngine.defineExtension('yoyo', {
 			)
 
 			Yoyo.processRedirectHeader(xhr)
+
+			// Re-spawn targets removed from the page and take into account swap delays
+			let modifier = xhr.getResponseHeader('Yoyo-Swap-Modifier')
+			if (!modifier) return
+			let swap = modifier.match(/swap:([0-9.]+)s/)
+			let time = swap[1] ? swap[1] * 1000 + 1 : 0
+			setTimeout(() => {
+				if (
+					!evt.detail.target.isConnected &&
+					document.querySelector(
+						`[hx-target="#${evt.detail.target.id}"]`
+					)
+				) {
+					Yoyo.createNonExistentIdTarget(`#${evt.detail.target.id}`)
+				}
+			}, time)
 		}
 
 		if (name === 'htmx:beforeSwap') {
@@ -728,16 +744,6 @@ YoyoEngine.defineExtension('yoyo', {
 			Yoyo.processBrowserEvents(
 				evt.detail.xhr.getResponseHeader('Yoyo-Browser-Event')
 			)
-		}
-
-		if (name === 'htmx:afterSwap') {
-			// Automatically re-spawn targets removed from the page that are used by Yoyo components
-			if (
-				!evt.detail.elt.isConnected &&
-				document.querySelector(`[hx-target="#${evt.detail.elt.id}"]`)
-			) {
-				Yoyo.createNonExistentIdTarget(`#${evt.detail.elt.id}`)
-			}
 		}
 
 		if (name === 'htmx:afterSettle') {
