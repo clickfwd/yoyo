@@ -42,10 +42,6 @@ class ComponentManager
 
     public function getPublicVars()
     {
-        if ($this->request->method() !== 'GET') {
-            return $this->includeYoyoPrefixedVars();
-        }
-
         if ($this->isAnonymousComponent()) {
             return $this->request->except(['component', YoyoCompiler::yoprefix('id')]);
         }
