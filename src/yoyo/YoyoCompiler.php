@@ -50,6 +50,7 @@ class YoyoCompiler
         'confirm',
         'encoding',
         'ext',
+        'headers',
         'history-elt',
         'include',
         'indicator',
