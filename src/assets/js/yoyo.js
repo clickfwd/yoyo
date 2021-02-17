@@ -52,7 +52,7 @@
 				let component
 
 				if (!evt.srcElement || !isComponent(evt.srcElement)) {
-					// Check if it's an innerHTML swap and use find the root node for the component
+					// For innerHTML swap find the component root node
 					component = YoyoEngine.closest(
 						evt.detail.elt,
 						'[hx-swap~=innerHTML]'
@@ -61,7 +61,7 @@
 					component = getComponent(evt.srcElement)
 				}
 
-				if (component === undefined) {
+				if (!component) {
 					return
 				}
 
