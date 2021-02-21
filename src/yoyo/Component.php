@@ -50,7 +50,7 @@ abstract class Component
         'spinning',
     ];
 
-    public function __construct(string $id, string $name, ComponentResolverInterface $resolver)
+    public function __construct(ComponentResolverInterface $resolver, string $id, string $name)
     {
         $this->yoyo_id = $id;
 
@@ -142,12 +142,6 @@ abstract class Component
     public function parameters($array = [])
     {
         return $this->buildParametersForView($array);
-    }
-
-    public function callActionWithArguments($action, $args)
-    {
-        // return call_user_func_array([$this, $action], $args);
-        return DI::call($this, $args, $action);
     }
 
     public function set($key, $value = null)

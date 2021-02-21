@@ -157,20 +157,28 @@ class ComponentManager
 
         foreach ($hookStack['initialize'] as $method) {
             if (method_exists($this->component, $method)) {
-                DI::call($this->component, $parameters, $method);
+                Yoyo::container()->call([$this->component, $method], $parameters);
             }
         }
 
         foreach ($hookStack['mount'] as $method) {
             if (method_exists($this->component, $method)) {
-                DI::call($this->component, $parameters, $method);
+                Yoyo::container()->call([$this->component, $method], $parameters);
             }
         }
 
         if ($action !== 'render') {
             $parameters = $isEventListenerAction ? $eventParams : $this->parseActionArguments();
+            
+            $parameterNames = ClassHelpers::getMethodParameterNames($this->component, $action);
 
-            $actionResponse = $this->component->callActionWithArguments($action, $parameters);
+            if (count($parameterNames) == count($parameters)) {
+                $args = array_combine($parameterNames, $parameters);
+            } else {
+                throw new \InvalidArgumentException("Incorrect number of parameters passed to [{$this->name}::{$action}]");
+            }
+
+            $actionResponse = Yoyo::container()->call([$this->component, $action], $args);
 
             $type = gettype($actionResponse);
 
@@ -181,7 +189,7 @@ class ComponentManager
 
         foreach ($hookStack['rendering'] as $method) {
             if (method_exists($this->component, $method)) {
-                DI::call($this->component, [], $method);
+                Yoyo::container()->call([$this->component, $method]);
             }
         }
 
@@ -198,7 +206,7 @@ class ComponentManager
 
         foreach ($hookStack['rendered'] as $method) {
             if (method_exists($this->component, $method)) {
-                $view = DI::call($this->component, [$view], $method);
+                $view = Yoyo::container()->call([$this->component, $method], ['view' => $view]);
             }
         }
 

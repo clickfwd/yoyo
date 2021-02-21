@@ -6,7 +6,7 @@ use Clickfwd\Yoyo\Component;
 
 interface ComponentResolverInterface
 {
-    public function __construct($id, $name, $variables, $viewProviders);
+    public function __construct($id, $name, $variables);
 
     public function source(): ?string;
 

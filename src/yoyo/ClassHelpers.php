@@ -143,4 +143,21 @@ class ClassHelpers
 
         return basename(str_replace('\\', '/', $class));
     }
+
+    public static function getMethodParameterNames($class, $method)
+    {
+        $names = [];
+
+        $reflector = new ReflectionClass($class);
+
+        $method = $reflector->getMethod($method);
+
+        foreach ($method->getParameters() as $parameter) {
+            if (! $parameter->getClass()) {
+                $names[] = $parameter->getName();
+            }
+        }
+
+        return $names;
+    }
 }

@@ -6,10 +6,6 @@ use Clickfwd\Yoyo\Component;
 
 class ActionArguments extends Component
 {
-    protected $a;
-
-    protected $b;
-
     public function someAction($a, $b)
     {
         $this->a = $a;

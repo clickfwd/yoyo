@@ -17,11 +17,12 @@
     "minimum-stability": "dev",
     "prefer-stable": true,    
     "require": {
-        "php": "^7.1"
+        "php": "^7.3|^8.0",
+        "illuminate/container": "^8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.3.10",
-        "pestphp/pest": "^0.3.6"
+        "phpunit/phpunit": "^9.3",
+        "pestphp/pest": "^1.0"
     },
     "autoload": {
         "files": [

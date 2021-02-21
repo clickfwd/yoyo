@@ -10,6 +10,7 @@ use Clickfwd\Yoyo\Services\Configuration;
 use Clickfwd\Yoyo\Services\PageRedirectService;
 use Clickfwd\Yoyo\Services\Response;
 use Clickfwd\Yoyo\Services\UrlStateManagerService;
+use Psr\Container\ContainerInterface;
 
 class Yoyo
 {
@@ -17,21 +18,33 @@ class Yoyo
 
     private $attributes = [];
 
-    private static $componentResolver;
-
     private $id;
 
     private $name;
+    
+    private $variables = [];
+
+    private static $componentResolver;
 
     private static $request;
 
-    private $variables = [];
-
     private static $viewProviders = [];
 
-    private static $classBindings = [];
+    private static $container;
 
-    private static $classSingletons = [];
+    public function __construct(ContainerInterface $container)
+    {
+        static::$container = $container;
+    }
+
+    /**
+     * Not really an instance, but we avoid having to call `new` with an empty constructor
+     * Nested components don't work when re-using an instance
+     */
+    public static function getInstance()
+    {
+        return new Self(self::$container);
+    }
 
     public function bindRequest(RequestInterface $request)
     {
@@ -50,6 +63,11 @@ class Yoyo
     public function configure($options): void
     {
         Configuration::getInstance($options);
+    }
+
+    public static function container()
+    {
+        return self::$container;
     }
 
     public function getComponentId($attributes): string
@@ -74,33 +92,32 @@ class Yoyo
         $this->variables = array_merge($this->variables, $componentManager->includeYoyoPrefixedVars());
 
         if ($resolverName && isset(self::$componentResolver[$resolverName])) {
-            return new self::$componentResolver[$resolverName]($this->id, $this->name, $this->variables, self::$viewProviders);
+            return new self::$componentResolver[$resolverName]($this->id, $this->name, $this->variables);
         }
 
         return new ComponentResolver($this->id, $this->name, $this->variables, self::$viewProviders);
     }
 
-    public function registerViewProvider(...$params)
+    public function registerViewProvider($name, $provider = null)
     {
-        $viewProvider = array_pop($params);
-
-        if (! empty($params)) {
-            self::$viewProviders[$params] = $viewProvider;
+        if (is_null($provider)) {
+            $provider = $name;
+            $name = 'default';
         }
 
-        self::$viewProviders['default'] = $viewProvider;
+        self::$container->bindIf("yoyo.view.{$name}", $provider);
     }
 
     public function registerViewProviders($providers)
     {
         foreach ($providers as $key => $provider) {
-            $this->registerViewProvider($key, $provider);
+            self::$container->bindIf("yoyo.view.{$provider}", $viewProvider);
         }
     }
 
     public static function getViewProvider($name = 'default')
     {
-        return self::$viewProviders[$name]();
+        return self::$container->get("yoyo.view.{$name}");
     }
 
     public function registerComponentResolver($name, $resolverClass)
@@ -127,7 +144,7 @@ class Yoyo
         $this->action($action);
 
         $this->id = $this->getComponentId($attributes);
-
+        
         unset($attributes['id']);
 
         $this->name = $name;

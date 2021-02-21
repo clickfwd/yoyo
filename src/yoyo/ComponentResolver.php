@@ -14,17 +14,13 @@ class ComponentResolver implements ComponentResolverInterface
 
     protected $variables;
 
-    protected $viewProviders;
-
-    public function __construct($id, $name, $variables, $viewProviders = [])
+    public function __construct($id, $name, $variables)
     {
         $this->id = $id;
 
         $this->name = $name;
 
         $this->variables = $variables;
-
-        $this->viewProviders = $viewProviders;
     }
 
     public function source(): ?string
@@ -35,7 +31,7 @@ class ComponentResolver implements ComponentResolverInterface
     public function resolveDynamic($registered): ?Component
     {
         if (isset($registered[$this->name])) {
-            return new $registered[$this->name]($this->id, $this->name, $this);
+            return new $registered[$this->name]($this, $this->id, $this->name);
         }
 
         $className = YoyoHelpers::studly($this->name);
@@ -43,7 +39,7 @@ class ComponentResolver implements ComponentResolverInterface
         $class = Configuration::get('namespace').$className;
 
         if (is_subclass_of($class, Component::class)) {
-            return new $class($this->id, $this->name, $this);
+            return new $class($this, $this->id, $this->name);
         }
 
         return null;
@@ -52,13 +48,13 @@ class ComponentResolver implements ComponentResolverInterface
     public function resolveAnonymous($registered): ?Component
     {
         if (isset($registered[$this->name])) {
-            return new AnonymousComponent($this->id, $this->name, $this);
+            return new AnonymousComponent($this, $this->id, $this->name);
         }
 
         $view = $this->resolveViewProvider();
 
         if ($view->exists($this->name)) {
-            return new AnonymousComponent($this->id, $this->name, $this);
+            return new AnonymousComponent($this, $this->id, $this->name);
         }
 
         return null;
@@ -66,6 +62,6 @@ class ComponentResolver implements ComponentResolverInterface
 
     public function resolveViewProvider(): ViewProviderInterface
     {
-        return $this->viewProviders['default']();
+        return Yoyo::container()->get('yoyo.view.default');
     }
 }

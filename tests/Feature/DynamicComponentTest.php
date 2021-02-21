@@ -117,12 +117,12 @@ test('skipRenderAndReplace method returns empty response with 200 status', funct
     expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
 });
 
-test('dependency injection with class and recursive argument mapping', function () {
-    mockYoyoGetRequest('http://example.com/', 'di-class-with-recursive-argument-mapping', '', [
+test('dependency injection with class and named argument mapping', function () {
+    mockYoyoGetRequest('http://example.com/', 'di-class-with-named-argument-mapping', '', [
         'id' => 100,
     ]);
 
-    expect(render('di-class-with-recursive-argument-mapping'))->toContain('the comment title-100');
+    expect(render('di-class-with-named-argument-mapping'))->toContain('the comment title-100');
 
     resetYoyoRequest();
 });

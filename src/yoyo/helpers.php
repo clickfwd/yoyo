@@ -8,7 +8,7 @@ use Clickfwd\Yoyo\Yoyo;
 if (! function_exists('Yoyo\yoyo_render')) {
     function yoyo_render($name, $variables = [], $attributes = []): string
     {
-        $yoyo = new Yoyo();
+        $yoyo = Yoyo::getInstance();
 
         return $yoyo->mount($name, $variables, $attributes)->render();
     }

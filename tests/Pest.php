@@ -3,8 +3,11 @@
 use Clickfwd\Yoyo\View;
 use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
 use Clickfwd\Yoyo\Yoyo;
+use Illuminate\Container\Container;
 
-$yoyo = new Yoyo();
+$container = Container::getInstance();
+
+$yoyo = new Yoyo($container);
 
 $yoyo->configure([
     'namespace' => 'Tests\\App\\Yoyo\\',
