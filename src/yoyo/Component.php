@@ -6,7 +6,7 @@ use Clickfwd\Yoyo\Concerns\BrowserEvents;
 use Clickfwd\Yoyo\Concerns\Redirector;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
-use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
+use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\Services\Response;
 use Closure;
@@ -50,7 +50,7 @@ abstract class Component
         'spinning',
     ];
 
-    public function __construct(ComponentResolverInterface $resolver, string $id, string $name)
+    public function __construct(ComponentResolver $resolver, string $id, string $name)
     {
         $this->yoyo_id = $id;
 

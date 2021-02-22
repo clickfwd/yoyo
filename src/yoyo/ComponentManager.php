@@ -130,7 +130,7 @@ class ComponentManager
             throw new ComponentMethodNotFound($class, $action);
         }
         
-        $excludedActions = ClassHelpers::getPublicMethodsBaseClass($this->component, ['render']);
+        $excludedActions = ClassHelpers::getPublicMethods(Component::class, ['render']);
 
         if (in_array($action, $excludedActions) ||
             (! $isEventListenerAction && ClassHelpers::methodIsPrivate($this->component, $action))) {

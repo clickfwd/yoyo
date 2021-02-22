@@ -95,7 +95,7 @@ class Yoyo
             return new self::$componentResolver[$resolverName]($this->id, $this->name, $this->variables);
         }
 
-        return new ComponentResolver($this->id, $this->name, $this->variables, self::$viewProviders);
+        return new ComponentResolver($this->id, $this->name, $this->variables, self::$container);
     }
 
     public function registerViewProvider($name, $provider = null)
@@ -105,13 +105,13 @@ class Yoyo
             $name = 'default';
         }
 
-        self::$container->bindIf("yoyo.view.{$name}", $provider);
+        self::$container->bind("yoyo.view.{$name}", $provider);
     }
 
     public function registerViewProviders($providers)
     {
-        foreach ($providers as $key => $provider) {
-            self::$container->bindIf("yoyo.view.{$provider}", $viewProvider);
+        foreach ($providers as $name => $provider) {
+            self::$container->bind("yoyo.view.{$name}", $provider);
         }
     }
 

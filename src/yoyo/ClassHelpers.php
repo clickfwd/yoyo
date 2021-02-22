@@ -56,7 +56,7 @@ class ClassHelpers
 
     public static function getPublicMethods($instance, $exceptions = [])
     {
-        $class = new ReflectionClass(get_class($instance));
+        $class = new ReflectionClass(is_string($instance) ? $instance : get_class($instance));
 
         $className = $class->getName();
 
@@ -64,23 +64,6 @@ class ClassHelpers
 
         foreach ($methods as $method) {
             if ($method->class == $className && ! in_array($method->name, $exceptions)) {
-                $publicMethods[] = $method->name;
-            }
-        }
-
-        return $publicMethods ?? [];
-    }
-
-    public static function getPublicMethodsBaseClass($instance, $exceptions = [])
-    {
-        $class_tmp = new ReflectionClass(get_class($instance));
-
-        $className = $class_tmp->getName();
-
-        $methods = $class_tmp->getMethods(ReflectionMethod::IS_PUBLIC);
-
-        foreach ($methods as $method) {
-            if ($method->class !== $className && ! in_array($method->name, $exceptions)) {
                 $publicMethods[] = $method->name;
             }
         }
