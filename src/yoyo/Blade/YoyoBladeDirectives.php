@@ -17,13 +17,19 @@ class YoyoBladeDirectives
         $blade->directive('emit', [$this, 'emit']);
 
         $blade->directive('emitTo', [$this, 'emitTo']);
+
+        $blade->directive('emitToWithSelector', [$this, 'emitToWithSelector']);
+
+        $blade->directive('emitSelf', [$this, 'emitToWithSelector']);
+    
+        $blade->directive('emitUp', [$this, 'emitToWithSelector']);
     }
 
     public function yoyo($expression)
     {
         return <<<yoyo
 <?php
-\$yoyo = new \Clickfwd\Yoyo\Yoyo();
+\$yoyo = \Clickfwd\Yoyo\Yoyo::getInstance();
 if (Yoyo\is_spinning()) {
     echo \$yoyo->mount({$expression})->refresh();
 } else {
