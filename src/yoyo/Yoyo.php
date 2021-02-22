@@ -10,6 +10,7 @@ use Clickfwd\Yoyo\Services\Configuration;
 use Clickfwd\Yoyo\Services\PageRedirectService;
 use Clickfwd\Yoyo\Services\Response;
 use Clickfwd\Yoyo\Services\UrlStateManagerService;
+use Illuminate\Container\Container;
 use Psr\Container\ContainerInterface;
 
 class Yoyo
@@ -32,9 +33,9 @@ class Yoyo
 
     private static $container;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container = null)
     {
-        static::$container = $container;
+        static::$container = $container ?? Container::getInstance();
     }
 
     /**
