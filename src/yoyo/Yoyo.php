@@ -25,13 +25,18 @@ class Yoyo
     
     private $variables = [];
 
-    private static $componentResolver;
+    private static $container;
 
     private static $request;
 
     private static $viewProviders = [];
 
-    private static $container;
+    private static $registeredComponents = [
+        'dynamic' => [],
+        'anonymous' => [],
+    ];
+
+    private static $registereComponentResolvers = [];
 
     public function __construct(ContainerInterface $container = null)
     {
@@ -85,18 +90,18 @@ class Yoyo
         return $id;
     }
 
-    private function getComponentResolver($componentManager)
+    private function getComponentResolver()
     {
         $resolverName = $this->variables[YoyoCompiler::yoprefix('resolver')]
                             ?? self::request()->get(YoyoCompiler::yoprefix('resolver'));
 
-        $this->variables = array_merge($this->variables, $componentManager->includeYoyoPrefixedVars());
+        $this->variables = array_merge($this->variables, self::$request->startsWith(YoyoCompiler::yoprefix('')));
 
-        if ($resolverName && isset(self::$componentResolver[$resolverName])) {
-            return new self::$componentResolver[$resolverName]($this->id, $this->name, $this->variables);
+        if ($resolverName && isset(self::$registeredComponentResolvers[$resolverName])) {
+            return new self::$registeredComponentResolvers[$resolverName](self::$container, self::$registeredComponents, $this->variables);
         }
 
-        return new ComponentResolver(self::$container, $this->id, $this->name, $this->variables);
+        return new ComponentResolver(self::$container, self::$registeredComponents, $this->variables);
     }
 
     public function registerViewProvider($name, $provider = null)
@@ -127,17 +132,31 @@ class Yoyo
             throw new \Exception("Component resolver [$resolverClass] does not implement [ComponentResolverInterface] interface");
         }
 
-        self::$componentResolver[$name] = $resolverClass;
+        self::$registereComponentResolvers[$name] = $resolverClass;
     }
 
-    public function registerComponents($components): void
+    public static function registerComponent($name, $class = null): void
     {
-        ComponentManager::registerComponents($components);
+        if ($class && $name !== $class && ! class_exists($class)) {
+            throw new FailedToRegisterComponent($name, $class);
+        }
+
+        if (! $class || $name == $class) {
+            self::$registeredComponents['anonymous'][$name] = $name;
+        } else {
+            self::$registeredComponents['dynamic'][$name] = $class;
+        }
     }
 
-    public function registerComponent($name, $class): void
+    public static function registerComponents($components): void
     {
-        ComponentManager::registerComponent($name, $class);
+        foreach ($components as $name => $class) {
+            if (is_numeric($name)) {
+                $name = $class;
+                $class = null;
+            }
+            self::registerComponent($name, $class);
+        }
     }
 
     public function mount($name, $variables = [], $attributes = [], $action = 'render'): self
@@ -210,9 +229,7 @@ class Yoyo
     {
         $variables = [];
 
-        $componentManager = new ComponentManager(self::request(), $spinning);
-
-        $componentManager->addComponentResolver($this->getComponentResolver($componentManager));
+        $componentManager = new ComponentManager($this->getComponentResolver(), self::request(), $spinning);
 
         $html = $componentManager->process($this->id, $this->name, $this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
 

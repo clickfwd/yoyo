@@ -76,6 +76,19 @@ class Request implements RequestInterface
         return $value;
     }
 
+    public function startsWith($prefix)
+    {
+        $vars = [];
+
+        foreach ($this->all() as $key => $value) {
+            if (strpos($key, $prefix) === 0) {
+                $vars[$key] = $value;
+            }
+        }
+
+        return $vars;
+    }
+
     public function drop($key)
     {
         $this->dropped[] = $key;

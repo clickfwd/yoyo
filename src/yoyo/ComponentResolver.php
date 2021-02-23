@@ -9,23 +9,19 @@ use Psr\Container\ContainerInterface;
 
 class ComponentResolver implements ComponentResolverInterface
 {
-    protected $id;
-
-    protected $name;
-
     protected $variables;
+
+    protected $registered;
 
     protected $container;
 
-    public function __construct(ContainerInterface $container, $id, $name, $variables)
+    public function __construct(ContainerInterface $container, $registered, $variables)
     {
-        $this->id = $id;
+        $this->container = $container;
 
-        $this->name = $name;
+        $this->registered = $registered;
 
         $this->variables = $variables;
-
-        $this->container = $container;
     }
 
     public function source(): ?string
@@ -33,15 +29,17 @@ class ComponentResolver implements ComponentResolverInterface
         return $this->variables[YoyoCompiler::yoprefix('source')] ?? null;
     }
 
-    public function resolveDynamic($registered): ?Component
+    public function resolveDynamic($id, $name): ?Component
     {
-        $args = ['resolver' => $this, 'id' => $this->id, 'name' => $this->name];
+        $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
 
-        if (isset($registered[$this->name])) {
-            return $this->container->make($registered[$this->name], $args);
+        $registered = $this->registered['dynamic'][$name] ?? null;
+
+        if ($registered) {
+            return $this->container->make($registered, $args);
         }
 
-        $className = YoyoHelpers::studly($this->name);
+        $className = YoyoHelpers::studly($name);
 
         $class = Configuration::get('namespace').$className;
 
@@ -52,17 +50,17 @@ class ComponentResolver implements ComponentResolverInterface
         return null;
     }
 
-    public function resolveAnonymous($registered): ?Component
+    public function resolveAnonymous($id, $name): ?Component
     {
-        $args = ['resolver' => $this, 'id' => $this->id, 'name' => $this->name];
+        $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
 
-        if (isset($registered[$this->name])) {
+        if ($this->registered['anonymous'][$name] ?? null) {
             return $this->container->make(AnonymousComponent::class, $args);
         }
 
         $view = $this->resolveViewProvider();
 
-        if ($view->exists($this->name)) {
+        if ($view->exists($name)) {
             return $this->container->make(AnonymousComponent::class, $args);
         }
 

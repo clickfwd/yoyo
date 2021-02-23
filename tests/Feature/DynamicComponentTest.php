@@ -103,17 +103,17 @@ test('posted vars are not added to component root', function () {
 })->group('component-root-vars');
 
 test('registered dynamic component is loaded', function () {
-    ComponentManager::registerComponent('registered-test', \Tests\App\Yoyo\Registered::class);
+    \Clickfwd\Yoyo\Yoyo::registerComponent('registered-test', \Tests\App\Yoyo\Registered::class);
     expect(render('registered-test'))->toContain('id="registered"');
 });
 
 test('skipRender method returns empty response with 204 status', function () {
-    ComponentManager::registerComponent('empty-response', \Tests\App\Yoyo\EmptyResponse::class);
+    \Clickfwd\Yoyo\Yoyo::registerComponent('empty-response', \Tests\App\Yoyo\EmptyResponse::class);
     expect(render('empty-response'))->toBeEmpty()->and(http_response_code())->toBe(204);
 });
 
 test('skipRenderAndReplace method returns empty response with 200 status', function () {
-    ComponentManager::registerComponent('empty-response-and-remove', \Tests\App\Yoyo\EmptyResponseAndRemove::class);
+    \Clickfwd\Yoyo\Yoyo::registerComponent('empty-response-and-remove', \Tests\App\Yoyo\EmptyResponseAndRemove::class);
     expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
 });
 

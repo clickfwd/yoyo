@@ -19,19 +19,12 @@ class ComponentManager
 
     private $resolver;
 
-    private static $dynamicComponents = [];
-
-    private static $anonymousComponents = [];
-
-    public function __construct($request, $spinning)
+    public function __construct($resolver, $request, $spinning)
     {
         $this->request = $request;
 
         $this->spinning = $spinning;
-    }
 
-    public function addComponentResolver($resolver)
-    {
         $this->resolver = $resolver;
     }
 
@@ -48,20 +41,7 @@ class ComponentManager
 
         $vars = ClassHelpers::getPublicVars($this->component);
 
-        $vars = array_merge($vars, $this->includeYoyoPrefixedVars());
-
-        return $vars;
-    }
-
-    public function includeYoyoPrefixedVars()
-    {
-        $vars = [];
-
-        foreach ($this->request->all() as $key => $value) {
-            if (substr($key, 0, 5) == YoyoCompiler::yoprefix('')) {
-                $vars[$key] = $value;
-            }
-        }
+        $vars = array_merge($vars, $this->request->startsWith(YoyoCompiler::yoprefix('')));
 
         return $vars;
     }
@@ -89,7 +69,7 @@ class ComponentManager
 
     public function process($id, $name, $action, $variables, $attributes): string
     {
-        $this->component = $this->makeComponentInstance();
+        $this->component = $this->makeComponentInstance($id, $name);
 
         if ($this->isAnonymousComponent()) {
             return $this->processAnonymousComponent($variables, $attributes);
@@ -100,12 +80,12 @@ class ComponentManager
 
     public function isAnonymousComponent(): bool
     {
-        return $this->component instanceof AnonymousComponent;
+        return is_a($this->component, AnonymousComponent::class);
     }
 
     public function isDynamicComponent(): bool
     {
-        return ! $this->component instanceof AnonymousComponent;
+        return ! $this->isAnonymousComponent();
     }
 
     private function processDynamicComponent($action, $variables = [], $attributes = []): string
@@ -229,45 +209,21 @@ class ComponentManager
         return $view;
     }
 
-    public static function registerComponent($name, $class = null)
-    {
-        if ($class && $name !== $class && ! class_exists($class)) {
-            throw new FailedToRegisterComponent($name, $class);
-        }
-
-        if (! $class || $name == $class) {
-            self::$anonymousComponents[$name] = $name;
-        } else {
-            self::$dynamicComponents[$name] = $class;
-        }
-    }
-
-    public static function registerComponents($components)
-    {
-        foreach ($components as $name => $class) {
-            if (is_numeric($name)) {
-                $name = $class;
-                $class = null;
-            }
-            self::registerComponent($name, $class);
-        }
-    }
-
     public function getComponentInstance()
     {
         return $this->component;
     }
 
-    private function makeComponentInstance()
+    private function makeComponentInstance($id, $name)
     {
-        if ($instance = $this->resolver->resolveDynamic(self::$dynamicComponents)) {
+        if ($instance = $this->resolver->resolveDynamic($id, $name)) {
             return $instance;
         }
 
-        if ($instance = $this->resolver->resolveAnonymous(self::$anonymousComponents)) {
+        if ($instance = $this->resolver->resolveAnonymous($id, $name)) {
             return $instance;
         }
 
-        throw new ComponentNotFound($this->name);
+        throw new ComponentNotFound($name);
     }
 }

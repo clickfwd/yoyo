@@ -18,6 +18,6 @@ test('updates anonymous foo component', function () {
 });
 
 test('registered anonymous component is loaded', function () {
-    ComponentManager::registerComponent('registered-anon');
+    \Clickfwd\Yoyo\Yoyo::registerComponent('registered-anon');
     expect(render('registered-anon'))->toContain('id="registered-anon"');
 });

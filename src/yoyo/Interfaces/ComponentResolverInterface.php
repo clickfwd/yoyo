@@ -7,13 +7,13 @@ use Psr\Container\ContainerInterface;
 
 interface ComponentResolverInterface
 {
-    public function __construct(ContainerInterface $container, $id, $name, $variables);
+    public function __construct(ContainerInterface $container, array $registeredComponents, array $variables);
 
     public function source(): ?string;
 
-    public function resolveDynamic($registered): ?Component;
+    public function resolveDynamic($id, $name): ?Component;
 
-    public function resolveAnonymous($registered): ?Component;
+    public function resolveAnonymous($id, $name): ?Component;
 
     public function resolveViewProvider(): ViewProviderInterface;
 }
