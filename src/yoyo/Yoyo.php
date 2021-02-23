@@ -96,7 +96,7 @@ class Yoyo
             return new self::$componentResolver[$resolverName]($this->id, $this->name, $this->variables);
         }
 
-        return new ComponentResolver($this->id, $this->name, $this->variables, self::$container);
+        return new ComponentResolver(self::$container, $this->id, $this->name, $this->variables);
     }
 
     public function registerViewProvider($name, $provider = null)

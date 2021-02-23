@@ -7,7 +7,7 @@ use Psr\Container\ContainerInterface;
 
 interface ComponentResolverInterface
 {
-    public function __construct($id, $name, $variables, ContainerInterface $container);
+    public function __construct(ContainerInterface $container, $id, $name, $variables);
 
     public function source(): ?string;
 

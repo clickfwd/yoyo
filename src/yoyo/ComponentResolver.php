@@ -17,7 +17,7 @@ class ComponentResolver implements ComponentResolverInterface
 
     protected $container;
 
-    public function __construct($id, $name, $variables, ContainerInterface $container)
+    public function __construct(ContainerInterface $container, $id, $name, $variables)
     {
         $this->id = $id;
 
@@ -71,6 +71,6 @@ class ComponentResolver implements ComponentResolverInterface
 
     public function resolveViewProvider(): ViewProviderInterface
     {
-        return Yoyo::container()->get('yoyo.view.default');
+        return $this->container->get('yoyo.view.default');
     }
 }
