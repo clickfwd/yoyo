@@ -14,13 +14,17 @@ class ComponentResolver implements ComponentResolverInterface
 
     protected $registered;
 
+    protected $hints;
+
     protected $container;
 
-    public function __construct(ContainerInterface $container, $registered, $variables)
+    public function __construct(ContainerInterface $container, array $registered  = [], array $hints = [], array $variables = [])
     {
         $this->container = $container;
 
         $this->registered = $registered;
+
+        $this->hints = $hints;
 
         $this->variables = $variables;
     }
@@ -41,22 +45,29 @@ class ComponentResolver implements ComponentResolverInterface
 
     public function resolveDynamic($id, $name): ?Component
     {
+        $className = null;
+
         $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
 
-        $registered = $this->registered[$name] ?? null;
-        
-        if (! $registered) {
-            $className = YoyoHelpers::studly($name);
-
-            $class = Configuration::get('namespace').$className;
-    
-            if (is_subclass_of($class, Component::class)) {
-                return $this->container->make($class, $args);
+        // Check namespaced components
+        if (strpos($name, ViewProviderInterface::HINT_PATH_DELIMITER) > 0) {
+            [$namespaceAlias, $name] = explode(ViewProviderInterface::HINT_PATH_DELIMITER, $name);
+            if (isset($namespaceAlias, $this->hints)) {
+                $className = $this->hints[$namespaceAlias].'\\'.YoyoHelpers::studly($name);
             }
         }
 
+        if ( !$className) {
+            $className = $this->registered[$name] ?? null;
+        }
+        
+        if (! $className) {
+            $name = YoyoHelpers::studly($name);
+            $className = Configuration::get('namespace').$name;
+        }
+
         try {
-            return $this->container->make($registered, $args);
+            return $this->container->make($className, $args);
         } catch (ContainerExceptionInterface $e) {
             return null;
         }

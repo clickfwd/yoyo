@@ -4,6 +4,8 @@ namespace Clickfwd\Yoyo\Interfaces;
 
 interface ViewProviderInterface
 {
+    const HINT_PATH_DELIMITER = '::';
+
     public function __construct($view);
 
     public function render($template, $vars = []): self;

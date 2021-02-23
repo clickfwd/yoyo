@@ -4,7 +4,7 @@ namespace Clickfwd\Yoyo\ViewProviders;
 
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
-class TwigViewProvider implements ViewProviderInterface
+class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
 {
     protected $view;
 
@@ -50,11 +50,6 @@ class TwigViewProvider implements ViewProviderInterface
     public function exists($template): bool
     {
         return $this->view->getLoader()->exists($template.'.'.self::$twig_template_extension);
-    }
-
-    public function getProviderInstance()
-    {
-        return $this->view;
     }
 
     public function __toString()

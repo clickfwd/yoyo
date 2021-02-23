@@ -4,7 +4,7 @@ namespace Clickfwd\Yoyo\ViewProviders;
 
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
-class BladeViewProvider implements ViewProviderInterface
+class BladeViewProvider extends BaseViewProvider implements ViewProviderInterface
 {
     protected $view;
 
@@ -50,11 +50,6 @@ class BladeViewProvider implements ViewProviderInterface
     public function exists($template): bool
     {
         return $this->view->exists($template);
-    }
-
-    public function getProviderInstance()
-    {
-        return $this->view;
     }
 
     public function __toString()

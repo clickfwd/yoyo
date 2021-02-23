@@ -33,6 +33,8 @@ class Yoyo
 
     private static $registeredComponents = [];
 
+    private static $componentNamespaces = [];
+
     private static $registereComponentResolvers = [];
 
     public function __construct(ContainerInterface $container = null)
@@ -94,11 +96,13 @@ class Yoyo
 
         $this->variables = array_merge($this->variables, self::$request->startsWith(YoyoCompiler::yoprefix('')));
 
-        if ($resolverName && isset(self::$registeredComponentResolvers[$resolverName])) {
-            return new self::$registeredComponentResolvers[$resolverName](self::$container, self::$registeredComponents, $this->variables);
+        if (! $resolverName) {
+            return new ComponentResolver(self::$container, self::$registeredComponents, $this->variables);
         }
+        
+        $resolverClass = self::$registeredComponentResolvers[$resolverName];
 
-        return new ComponentResolver(self::$container, self::$registeredComponents, $this->variables);
+        return new $resolverClass(self::$container, self::$registeredComponents, self::$componentNamespaces, $this->variables);
     }
 
     public function registerViewProvider($name, $provider = null)
@@ -135,6 +139,11 @@ class Yoyo
     public static function registerComponent($name, $class = null): void
     {
         self::$registeredComponents[$name] = $class;
+    }
+
+    public static function componentNamespace($namespace, $alias): void
+    {
+        self::$componentNamespaces[$alias] = $namespace;
     }
 
     public static function registerComponents($components): void
