@@ -15,8 +15,13 @@ use function Tests\response;
 use function Tests\update;
 use function Tests\yoprefix_value;
 use function Tests\yoyo_update;
+use function Tests\yoyo_view;
 
 uses()->group('unit-dynamic');
+
+beforeAll(function () {
+    yoyo_view();
+});
 
 test('component class not found', function () {
     render('random');

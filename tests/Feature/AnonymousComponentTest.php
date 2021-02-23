@@ -4,6 +4,11 @@ use Clickfwd\Yoyo\ComponentManager;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use function Tests\render;
 use function Tests\update;
+use function Tests\yoyo_view;
+
+beforeAll(function () {
+    yoyo_view();
+});
 
 test('errors when anonymous component template not found', function () {
     render('random');

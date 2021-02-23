@@ -2,11 +2,22 @@
 
 namespace Tests;
 
-use Clickfwd\Yoyo\Services\Response;
-use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\Request;
+use Clickfwd\Yoyo\Services\Response;
+use Clickfwd\Yoyo\View;
+use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
+use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\YoyoCompiler;
 use Clickfwd\Yoyo\YoyoHelpers;
+
+require_once __DIR__.'/HelpersBlade.php';
+require_once __DIR__.'/HelpersTwig.php';
+
+function yoyo_view() {
+    yoyo_instance()->registerViewProvider(function () {
+        return new YoyoViewProvider(new View(__DIR__.'/app/resources/views/yoyo'));
+    });
+}
 
 function yoyo_instance()
 {
