@@ -31,10 +31,7 @@ class Yoyo
 
     private static $viewProviders = [];
 
-    private static $registeredComponents = [
-        'dynamic' => [],
-        'anonymous' => [],
-    ];
+    private static $registeredComponents = [];
 
     private static $registereComponentResolvers = [];
 
@@ -137,15 +134,7 @@ class Yoyo
 
     public static function registerComponent($name, $class = null): void
     {
-        if ($class && $name !== $class && ! class_exists($class)) {
-            throw new FailedToRegisterComponent($name, $class);
-        }
-
-        if (! $class || $name == $class) {
-            self::$registeredComponents['anonymous'][$name] = $name;
-        } else {
-            self::$registeredComponents['dynamic'][$name] = $class;
-        }
+        self::$registeredComponents[$name] = $class;
     }
 
     public static function registerComponents($components): void

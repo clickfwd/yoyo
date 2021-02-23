@@ -69,7 +69,9 @@ class ComponentManager
 
     public function process($id, $name, $action, $variables, $attributes): string
     {
-        $this->component = $this->makeComponentInstance($id, $name);
+        if (! ($this->component = $this->resolver->resolveComponent($id, $name))) {
+            throw new ComponentNotFound($name);
+        }
 
         if ($this->isAnonymousComponent()) {
             return $this->processAnonymousComponent($variables, $attributes);
@@ -212,18 +214,5 @@ class ComponentManager
     public function getComponentInstance()
     {
         return $this->component;
-    }
-
-    private function makeComponentInstance($id, $name)
-    {
-        if ($instance = $this->resolver->resolveDynamic($id, $name)) {
-            return $instance;
-        }
-
-        if ($instance = $this->resolver->resolveAnonymous($id, $name)) {
-            return $instance;
-        }
-
-        throw new ComponentNotFound($name);
     }
 }
