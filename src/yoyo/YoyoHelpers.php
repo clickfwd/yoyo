@@ -6,7 +6,13 @@ class YoyoHelpers
 {
     public static function encode_vals(array $vars): string
     {
-        return json_encode($vars, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        $adjusted = [];
+        foreach ($vars as $key => $val) {
+            $newKey = is_array($val) ? $key.'[]' : $key;
+            $adjusted[$newKey] = $val;
+        }
+
+        return json_encode($adjusted, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 
     public static function decode_vals(string $string): array
