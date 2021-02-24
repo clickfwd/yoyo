@@ -64,7 +64,6 @@ class YoyoCompiler
         'swap',
         'target',
         'vals',
-        'vars',
     ];
 
     public const YOYO_TO_HX_ATTRIBUTE_REMAP = [
