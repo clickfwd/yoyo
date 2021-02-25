@@ -70,7 +70,7 @@ class YoyoViewProvider extends BaseViewProvider implements ViewProviderInterface
     public function prependLocation($location)
     {
         return $this->view->prependLocation($location);
-    }    
+    }
 
     public function __toString()
     {

@@ -57,7 +57,7 @@ class ComponentResolver implements ComponentResolverInterface
             }
         }
 
-        if ( !$className) {
+        if (!$className) {
             $className = $this->registered[$name] ?? null;
         }
         

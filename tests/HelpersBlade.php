@@ -12,8 +12,8 @@ use Illuminate\Support\Fluent;
 use Jenssegers\Blade\Blade;
 use function Tests\yoyo_instance;
 
-function yoyo_blade() {
-    
+function yoyo_blade()
+{
     $yoyo = yoyo_instance();
     
     // Create a Blade instance
@@ -45,7 +45,7 @@ function yoyo_blade() {
     
     // Register Blade view provider for Yoyo
     
-    $yoyo->registerViewProvider(function() use ($blade) {
+    $yoyo->registerViewProvider(function () use ($blade) {
         return new BladeViewProvider($blade);
     });
 }

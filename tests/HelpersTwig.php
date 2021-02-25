@@ -8,8 +8,8 @@ use Twig\Extension\DebugExtension;
 
 use function Tests\yoyo_instance;
 
-function yoyo_twig() {
-    
+function yoyo_twig()
+{
     $yoyo = yoyo_instance();
     
     $loader = new \Twig\Loader\FilesystemLoader([
@@ -28,7 +28,7 @@ function yoyo_twig() {
     
     // Register Twig view provider for Yoyo
     
-    $yoyo->registerViewProvider(function() use ($twig) {
+    $yoyo->registerViewProvider(function () use ($twig) {
         return new TwigViewProvider($twig);
     });
 }

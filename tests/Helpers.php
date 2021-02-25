@@ -13,7 +13,8 @@ use Clickfwd\Yoyo\YoyoHelpers;
 require_once __DIR__.'/HelpersBlade.php';
 require_once __DIR__.'/HelpersTwig.php';
 
-function yoyo_view() {
+function yoyo_view()
+{
     yoyo_instance()->registerViewProvider(function () {
         return new YoyoViewProvider(new View(__DIR__.'/app/resources/views/yoyo'));
     });

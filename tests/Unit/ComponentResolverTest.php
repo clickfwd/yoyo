@@ -2,7 +2,7 @@
 
 use Illuminate\Container\Container;
 
-test('finds resolver source',  function() {
+test('finds resolver source', function () {
     $resolver = new Clickfwd\Yoyo\ComponentResolver(Container::getInstance(), [], [], [
         'yoyo:source' => 'path.to.component'
     ]);
@@ -10,19 +10,19 @@ test('finds resolver source',  function() {
     expect($resolver->source())->toBe('path.to.component');
 });
 
-test('resolves dynamic component',  function() {
+test('resolves dynamic component', function () {
     $resolver = new Clickfwd\Yoyo\ComponentResolver(Container::getInstance());
 
     expect($resolver->resolveDynamic('counter', 'counter'))->toBeInstanceOf(Tests\App\Yoyo\Counter::class);
 });
 
-test('resolves anonymous component',  function() {
+test('resolves anonymous component', function () {
     $resolver = new Clickfwd\Yoyo\ComponentResolver(Container::getInstance());
 
     expect($resolver->resolveAnonymous('foo', 'foo'))->toBeInstanceOf(Clickfwd\Yoyo\AnonymousComponent::class);
 });
 
-test('resolves dynamic component using a namespace alias',  function() {
+test('resolves dynamic component using a namespace alias', function () {
     $namespaces = ['packagename' => 'Tests\\AppAnother\\Yoyo'];
     $resolver = new Clickfwd\Yoyo\ComponentResolver(Container::getInstance(), [], $namespaces);
 
