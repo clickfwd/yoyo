@@ -16,12 +16,18 @@ function yoyo_blade()
 {
     $yoyo = yoyo_instance();
     
-    // Create a Blade instance
+    $blade = blade();
+    
+    $yoyo->registerViewProvider(function () use ($blade) {
+        return new BladeViewProvider($blade);
+    });
+}
+
+function blade()
+{
     $app = Application::getInstance();
     
     $app->bind(ApplicationContract::class, Application::class);
-    
-    // Needed for Blade anonymous components
     
     $app->alias('view', ViewFactory::class);
     
@@ -37,15 +43,5 @@ function yoyo_blade()
     
     (new YoyoServiceProvider($app))->boot();
     
-    // Optionally register Blade components
-    
-    $blade->compiler()->components([
-        // 'button' => 'button',
-    ]);
-    
-    // Register Blade view provider for Yoyo
-    
-    $yoyo->registerViewProvider(function () use ($blade) {
-        return new BladeViewProvider($blade);
-    });
+    return $blade;
 }

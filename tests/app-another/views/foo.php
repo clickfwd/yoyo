@@ -1,1 +1,1 @@
-<div>foo from another app</div>
+<div>other foo from another app</div>

@@ -13,7 +13,7 @@ class View
 
     protected $yoyoComponent;
 
-    protected $hints;
+    protected static $hints;
 
     public function __construct($paths)
     {
@@ -97,7 +97,7 @@ class View
     {
         [$namespace, $view] = $this->parseNamespaceSegments($name);
 
-        return $this->findInPaths($view, $this->hints[$namespace]);
+        return $this->findInPaths($view, static::$hints[$namespace]);
     }
 
     protected function parseNamespaceSegments($name)
@@ -108,7 +108,7 @@ class View
             throw new InvalidArgumentException("View [{$name}] has an invalid name.");
         }
 
-        if (! isset($this->hints[$segments[0]])) {
+        if (! isset(static::$hints[$segments[0]])) {
             throw new InvalidArgumentException("No hint path defined for [{$segments[0]}].");
         }
 
@@ -119,22 +119,22 @@ class View
     {
         $hints = (array) $hints;
 
-        if (isset($this->hints[$namespace])) {
-            $hints = array_merge($this->hints[$namespace], $hints);
+        if (isset(static::$hints[$namespace])) {
+            $hints = array_merge(static::$hints[$namespace], $hints);
         }
 
-        $this->hints[$namespace] = $hints;
+        static::$hints[$namespace] = $hints;
     }
 
     public function prependNamespace($namespace, $hints)
     {
         $hints = (array) $hints;
 
-        if (isset($this->hints[$namespace])) {
-            $hints = array_merge($hints, $this->hints[$namespace]);
+        if (isset(static::$hints[$namespace])) {
+            $hints = array_merge($hints, static::$hints[$namespace]);
         }
 
-        $this->hints[$namespace] = $hints;
+        static::$hints[$namespace] = $hints;
     }
 
     public function hasHintInformation($name)

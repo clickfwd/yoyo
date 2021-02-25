@@ -1,0 +1,1 @@
+<div>blade foo from another app</div>

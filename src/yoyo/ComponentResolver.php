@@ -52,7 +52,7 @@ class ComponentResolver implements ComponentResolverInterface
         // Check namespaced components
         if (strpos($name, ViewProviderInterface::HINT_PATH_DELIMITER) > 0) {
             [$namespaceAlias, $name] = explode(ViewProviderInterface::HINT_PATH_DELIMITER, $name);
-            if (isset($namespaceAlias, $this->hints)) {
+            if (isset($this->hints[$namespaceAlias])) {
                 $className = $this->hints[$namespaceAlias].'\\'.YoyoHelpers::studly($name);
             }
         }

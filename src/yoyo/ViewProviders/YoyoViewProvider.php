@@ -54,22 +54,30 @@ class YoyoViewProvider extends BaseViewProvider implements ViewProviderInterface
 
     public function addNamespace($namespace, $hints)
     {
-        return $this->view->addNamespace($namespace, $hints);
+        $this->view->addNamespace($namespace, $hints);
+
+        return $this;
     }
 
     public function prependNamespace($namespace, $hints)
     {
-        return $this->view->prependNamespace($namespace, $hints);
+        $this->view->prependNamespace($namespace, $hints);
+
+        return $this;
     }
 
     public function addLocation($location)
     {
-        return $this->view->addLocation($location);
+        $this->view->addLocation($location);
+
+        return $this;
     }
 
     public function prependLocation($location)
     {
-        return $this->view->prependLocation($location);
+        $this->view->prependLocation($location);
+
+        return $this;
     }
 
     public function __toString()
