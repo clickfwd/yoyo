@@ -24,7 +24,8 @@
         "phpunit/phpunit": "^9.3",
         "pestphp/pest": "^1.0",
         "jenssegers/blade": "^1.4",
-        "twig/twig": "^3.3"
+        "twig/twig": "^3.3",
+        "symfony/var-dumper": "^5.2"
     },
     "autoload": {
         "files": [
