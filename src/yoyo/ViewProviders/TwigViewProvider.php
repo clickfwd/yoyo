@@ -67,7 +67,7 @@ class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
     public function getLoader()
     {
         return $this->view->getLoader();
-    }    
+    }
 
     public function addNamespace($namespace, $path)
     {

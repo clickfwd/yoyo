@@ -28,5 +28,5 @@ test('render dynamic component using a view and class namespace', function () {
     $view = Yoyo::getInstance()->getViewProvider();
     $view->addNamespace('packagename', __DIR__.'/../app-another/views');
     Yoyo::getInstance()->componentNamespace('packagename', 'Tests\\AppAnother\\Yoyo');
-    expect(render('packagename::counter',['count' => 3]))->toContain('The count is now 3');
+    expect(render('packagename::counter', ['count' => 3]))->toContain('The count is now 3');
 });
