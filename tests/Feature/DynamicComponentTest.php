@@ -135,12 +135,6 @@ test('component executes trait lifecycle hooks', function () {
     expect(render('component-with-trait'))->toContain('{ComponentWithTrait} saw that {mountWithFramework} was here');
 });
 
-test('render anonymous component using a view namespace', function () {
-    $view = Yoyo::getInstance()->getViewProvider();
-    $view->addNamespace('packagename', __DIR__.'/../app-another/views');
-    expect(render('packagename::foo'))->toContain('other foo from another app');
-});
-
 test('render dynamic component using a view and class namespace', function () {
     $view = Yoyo::getInstance()->getViewProvider();
     $view->addNamespace('packagename', __DIR__.'/../app-another/views');

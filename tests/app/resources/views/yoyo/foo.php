@@ -1,3 +1,3 @@
 <div>
-    <?php echo ! $spinning ? 'Foo' : 'Bar'; ?>
+    <?php echo ! $spinning ? 'default foo' : 'default bar'; ?>
 </div>

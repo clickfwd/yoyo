@@ -12,6 +12,13 @@ function yoyo_twig()
 {
     $yoyo = yoyo_instance();
     
+    $yoyo->registerViewProvider(function () {
+        return new TwigViewProvider(twig());
+    });
+}
+
+function twig()
+{
     $loader = new \Twig\Loader\FilesystemLoader([
         __DIR__.'/app/resources/views/yoyo',
       ]);
@@ -23,12 +30,7 @@ function yoyo_twig()
     ]);
     
     // Add Yoyo's Twig Extension
-    
     $twig->addExtension(new YoyoTwigExtension());
     
-    // Register Twig view provider for Yoyo
-    
-    $yoyo->registerViewProvider(function () use ($twig) {
-        return new TwigViewProvider($twig);
-    });
+    return $twig;
 }

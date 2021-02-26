@@ -1,7 +1,7 @@
 <div>
     @spinning 
-        Bar 
+        blade bar 
     @else 
-        Foo 
+        blade foo 
     @endspinning
 </div>

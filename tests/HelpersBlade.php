@@ -14,18 +14,16 @@ use function Tests\yoyo_instance;
 
 function yoyo_blade()
 {
-    $yoyo = yoyo_instance();
-    
     $blade = blade();
     
-    $yoyo->registerViewProvider(function () use ($blade) {
+    yoyo_instance()->registerViewProvider(function () use ($blade) {
         return new BladeViewProvider($blade);
     });
 }
 
 function blade()
 {
-    $app = Application::getInstance();
+    $app = new Application();
     
     $app->bind(ApplicationContract::class, Application::class);
     

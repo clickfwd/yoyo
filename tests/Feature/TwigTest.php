@@ -9,7 +9,7 @@ beforeAll(function () {
 });
 
 test('discovers and renders anonymous foo component', function () {
-    expect(render('foo'))->toContain('Foo');
+    expect(render('foo'))->toContain('twig foo');
 });
 
 test('render anonymous component form different location', function () {

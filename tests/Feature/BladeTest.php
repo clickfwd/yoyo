@@ -9,7 +9,7 @@ beforeAll(function () {
 });
 
 test('render anonymous component', function () {
-    expect(render('foo'))->toContain('Foo');
+    expect(render('foo'))->toContain('blade foo');
 });
 
 test('render anonymous component form different location', function () {

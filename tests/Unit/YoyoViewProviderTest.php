@@ -5,7 +5,7 @@ use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;
 
 test('can render a template', function () {
     $view = new YoyoViewProvider(new View(__DIR__.'/../app/resources/views/yoyo'));
-    expect(preg_replace("/\n|\s/", "", $view->render('foo', ['spinning' => false])))->toBe('<div>Foo</div>');
+    expect((string) $view->render('foo', ['spinning' => false]))->toContain('default foo');
 });
 
 test('can render a template with a prepended location with higher priority', function () {

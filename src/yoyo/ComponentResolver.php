@@ -2,14 +2,15 @@
 
 namespace Clickfwd\Yoyo;
 
-use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\Services\Configuration;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 
-class ComponentResolver implements ComponentResolverInterface
+class ComponentResolver
 {
+    protected $name = 'default';
+
     protected $variables;
 
     protected $registered;
@@ -18,7 +19,7 @@ class ComponentResolver implements ComponentResolverInterface
 
     protected $container;
 
-    public function __construct(ContainerInterface $container, array $registered  = [], array $hints = [], array $variables = [])
+    public function __invoke(ContainerInterface $container, array $registered  = [], array $hints = [])
     {
         $this->container = $container;
 
@@ -26,12 +27,12 @@ class ComponentResolver implements ComponentResolverInterface
 
         $this->hints = $hints;
 
-        $this->variables = $variables;
+        return $this;
     }
 
-    public function source(): ?string
+    public function getName()
     {
-        return $this->variables[YoyoCompiler::yoprefix('source')] ?? null;
+        return $this->name;
     }
 
     public function resolveComponent($id, $name): ?Component
@@ -46,7 +47,7 @@ class ComponentResolver implements ComponentResolverInterface
     public function resolveDynamic($id, $name): ?Component
     {
         $className = null;
-
+        
         $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
 
         // Check namespaced components
@@ -65,7 +66,6 @@ class ComponentResolver implements ComponentResolverInterface
             $name = YoyoHelpers::studly($name);
             $className = Configuration::get('namespace').$name;
         }
-
         try {
             return $this->container->make($className, $args);
         } catch (ContainerExceptionInterface $e) {
@@ -76,7 +76,7 @@ class ComponentResolver implements ComponentResolverInterface
     public function resolveAnonymous($id, $name): ?Component
     {
         $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
-
+        
         if ($this->registered[$name] ?? null) {
             return $this->container->make(AnonymousComponent::class, $args);
         }
@@ -92,6 +92,6 @@ class ComponentResolver implements ComponentResolverInterface
 
     public function resolveViewProvider(): ViewProviderInterface
     {
-        return $this->container->get('yoyo.view.default');
+        return $this->container->get('yoyo.view.'.$this->getName());
     }
 }

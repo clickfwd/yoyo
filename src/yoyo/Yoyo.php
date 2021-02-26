@@ -29,13 +29,11 @@ class Yoyo
 
     private static $request;
 
-    private static $viewProviders = [];
-
     private static $registeredComponents = [];
 
     private static $componentNamespaces = [];
 
-    private static $registereComponentResolvers = [];
+    private static $resolverInstances = [];
 
     public function __construct(ContainerInterface $container = null)
     {
@@ -48,21 +46,21 @@ class Yoyo
      */
     public static function getInstance()
     {
-        return new Self(self::$container);
+        return new Self(static::$container);
     }
 
     public function bindRequest(RequestInterface $request)
     {
-        self::$request = $request;
+        static::$request = $request;
     }
 
     public static function request()
     {
-        if (! self::$request) {
-            self::$request = new Request();
+        if (! static::$request) {
+            static::$request = new Request();
         }
 
-        return self::$request;
+        return static::$request;
     }
 
     public function configure($options): void
@@ -72,7 +70,7 @@ class Yoyo
 
     public static function container()
     {
-        return self::$container;
+        return static::$container;
     }
 
     public function getComponentId($attributes): string
@@ -80,29 +78,23 @@ class Yoyo
         if (isset($attributes['id'])) {
             $id = $attributes['id'];
         } else {
-            $id = self::request()->get(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
+            $id = static::request()->get(YoyoCompiler::yoprefix_value('id'), YoyoCompiler::yoprefix_value(YoyoHelpers::randString()));
         }
 
         // Remove the component ID from the request so it's not passed to child components
-        self::request()->drop(YoyoCompiler::yoprefix_value('id'));
+        static::request()->drop(YoyoCompiler::yoprefix_value('id'));
 
         return $id;
     }
 
     private function getComponentResolver()
     {
-        $resolverName = $this->variables[YoyoCompiler::yoprefix('resolver')]
-                            ?? self::request()->get(YoyoCompiler::yoprefix('resolver'));
+        $name = $this->variables[YoyoCompiler::yoprefix('resolver')]
+                            ?? static::request()->get(YoyoCompiler::yoprefix('resolver'));
 
-        $this->variables = array_merge($this->variables, self::$request->startsWith(YoyoCompiler::yoprefix('')));
-
-        if (! $resolverName) {
-            return new ComponentResolver(self::$container, self::$registeredComponents, $this->variables);
-        }
+        $resolver = ! $name ? new ComponentResolver() : static::$resolverInstances[$name];
         
-        $resolverClass = self::$registeredComponentResolvers[$resolverName];
-
-        return new $resolverClass(self::$container, self::$registeredComponents, self::$componentNamespaces, $this->variables);
+        return $resolver(static::$container, static::$registeredComponents, static::$componentNamespaces);
     }
 
     public function registerViewProvider($name, $provider = null)
@@ -112,38 +104,38 @@ class Yoyo
             $name = 'default';
         }
 
-        self::$container->bind("yoyo.view.{$name}", $provider);
+        static::$container->singleton("yoyo.view.{$name}", $provider);
     }
 
     public function registerViewProviders($providers)
     {
         foreach ($providers as $name => $provider) {
-            self::$container->bind("yoyo.view.{$name}", $provider);
+            $this->registerViewProvider($name, $provider);
         }
     }
 
     public static function getViewProvider($name = 'default')
     {
-        return self::$container->get("yoyo.view.{$name}");
+        return static::$container->get("yoyo.view.{$name}");
     }
 
-    public function registerComponentResolver($name, $resolverClass)
+    public function registerComponentResolver($resolver)
     {
-        if (! ClassHelpers::classImplementsInterface($resolverClass, ComponentResolverInterface::class)) {
-            throw new \Exception("Component resolver [$resolverClass] does not implement [ComponentResolverInterface] interface");
-        }
+        $this->registerViewProvider($name = $resolver->getName(), function () use ($resolver) {
+            return $resolver->getViewProvider();
+        });
 
-        self::$registereComponentResolvers[$name] = $resolverClass;
+        static::$resolverInstances[$name] = $resolver;
     }
 
     public static function registerComponent($name, $class = null): void
     {
-        self::$registeredComponents[$name] = $class;
+        static::$registeredComponents[$name] = $class;
     }
 
     public static function componentNamespace($namespace, $alias): void
     {
-        self::$componentNamespaces[$alias] = $namespace;
+        static::$componentNamespaces[$alias] = $namespace;
     }
 
     public static function registerComponents($components): void
@@ -153,7 +145,7 @@ class Yoyo
                 $name = $class;
                 $class = null;
             }
-            self::registerComponent($name, $class);
+            static::registerComponent($name, $class);
         }
     }
 
@@ -208,7 +200,7 @@ class Yoyo
 
     protected function parseUpdateRequest()
     {
-        $component = self::request()->get('component');
+        $component = static::request()->get('component');
 
         $parts = array_filter(explode('/', $component));
 
@@ -227,7 +219,7 @@ class Yoyo
     {
         $variables = [];
 
-        $componentManager = new ComponentManager($this->getComponentResolver(), self::request(), $spinning);
+        $componentManager = new ComponentManager($this->getComponentResolver(), static::request(), $spinning);
 
         $html = $componentManager->process($this->id, $this->name, $this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
 
@@ -298,11 +290,11 @@ class Yoyo
      */
     private function is_spinning(): bool
     {
-        $spinning = self::request()->isYoyoRequest();
+        $spinning = static::request()->isYoyoRequest();
 
         // Stop spinning of child components when parent is refreshed
 
-        self::request()->windUp();
+        static::request()->windUp();
 
         return $spinning;
     }
