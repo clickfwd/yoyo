@@ -1,7 +1,6 @@
 <?php
 
 use Clickfwd\Yoyo\Yoyo;
-use Clickfwd\Yoyo\ComponentManager;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use function Tests\encode_vals;
@@ -108,17 +107,17 @@ test('posted vars are not added to component root', function () {
 })->group('component-root-vars');
 
 test('registered dynamic component is loaded', function () {
-    \Clickfwd\Yoyo\Yoyo::registerComponent('registered-test', \Tests\App\Yoyo\Registered::class);
+    Yoyo::registerComponent('registered-test', \Tests\App\Yoyo\Registered::class);
     expect(render('registered-test'))->toContain('id="registered"');
 });
 
 test('skipRender method returns empty response with 204 status', function () {
-    \Clickfwd\Yoyo\Yoyo::registerComponent('empty-response', \Tests\App\Yoyo\EmptyResponse::class);
+    Yoyo::registerComponent('empty-response', \Tests\App\Yoyo\EmptyResponse::class);
     expect(render('empty-response'))->toBeEmpty()->and(http_response_code())->toBe(204);
 });
 
 test('skipRenderAndReplace method returns empty response with 200 status', function () {
-    \Clickfwd\Yoyo\Yoyo::registerComponent('empty-response-and-remove', \Tests\App\Yoyo\EmptyResponseAndRemove::class);
+    Yoyo::registerComponent('empty-response-and-remove', \Tests\App\Yoyo\EmptyResponseAndRemove::class);
     expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
 });
 
