@@ -66,29 +66,3 @@ function not_spinning($expression = null)
         return false;
     }
 }
-
-function d(...$params)
-{
-    var_dump(...$params);
-}
-
-function dd(...$params)
-{
-    d(...$params);
-
-    exit;
-}
-
-function prx(...$params)
-{
-    foreach ($params as $param) {
-        echo '<pre>';
-        print_r($param);
-        echo '</pre>';
-    }
-}
-
-function cm($class)
-{
-    dd(get_class_methods($class));
-}
