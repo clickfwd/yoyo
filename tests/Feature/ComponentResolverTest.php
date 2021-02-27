@@ -6,7 +6,7 @@ use Tests\App\Resolvers\BladeComponentResolver;
 use Tests\App\Resolvers\TwigComponentResolver;
 use function Tests\render;
 
-test('can have multiple view providers using component resolvers', function () {
+test('can use multiple view providers using component resolvers', function () {
     $yoyo = Yoyo::getInstance();
     $yoyo->registerComponentResolver(new CustomComponentResolver());
     $yoyo->registerComponentResolver(new BladeComponentResolver());

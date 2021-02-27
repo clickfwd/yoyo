@@ -134,10 +134,3 @@ test('dependency injection with class and named argument mapping', function () {
 test('component executes trait lifecycle hooks', function () {
     expect(render('component-with-trait'))->toContain('{ComponentWithTrait} saw that {mountWithFramework} was here');
 });
-
-test('render dynamic component using a view and class namespace', function () {
-    $view = Yoyo::getInstance()->getViewProvider();
-    $view->addNamespace('packagename', __DIR__.'/../app-another/views');
-    Yoyo::getInstance()->componentNamespace('packagename', 'Tests\\AppAnother\\Yoyo');
-    expect(render('packagename::counter', ['count' => 3]))->toContain('The count is now 3');
-});

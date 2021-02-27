@@ -27,9 +27,3 @@ test('registered anonymous component is loaded', function () {
     \Clickfwd\Yoyo\Yoyo::registerComponent('registered-anon');
     expect(render('registered-anon'))->toContain('id="registered-anon"');
 });
-
-test('render anonymous component using a view namespace', function () {
-    $view = Yoyo::getInstance()->getViewProvider();
-    $view->addNamespace('packagename', __DIR__.'/../app-another/views');
-    expect(render('packagename::foo'))->toContain('other foo from another app');
-});

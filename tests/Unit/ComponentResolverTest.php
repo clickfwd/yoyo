@@ -14,7 +14,7 @@ test('resolves anonymous component', function () {
     expect($resolver->resolveAnonymous('foo', 'foo'))->toBeInstanceOf(Clickfwd\Yoyo\AnonymousComponent::class);
 });
 
-test('resolves dynamic component using a namespace alias', function () {
+test('resolves namespaced dynamic component', function () {
     $namespaces = ['packagename' => 'Tests\\AppAnother\\Yoyo'];
     $resolver = (new Clickfwd\Yoyo\ComponentResolver())(Container::getInstance(), [], $namespaces);
 
