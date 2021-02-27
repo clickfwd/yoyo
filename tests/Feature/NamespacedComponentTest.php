@@ -11,7 +11,8 @@ test('render namespaced anonymous component', function () {
 });
 
 test('can render namespaced dynamic component', function () {
-    $view = Yoyo::getInstance()->getViewProvider();
+    $yoyo = Yoyo::getInstance();
+    $view = $yoyo->getViewProvider();
     $view->addNamespace('packagename', __DIR__.'/../app-another/views');
     Yoyo::getInstance()->componentNamespace('packagename', 'Tests\\AppAnother\\Yoyo');
     expect(render('packagename::counter', ['count' => 3]))->toContain('The count is now 3');
@@ -19,6 +20,7 @@ test('can render namespaced dynamic component', function () {
 
 test('can render namespaced dynamic component with custom resolver', function () {
     $yoyo = Yoyo::getInstance();
+    $yoyo->container()->flush();
     $yoyo->registerComponentResolver(new BladeComponentResolver());
     $view = $yoyo->getViewProvider('blade');
     $view->addNamespace('packagename', __DIR__.'/../app-another/views');
