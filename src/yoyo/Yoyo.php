@@ -2,7 +2,10 @@
 
 namespace Clickfwd\Yoyo;
 
+use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\IncompleteComponentParamInRequest;
+use Clickfwd\Yoyo\Exceptions\NotFoundHttpException;
+use Clickfwd\Yoyo\Exceptions\HttpException;
 use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
 use Clickfwd\Yoyo\Interfaces\RequestInterface;
 use Clickfwd\Yoyo\Services\BrowserEventsService;
@@ -159,6 +162,15 @@ class Yoyo
         }
     }
 
+    public static function abort($code, $message = '', array $headers = [])
+    {
+        if ($code == 404) {
+            throw new NotFoundHttpException($message, $headers);
+        }
+
+        throw new HttpException($code, $message, $headers);
+    }
+
     public function mount($name, $variables = [], $attributes = [], $action = 'render'): self
     {
         $this->action($action);
@@ -215,7 +227,7 @@ class Yoyo
         $parts = array_filter(explode('/', $component));
 
         if (empty($parts)) {
-            throw new IncompleteComponentParamInRequest();
+            throw new Exceptions\IncompleteComponentParamInRequest();
         }
 
         $name = $parts[0];
@@ -231,51 +243,81 @@ class Yoyo
 
         $componentManager = new ComponentManager($this->getComponentResolver(), static::request(), $spinning);
 
-        $html = $componentManager->process($this->id, $this->name, $this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
+        try {
+            try {
+                $html = $componentManager->process($this->id, $this->name, $this->action ?? YoyoCompiler::COMPONENT_DEFAULT_ACTION, $this->variables, $this->attributes);
+            } finally {
+                if ($componentManager->getComponentInstance()) {
+                    // Get all data needed to pass the rendered HTML through the Yoyo compiler to make it reactive
+                        
+                    $defaultValues = $componentManager->getDefaultPublicVars();
 
-        $defaultValues = $componentManager->getDefaultPublicVars();
+                    $newValues = $componentManager->getPublicVars();
 
-        $newValues = $componentManager->getPublicVars();
+                    // Get dynamic component public properties anonymous components vars to pass them to the compiler
+                    // Any matching parameter names in yoyo:props will be automatically added to yoyo:vals
 
-        // Get dynamic component public properties anonymous components vars to pass them to the compiler
-        // Any matching parameter names in yoyo:props will be automatically added to yoyo:vals
+                    $variables = array_merge($defaultValues, $newValues);
 
-        $variables = array_merge($defaultValues, $newValues);
+                    $variables = YoyoHelpers::removeEmptyValues($variables);
 
-        $variables = YoyoHelpers::removeEmptyValues($variables);
+                    $listeners = $componentManager->getListeners();
 
-        $listeners = $componentManager->getListeners();
+                    $componentType = $componentManager->isDynamicComponent() ? 'dynamic' : 'anonymous';
 
-        $componentType = $componentManager->isDynamicComponent() ? 'dynamic' : 'anonymous';
+                    // For dynamic components, filter variables based on component props
+                        
+                    $props = $componentManager->getProps();
 
-        // For dynamic components, filter variables based on component props
-        
-        $props = $componentManager->getProps();
+                    $postComponentProcessingActions = function () use ($componentManager, $defaultValues, $newValues) {
+                        $queryStringKeys = $componentManager->getQueryString();
+                        $queryString = new QueryString($defaultValues, $newValues, $queryStringKeys);
+                
+                        // Browser URL State
+                        $urlStateManager = new UrlStateManagerService();
+                
+                        if ($componentManager->isDynamicComponent()) {
+                            $urlStateManager->pushState($queryString->getPageQueryParams());
+                        }
+                
+                        // Browser Events
+                        $eventsService = BrowserEventsService::getInstance();
+                        $eventsService->dispatch();
+                
+                        // Browser Redirect
+                        (PageRedirectService::getInstance())->redirect($componentManager->getComponentInstance()->redirectTo);
+                    };
+                }
+            }
+        } catch (BypassRenderMethod $e) {
+            if (isset($postComponentProcessingActions)) {
+                $postComponentProcessingActions();
+            }
+            if ($e->getCode() == 204) {
+                Response::getInstance()->status(204)->send();
+                // Need to throw exception to stop execution and send 204 status code
+                throw $e;
+            } else {
+                return Response::getInstance()->status(200)->send();
+            }
+        } catch (HttpException $e) {
+            if (isset($postComponentProcessingActions)) {
+                $postComponentProcessingActions();
+            }
+            Response::getInstance()->status($e->getStatusCode())->setHeaders($e->getHeaders())->send();
+            throw $e;
+        } catch (\Exception $e) {
+            if (isset($postComponentProcessingActions)) {
+                $postComponentProcessingActions();
+            }
+            Response::getInstance()->send();
+            throw $e;
+        }
 
         $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props);
 
         if ($spinning) {
-            $queryStringKeys = $componentManager->getQueryString();
-
-            $queryString = new QueryString($defaultValues, $newValues, $queryStringKeys);
-
-            // Browser URL State
-
-            $urlStateManager = new UrlStateManagerService();
-
-            if ($componentManager->isDynamicComponent()) {
-                $urlStateManager->pushState($queryString->getPageQueryParams());
-            }
-
-            // Browser Events
-
-            $eventsService = BrowserEventsService::getInstance();
-
-            $eventsService->dispatch();
-
-            // Browser Redirect
-
-            (PageRedirectService::getInstance())->redirect($componentManager->getComponentInstance()->redirectTo);
+            $postComponentProcessingActions();
         }
 
         return (Response::getInstance())->send($compiledHtml);

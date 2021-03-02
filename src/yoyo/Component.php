@@ -4,6 +4,7 @@ namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Concerns\BrowserEvents;
 use Clickfwd\Yoyo\Concerns\Redirector;
+use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
 use Clickfwd\Yoyo\ComponentResolver;
@@ -158,7 +159,7 @@ abstract class Component
     public function render()
     {
         if ($this->omitResponse) {
-            return null;
+            throw new BypassRenderMethod($this->response->getStatusCode());
         }
 
         return $this->view($this->componentName);

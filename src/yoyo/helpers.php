@@ -32,6 +32,25 @@ function yoyo_styles($return = false)
     echo $output;
 }
 
+function abort($code, $message = '', array $headers = [])
+{
+    Yoyo::abort($code, $message, $headers);
+}
+
+function abort_if($boolean, $code, $message = '', array $headers = [])
+{
+    if ($boolean) {
+        Yoyo::abort($code, $message, $headers);
+    }
+}
+
+function abort_unless($boolean, $code, $message = '', array $headers = [])
+{
+    if (! $boolean) {
+        Yoyo::abort($code, $message, $headers);
+    }
+}
+
 function encode_vals($vals)
 {
     echo \Clickfwd\Yoyo\YoyoHelpers::encode_vals($vals);

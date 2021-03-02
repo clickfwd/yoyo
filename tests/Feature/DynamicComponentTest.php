@@ -1,8 +1,10 @@
 <?php
 
 use Clickfwd\Yoyo\Yoyo;
+use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
+use Clickfwd\Yoyo\Exceptions\HttpException;
 use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
@@ -89,7 +91,7 @@ it('loads dynamic component with registered alias', function () {
 
 it('returns empty response with 204 status on skipRender', function () {
     expect(render('empty-response'))->toBeEmpty()->and(http_response_code())->toBe(204);
-});
+})->throws(BypassRenderMethod::class);
 
 it('returns empty response with 200 status on skipRenderAndReplace', function () {
     expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
@@ -108,3 +110,14 @@ it('dynamically resolves class and named arguments in mount method', function ()
 it('executes trait lifecycle hooks', function () {
     expect(render('component-with-trait'))->toContain('{ComponentWithTrait} saw that {mountWithFramework} was here');
 });
+
+it('it aborts component execution and throws an exception', function () {
+    try {
+        render('abort');
+    } catch (HttpException $e) {
+        expect($e->getHeaders())->toMatchArray(['foo'=>'bar'])
+            ->and($e->getStatusCode())->toBe(404)
+            ->and($e->getMessage())->toBe('not found');
+        throw $e;
+    }
+})->throws(HttpException::class);
