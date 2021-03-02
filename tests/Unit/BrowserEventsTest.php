@@ -9,7 +9,7 @@ beforeAll(function () {
     yoyo_view();
 });
 
-test('emitted browser event', function () {
+it('emits browser event', function () {
     mockYoyoGetRequest('http://example.com/', 'counter/increment');
     
     yoyo_update();

@@ -11,7 +11,7 @@ beforeAll(function () {
     yoyo_view();
 });
 
-test('nested component renders correctly', function () {
+it('can render nested components', function () {
     $output = render('parent', ['data'=>[1, 2, 3]], ['id'=>'parent']);
     expect(htmlformat($output))->toEqual(response('nested'));
 });

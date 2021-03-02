@@ -19,13 +19,6 @@ class Counter extends Component
         $this->emit('counter:updated', ['count' => $this->count]);
     }
 
-    public function decrement()
-    {
-        $this->count--;
-
-        $this->emit('counter:updated', ['count' => $this->count]);
-    }
-
     public function getCurrentCountProperty()
     {
         return 'The count is now '.$this->count;

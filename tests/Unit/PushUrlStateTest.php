@@ -4,7 +4,7 @@ use function Tests\headers;
 use function Tests\mockYoyoGetRequest;
 use function Tests\yoyo_update;
 
-test('pushed new URL state', function () {
+it('pushes new URL state', function () {
     mockYoyoGetRequest('http://example.com/', 'counter/increment');
 
     yoyo_update();

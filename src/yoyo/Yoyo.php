@@ -92,8 +92,14 @@ class Yoyo
         $name = $this->variables[YoyoCompiler::yoprefix('resolver')]
                             ?? static::request()->get(YoyoCompiler::yoprefix('resolver'));
 
+        if (static::$container->bound("yoyo.resolver.{$name}")) {
+            return static::$container->get("yoyo.resolver.{$name}")(static::$container, static::$registeredComponents, static::$componentNamespaces);
+        }
+
         $resolver = ! $name ? new ComponentResolver() : static::$resolverInstances[$name];
-        
+
+        static::$container->instance("yoyo.resolver.{$name}", $resolver);
+              
         return $resolver(static::$container, static::$registeredComponents, static::$componentNamespaces);
     }
 
@@ -121,6 +127,10 @@ class Yoyo
 
     public function registerComponentResolver($resolver)
     {
+        if (is_string($resolver)) {
+            $resolver = self::$container->make($resolver);
+        }
+
         $this->registerViewProvider($name = $resolver->getName(), function () use ($resolver) {
             return $resolver->getViewProvider();
         });
@@ -128,14 +138,14 @@ class Yoyo
         static::$resolverInstances[$name] = $resolver;
     }
 
+    public static function componentNamespace($namespace, $class): void
+    {
+        static::$componentNamespaces[$namespace] = $class;
+    }
+        
     public static function registerComponent($name, $class = null): void
     {
         static::$registeredComponents[$name] = $class;
-    }
-
-    public static function componentNamespace($namespace, $alias): void
-    {
-        static::$componentNamespaces[$alias] = $namespace;
     }
 
     public static function registerComponents($components): void

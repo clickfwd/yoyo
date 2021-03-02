@@ -11,19 +11,19 @@ beforeAll(function () {
     yoyo_view();
 });
 
-test('errors when anonymous component template not found', function () {
+it('throws exception when template not found', function () {
     render('random');
 })->throws(ComponentNotFound::class);
 
-test('discovers and renders anonymous foo component', function () {
-    expect(render('foo'))->toContain('foo');
+it('renders anonymous component', function () {
+    expect(render('foo'))->toContain('default foo');
 });
 
-test('updates anonymous foo component', function () {
-    expect(update('foo'))->toContain('bar');
+it('updates anonymous component', function () {
+    expect(update('foo'))->toContain('default bar');
 });
 
-test('registered anonymous component is loaded', function () {
-    \Clickfwd\Yoyo\Yoyo::registerComponent('registered-anon');
-    expect(render('registered-anon'))->toContain('id="registered-anon"');
+it('loads anonymous component with a registered alias', function () {
+    \Clickfwd\Yoyo\Yoyo::registerComponent('awesome','registered-anon');
+    expect(render('awesome'))->toContain('id="registered-anon"');
 });

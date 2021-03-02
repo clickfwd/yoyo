@@ -1,0 +1,7 @@
+<div yoyo:props="data">
+{% for id in data %}
+
+    {{ yoyo( 'child', {'id': id}, {'id': 'child-'~id} ) }}
+
+{% endfor %}
+</div>

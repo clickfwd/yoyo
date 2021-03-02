@@ -69,7 +69,7 @@ class ComponentManager
 
     public function process($id, $name, $action, $variables, $attributes): string
     {
-        if (! ($this->component = $this->resolver->resolveComponent($id, $name))) {
+        if (! ($this->component = $this->resolver->resolveComponent($id, $name, $variables))) {
             throw new ComponentNotFound($name);
         }
 

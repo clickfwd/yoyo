@@ -35,8 +35,14 @@ class ComponentResolver
         return $this->name;
     }
 
-    public function resolveComponent($id, $name): ?Component
+    public function resolving($id, $name, $variables)
     {
+    }
+
+    public function resolveComponent($id, $name, $variables): ?Component
+    {
+        $this->resolving($id, $name, $variables);
+        
         if ($instance = $this->resolveDynamic($id, $name)) {
             return $instance;
         }
@@ -78,6 +84,7 @@ class ComponentResolver
         $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
         
         if ($this->registered[$name] ?? null) {
+            $args['name'] = $this->registered[$name] ?? $name;
             return $this->container->make(AnonymousComponent::class, $args);
         }
 
