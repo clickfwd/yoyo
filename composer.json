@@ -35,5 +35,11 @@
         "psr-4": {
             "Clickfwd\\Yoyo\\": "src/yoyo"
         }
-    }
+    },
+    "autoload-dev": {
+        "psr-4": { 
+            "Tests\\App\\": "tests/app",
+            "Tests\\AppAnother\\": "tests/app-another"  
+        }
+    }    
 }

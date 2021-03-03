@@ -72,6 +72,7 @@ class ComponentResolver
             $name = YoyoHelpers::studly($name);
             $className = Configuration::get('namespace').$name;
         }
+        
         try {
             return $this->container->make($className, $args);
         } catch (ContainerExceptionInterface $e) {

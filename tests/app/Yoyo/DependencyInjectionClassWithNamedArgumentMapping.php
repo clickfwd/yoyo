@@ -6,7 +6,7 @@ use Tests\App\Post;
 
 use Clickfwd\Yoyo\Component;
 
-class DIClassWithNamedArgumentMapping extends Component
+class DependencyInjectionClassWithNamedArgumentMapping extends Component
 {
     protected $post;
 

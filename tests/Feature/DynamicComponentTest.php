@@ -98,11 +98,11 @@ it('returns empty response with 200 status on skipRenderAndReplace', function ()
 });
 
 it('dynamically resolves class and named arguments in mount method', function () {
-    mockYoyoGetRequest('http://example.com/', 'di-class-with-named-argument-mapping', '', [
+    mockYoyoGetRequest('http://example.com/', 'ependency-injection-class-with-named-argument-mapping', '', [
         'id' => 100,
     ]);
-
-    expect(render('di-class-with-named-argument-mapping'))->toContain('the comment title-100');
+    
+    expect(render('dependency-injection-class-with-named-argument-mapping'))->toContain('the comment title-100');
 
     resetYoyoRequest();
 });

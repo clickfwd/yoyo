@@ -1,0 +1,2 @@
+# For runs-on: ubuntu-latest
+-P ubuntu-latest=shivammathur/node:latest
