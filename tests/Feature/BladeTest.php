@@ -45,3 +45,26 @@ it('can render nested components with @yoyo directive', function () {
     $output = render('parent', ['data'=>[1, 2, 3]], ['id'=>'parent']);
     expect(htmlformat($output))->toEqual(response('nested.blade'));
 });
+
+it('renders anonymous component in subdirectory', function () {
+    expect(render('account.login'))->toContain('blade:app/resources/views/yoyo/account/login.php');
+});
+
+it('renders dynamic component in subdirectory', function () {
+    expect(render('account.register'))->toContain('blade:Please register to access this page');
+});
+
+it('renders blade template within Yoyo', function () {
+    $view = Yoyo::getInstance()->getViewProvider();
+    $view->getFinder()->flush();
+    $view->addLocation(__DIR__.'/../app/resources/views');
+    expect(render('layout-a'))->toContain('app/resources/views/components/select.blade.php');
+});
+
+it('renders namespaced blade template within Yoyo', function () {
+    $view = Yoyo::getInstance()->getViewProvider();
+    $view->getFinder()->flush();
+    $view->addLocation(__DIR__.'/../app/resources/views');
+    $view->addNamespace('packagename', __DIR__.'/../app-another/views');
+    expect(render('layout-b'))->toContain('app-another/views/components/input.blade.php');
+});

@@ -60,7 +60,7 @@ class ComponentResolver
         if (strpos($name, ViewProviderInterface::HINT_PATH_DELIMITER) > 0) {
             [$namespaceAlias, $name] = explode(ViewProviderInterface::HINT_PATH_DELIMITER, $name);
             if (isset($this->hints[$namespaceAlias])) {
-                $className = $this->hints[$namespaceAlias].'\\'.YoyoHelpers::studly($name);
+                $className = $this->hints[$namespaceAlias].'\\'.$this->dotNotationToClass($name);
             }
         }
 
@@ -69,8 +69,7 @@ class ComponentResolver
         }
         
         if (! $className) {
-            $name = YoyoHelpers::studly($name);
-            $className = Configuration::get('namespace').$name;
+            $className = Configuration::get('namespace').$this->dotNotationToClass($name);
         }
         
         try {
@@ -96,6 +95,13 @@ class ComponentResolver
         }
 
         return null;
+    }
+
+    public function dotNotationToClass($name)
+    {
+        return implode('\\', array_map(function($name) {
+            return YoyoHelpers::studly($name);
+        }, explode('.', $name)));
     }
 
     public function resolveViewProvider(): ViewProviderInterface

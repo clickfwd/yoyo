@@ -121,3 +121,7 @@ it('it aborts component execution and throws an exception', function () {
         throw $e;
     }
 })->throws(HttpException::class);
+
+it('renders dynamic component in sub-directory', function () {
+    expect(render('account.register'))->toContain('Please register to access this page');
+});

@@ -80,6 +80,11 @@ class YoyoViewProvider extends BaseViewProvider implements ViewProviderInterface
         return $this;
     }
 
+    public function __call(string $method, array $params)
+    {
+        return call_user_func_array([$this->view, $method], $params);
+    }    
+
     public function __toString()
     {
         return $this->view->render($this->name, $this->vars);

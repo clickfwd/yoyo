@@ -95,12 +95,14 @@ class Yoyo
         $name = $this->variables[YoyoCompiler::yoprefix('resolver')]
                             ?? static::request()->get(YoyoCompiler::yoprefix('resolver'));
 
-        if (static::$container->bound("yoyo.resolver.{$name}")) {
+        if ($name && static::$container->bound("yoyo.resolver.{$name}")) {
             return static::$container->get("yoyo.resolver.{$name}")(static::$container, static::$registeredComponents, static::$componentNamespaces);
         }
-
+        
         $resolver = ! $name ? new ComponentResolver() : static::$resolverInstances[$name];
 
+        $name = $name ?? 'default';
+        
         static::$container->instance("yoyo.resolver.{$name}", $resolver);
               
         return $resolver(static::$container, static::$registeredComponents, static::$componentNamespaces);

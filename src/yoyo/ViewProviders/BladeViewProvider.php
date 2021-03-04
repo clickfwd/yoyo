@@ -81,6 +81,11 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
         return $this;
     }
 
+    public function __call(string $method, array $params)
+    {
+        return call_user_func_array([$this->view, $method], $params);
+    }
+        
     public function __toString()
     {
         $output = (string) $this->view->make($this->template, $this->vars);

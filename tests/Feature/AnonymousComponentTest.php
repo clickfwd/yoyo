@@ -27,3 +27,7 @@ it('loads anonymous component with a registered alias', function () {
     \Clickfwd\Yoyo\Yoyo::registerComponent('awesome','registered-anon');
     expect(render('awesome'))->toContain('id="registered-anon"');
 });
+
+it('renders anonymous component in sub-directory', function () {
+    expect(render('account.login'))->toContain('app/resources/views/yoyo/account/login.php');
+});
