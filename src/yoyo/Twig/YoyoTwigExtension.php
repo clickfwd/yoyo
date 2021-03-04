@@ -74,7 +74,7 @@ class YoyoTwigExtension extends AbstractExtension implements GlobalsInterface
     private function emitSelf()
     {
         return new TwigFunction('emitSelf', function ($eventName, $payload = []) {
-            (BrowserEventsService::getInstance())->emitSelf($target, $eventName, $payload);
+            (BrowserEventsService::getInstance())->emitSelf($eventName, $payload);
         });
     }
 

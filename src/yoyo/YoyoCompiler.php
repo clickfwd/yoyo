@@ -21,6 +21,8 @@ class YoyoCompiler
 
     protected $listeners;
 
+    protected $props;
+
     protected $idCounter = 1;
 
     /**

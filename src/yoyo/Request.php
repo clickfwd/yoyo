@@ -6,6 +6,10 @@ use Clickfwd\Yoyo\Interfaces\RequestInterface;
 
 class Request implements RequestInterface
 {
+    private $request;
+
+    private $server;
+    
     private $dropped = [];
 
     public function __construct()

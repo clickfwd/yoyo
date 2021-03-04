@@ -4,6 +4,10 @@ namespace Clickfwd\Yoyo\Exceptions;
 
 class HttpException extends \Exception
 {
+    protected $statusCode;
+
+    protected $headers;
+    
     public function __construct(int $statusCode, ?string $message = '', array $headers = [])
     {
         $this->statusCode = $statusCode;

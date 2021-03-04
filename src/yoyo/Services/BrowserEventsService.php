@@ -9,6 +9,10 @@ class BrowserEventsService
 {
     use Singleton;
 
+    private $request;
+
+    private $response;
+
     private $eventQueue = [];
 
     private $browserEventQueue = [];

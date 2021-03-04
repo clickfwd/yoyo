@@ -12,6 +12,8 @@ class Response
 
     protected $statusCode = 200;
 
+    public function __construct() {}
+
     public function header($name, $value)
     {
         $this->headers[$name] = $value;

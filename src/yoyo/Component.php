@@ -28,6 +28,8 @@ abstract class Component
 
     protected $request;
 
+    protected $response;
+
     protected $spinning;
 
     protected $queryString = [];
@@ -140,11 +142,6 @@ abstract class Component
         return $this->yoyo_id;
     }
 
-    public function parameters($array = [])
-    {
-        return $this->buildParametersForView($array);
-    }
-
     public function set($key, $value = null)
     {
         if (is_array($key)) {
@@ -206,7 +203,7 @@ abstract class Component
 
     public function createViewFromString($content): string
     {
-        $view = $this->resolve->resolveViewProvider();
+        $view = $this->resolver->resolveViewProvider();
 
         $view->startYoyoRendering($this);
 
