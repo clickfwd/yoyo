@@ -96,31 +96,12 @@ class ComponentManager
     {        
         $class = get_class($this->component);
 
-        $listeners = $this->component->getListeners();
-
         $this->component->setAction($action);
 
         $isEventListenerAction = false;
 
         $eventParams = $this->request->get('eventParams', []);
         
-        if (!empty($listeners[$action]) || in_array($action, $listeners)) {
-            // If action is an event listener, re-route it to the listener method
-
-            $action = !empty($listeners[$action]) ? $listeners[$action] : $action;
-            
-            $isEventListenerAction = true;
-        } elseif (! method_exists($this->component, $action)) {
-            throw new ComponentMethodNotFound($class, $action);
-        }
-        
-        $excludedActions = ClassHelpers::getPublicMethods(Component::class, ['render']);
-
-        if (in_array($action, $excludedActions) ||
-            (! $isEventListenerAction && ClassHelpers::methodIsPrivate($this->component, $action))) {
-            throw new NonPublicComponentMethodCall($class, $action);
-        }
-
         $this->component->spinning($this->spinning)->boot($variables, $attributes);
 
         $hookStack = [
@@ -143,6 +124,25 @@ class ComponentManager
             if (method_exists($this->component, $method)) {
                 Yoyo::container()->call([$this->component, $method], $parameters);
             }
+        }
+
+        $listeners = $this->component->getListeners();
+
+        if (!empty($listeners[$action]) || in_array($action, $listeners)) {
+            // If action is an event listener, re-route it to the listener method
+
+            $action = !empty($listeners[$action]) ? $listeners[$action] : $action;
+            
+            $isEventListenerAction = true;
+        } elseif (! method_exists($this->component, $action)) {
+            throw new ComponentMethodNotFound($class, $action);
+        }
+        
+        $excludedActions = ClassHelpers::getPublicMethods(Component::class, ['render']);
+
+        if (in_array($action, $excludedActions) ||
+            (! $isEventListenerAction && ClassHelpers::methodIsPrivate($this->component, $action))) {
+            throw new NonPublicComponentMethodCall($class, $action);
         }
 
         foreach ($hookStack['mount'] as $method) {
