@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use Clickfwd\Yoyo\Request;
 use Clickfwd\Yoyo\Services\Response;
 use Clickfwd\Yoyo\View;
 use Clickfwd\Yoyo\ViewProviders\YoyoViewProvider;

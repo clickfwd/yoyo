@@ -4,9 +4,6 @@ namespace Tests;
 
 use Clickfwd\Yoyo\Twig\YoyoTwigExtension;
 use Clickfwd\Yoyo\ViewProviders\TwigViewProvider;
-use Twig\Extension\DebugExtension;
-
-use function Tests\yoyo_instance;
 
 function yoyo_twig()
 {

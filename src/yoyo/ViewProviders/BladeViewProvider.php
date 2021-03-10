@@ -60,24 +60,28 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
     public function addNamespace($namespace, $hints)
     {
         $this->getFinder()->addNamespace($namespace, $hints);
+
         return $this;
     }
 
     public function prependNamespace($namespace, $hints)
     {
         $this->getFinder()->prependNamespace($namespace, $hints);
+
         return $this;
     }
 
     public function addLocation($location)
     {
         $this->getFinder()->addLocation($location);
+
         return $this;
     }
 
     public function prependLocation($location)
     {
         $this->getFinder()->prependLocation($location);
+
         return $this;
     }
 

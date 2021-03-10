@@ -7,7 +7,6 @@ use Clickfwd\Yoyo\Concerns\Redirector;
 use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
-use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\Services\Response;
 use Closure;
@@ -165,6 +164,7 @@ abstract class Component
     public function addSwapModifiers($modifier)
     {
         $this->response->header('Yoyo-Swap-Modifier', $modifier);
+
         return $this;
     }
     
@@ -172,6 +172,7 @@ abstract class Component
     {
         $this->response->status(204);
         $this->omitResponse = true;
+
         return $this;
     }
 
@@ -179,6 +180,7 @@ abstract class Component
     {
         $this->response->status(200);
         $this->omitResponse = true;
+
         return $this;
     }
 

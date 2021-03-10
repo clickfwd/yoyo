@@ -2,9 +2,9 @@
 
 namespace Tests\App\Yoyo;
 
-use Tests\App\Post;
-
 use Clickfwd\Yoyo\Component;
+
+use Tests\App\Post;
 
 class DependencyInjectionClassWithNamedArgumentMapping extends Component
 {

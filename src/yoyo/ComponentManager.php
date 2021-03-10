@@ -4,7 +4,6 @@ namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
-use Clickfwd\Yoyo\Exceptions\FailedToRegisterComponent;
 use Clickfwd\Yoyo\Exceptions\NonPublicComponentMethodCall;
 
 class ComponentManager
@@ -108,7 +107,7 @@ class ComponentManager
             'initialize' => ['initialize'],
             'mount' => ['mount'],
             'rendering' => ['rendering'],
-            'rendered' => ['rendered']
+            'rendered' => ['rendered'],
         ];
 
         $parameters = array_merge($variables, $this->request->all());
@@ -128,10 +127,10 @@ class ComponentManager
 
         $listeners = $this->component->getListeners();
 
-        if (!empty($listeners[$action]) || in_array($action, $listeners)) {
+        if (! empty($listeners[$action]) || in_array($action, $listeners)) {
             // If action is an event listener, re-route it to the listener method
 
-            $action = !empty($listeners[$action]) ? $listeners[$action] : $action;
+            $action = ! empty($listeners[$action]) ? $listeners[$action] : $action;
             
             $isEventListenerAction = true;
         } elseif (! method_exists($this->component, $action)) {

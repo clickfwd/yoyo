@@ -3,8 +3,8 @@
 use Clickfwd\Yoyo\Yoyo;
 use function Tests\htmlformat;
 use function Tests\render;
-use function Tests\update;
 use function Tests\response;
+use function Tests\update;
 use function Tests\yoyo_twig;
 
 beforeAll(function () {
@@ -39,6 +39,6 @@ it('can render dynamic component using a view and class namespace', function () 
 });
 
 it('can render nested components with yoyo function', function () {
-    $output = render('parent', ['data'=>[1, 2, 3]], ['id'=>'parent']);
+    $output = render('parent', ['data' => [1, 2, 3]], ['id' => 'parent']);
     expect(htmlformat($output))->toEqual(response('nested.twig'));
 });

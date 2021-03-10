@@ -35,6 +35,7 @@ class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
     {
         if (strpos($template, ViewProviderInterface::HINT_PATH_DELIMITER) > 0) {
             [$namespace, $name] = explode(ViewProviderInterface::HINT_PATH_DELIMITER, $template);
+
             return "@{$namespace}/{$name}";
         }
 
@@ -72,24 +73,28 @@ class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
     public function addNamespace($namespace, $path)
     {
         $this->getLoader()->addPath($path, $namespace);
+
         return $this;
     }
 
     public function prependNamespace($namespace, $path)
     {
         $this->getLoader()->prependPath($path, $namespace);
+
         return $this;
     }
 
     public function addLocation($location)
     {
         $this->getLoader()->addPath($location);
+
         return $this;
     }
 
     public function prependLocation($location)
     {
         $this->getLoader()->prependPath($location);
+
         return $this;
     }
 

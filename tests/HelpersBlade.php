@@ -10,7 +10,6 @@ use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Fluent;
 use Jenssegers\Blade\Blade;
-use function Tests\yoyo_instance;
 
 function yoyo_blade()
 {

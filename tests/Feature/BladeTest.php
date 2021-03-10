@@ -3,8 +3,8 @@
 use Clickfwd\Yoyo\Yoyo;
 use function Tests\htmlformat;
 use function Tests\render;
-use function Tests\update;
 use function Tests\response;
+use function Tests\update;
 use function Tests\yoyo_blade;
 
 beforeAll(function () {
@@ -42,7 +42,7 @@ it('renders dynamic component using a view and class namespace', function () {
 });
 
 it('can render nested components with @yoyo directive', function () {
-    $output = render('parent', ['data'=>[1, 2, 3]], ['id'=>'parent']);
+    $output = render('parent', ['data' => [1, 2, 3]], ['id' => 'parent']);
     expect(htmlformat($output))->toEqual(response('nested.blade'));
 });
 

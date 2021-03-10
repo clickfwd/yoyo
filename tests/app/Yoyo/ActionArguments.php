@@ -15,6 +15,6 @@ class ActionArguments extends Component
 
     public function render()
     {
-        return $this->view('action-arguments', ['a'=>$this->a, 'b'=>$this->b]);
+        return $this->view('action-arguments', ['a' => $this->a, 'b' => $this->b]);
     }
 }

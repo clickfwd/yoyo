@@ -38,6 +38,6 @@ it('can render namespaced dynamic component with custom resolver', function () {
     $yoyo->componentNamespace('packagename', 'Tests\\AppAnother\\Yoyo');
     expect(render('packagename::counter', [
         'yoyo:resolver' => 'blade',
-        'count' => 3
+        'count' => 3,
     ]))->toContain('The count is now 3');
 });

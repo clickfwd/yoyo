@@ -3,10 +3,8 @@
 namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
-use Clickfwd\Yoyo\Exceptions\IncompleteComponentParamInRequest;
-use Clickfwd\Yoyo\Exceptions\NotFoundHttpException;
 use Clickfwd\Yoyo\Exceptions\HttpException;
-use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
+use Clickfwd\Yoyo\Exceptions\NotFoundHttpException;
 use Clickfwd\Yoyo\Interfaces\RequestInterface;
 use Clickfwd\Yoyo\Services\BrowserEventsService;
 use Clickfwd\Yoyo\Services\Configuration;
@@ -307,12 +305,14 @@ class Yoyo
                 $postComponentProcessingActions();
             }
             Response::getInstance()->status($e->getStatusCode())->setHeaders($e->getHeaders())->send();
+
             throw $e;
         } catch (\Exception $e) {
             if (isset($postComponentProcessingActions)) {
                 $postComponentProcessingActions();
             }
             Response::getInstance()->send();
+
             throw $e;
         }
 

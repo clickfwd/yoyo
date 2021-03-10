@@ -1,15 +1,14 @@
 <?php
 
-use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use Clickfwd\Yoyo\Exceptions\HttpException;
+use Clickfwd\Yoyo\Yoyo;
 use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
 use function Tests\mockYoyoGetRequest;
-use function Tests\mockYoyoPostRequest;
 use function Tests\render;
 use function Tests\resetYoyoRequest;
 use function Tests\response;
@@ -38,9 +37,9 @@ it('renders counter component', function () {
 });
 
 it('uses passed variable value set in component', function () {
-    $vars = encode_vals([yoprefix_value('id')=>'counter', 'count'=>3]);
+    $vars = encode_vals([yoprefix_value('id') => 'counter', 'count' => 3]);
 
-    expect(render('counter', ['count'=>3]))->toContain(hxattr('vals', $vars));
+    expect(render('counter', ['count' => 3]))->toContain(hxattr('vals', $vars));
 });
 
 it('updates component', function () {
@@ -48,7 +47,7 @@ it('updates component', function () {
 });
 
 it('uses passed variable value in component action', function () {
-    $vars = encode_vals([yoprefix_value('id')=>'counter', 'count'=>1]);
+    $vars = encode_vals([yoprefix_value('id') => 'counter', 'count' => 1]);
 
     expect(update('counter', 'increment'))->toContain(hxattr('vals', $vars));
 });
@@ -115,9 +114,10 @@ it('it aborts component execution and throws an exception', function () {
     try {
         render('abort');
     } catch (HttpException $e) {
-        expect($e->getHeaders())->toMatchArray(['foo'=>'bar'])
+        expect($e->getHeaders())->toMatchArray(['foo' => 'bar'])
             ->and($e->getStatusCode())->toBe(404)
             ->and($e->getMessage())->toBe('not found');
+
         throw $e;
     }
 })->throws(HttpException::class);

@@ -1,7 +1,5 @@
 <?php
 
-use Clickfwd\Yoyo\Yoyo;
-use Clickfwd\Yoyo\ComponentManager;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use function Tests\render;
 use function Tests\update;

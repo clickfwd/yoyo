@@ -4,8 +4,8 @@ namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\Services\Configuration;
-use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 
 class ComponentResolver
 {
@@ -19,7 +19,7 @@ class ComponentResolver
 
     protected $container;
 
-    public function __invoke(ContainerInterface $container, array $registered  = [], array $hints = [])
+    public function __invoke(ContainerInterface $container, array $registered = [], array $hints = [])
     {
         $this->container = $container;
 
@@ -64,7 +64,7 @@ class ComponentResolver
             }
         }
 
-        if (!$className) {
+        if (! $className) {
             $className = $this->registered[$name] ?? null;
         }
         
@@ -85,6 +85,7 @@ class ComponentResolver
         
         if ($this->registered[$name] ?? null) {
             $args['name'] = $this->registered[$name] ?? $name;
+
             return $this->container->make(AnonymousComponent::class, $args);
         }
 

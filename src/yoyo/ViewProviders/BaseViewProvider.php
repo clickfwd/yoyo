@@ -2,8 +2,6 @@
 
 namespace Clickfwd\Yoyo\ViewProviders;
 
-use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
-
 abstract class BaseViewProvider
 {
     protected $view;

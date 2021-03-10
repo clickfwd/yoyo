@@ -2,8 +2,6 @@
 
 namespace Tests\App;
 
-use Tests\App\Comment;
-
 class Post
 {
     protected $comment;

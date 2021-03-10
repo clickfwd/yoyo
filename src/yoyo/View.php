@@ -2,8 +2,8 @@
 
 namespace Clickfwd\Yoyo;
 
-use InvalidArgumentException;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
+use InvalidArgumentException;
 
 class View
 {

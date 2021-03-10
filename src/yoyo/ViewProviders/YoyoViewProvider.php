@@ -2,8 +2,8 @@
 
 namespace Clickfwd\Yoyo\ViewProviders;
 
-use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
+use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use InvalidArgumentException;
 
 class YoyoViewProvider extends BaseViewProvider implements ViewProviderInterface
