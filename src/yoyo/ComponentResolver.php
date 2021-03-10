@@ -99,7 +99,7 @@ class ComponentResolver
 
     public function dotNotationToClass($name)
     {
-        return implode('\\', array_map(function($name) {
+        return implode('\\', array_map(function ($name) {
             return YoyoHelpers::studly($name);
         }, explode('.', $name)));
     }

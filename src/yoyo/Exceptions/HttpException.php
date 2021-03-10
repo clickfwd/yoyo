@@ -25,5 +25,5 @@ class HttpException extends \Exception
     public function getHeaders()
     {
         return $this->headers;
-    }    
+    }
 }

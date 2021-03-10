@@ -24,7 +24,7 @@ it('updates anonymous component', function () {
 });
 
 it('loads anonymous component with a registered alias', function () {
-    \Clickfwd\Yoyo\Yoyo::registerComponent('awesome','registered-anon');
+    \Clickfwd\Yoyo\Yoyo::registerComponent('awesome', 'registered-anon');
     expect(render('awesome'))->toContain('id="registered-anon"');
 });
 

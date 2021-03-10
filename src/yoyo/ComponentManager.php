@@ -93,7 +93,7 @@ class ComponentManager
     }
 
     private function processDynamicComponent($action, $variables = [], $attributes = []): string
-    {        
+    {
         $class = get_class($this->component);
 
         $this->component->setAction($action);

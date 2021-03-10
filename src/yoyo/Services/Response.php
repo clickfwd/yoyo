@@ -12,7 +12,9 @@ class Response
 
     protected $statusCode = 200;
 
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     public function header($name, $value)
     {
@@ -58,5 +60,5 @@ class Response
     public function getStatusCode()
     {
         return $this->statusCode;
-    }    
+    }
 }
