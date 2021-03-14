@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.0...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.1...develop)
 
 ## [0.7.1 (2021-03-14)](https://github.com/clickfwd/yoyo/compare/0.7.0...0.7.1)
 
