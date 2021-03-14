@@ -21,6 +21,8 @@ class YoyoCompiler
 
     protected $listeners;
 
+    protected $props;
+
     protected $idCounter = 1;
 
     /**
@@ -50,6 +52,7 @@ class YoyoCompiler
         'confirm',
         'encoding',
         'ext',
+        'headers',
         'history-elt',
         'include',
         'indicator',
@@ -63,7 +66,6 @@ class YoyoCompiler
         'swap',
         'target',
         'vals',
-        'vars',
     ];
 
     public const YOYO_TO_HX_ATTRIBUTE_REMAP = [
@@ -98,6 +100,13 @@ class YoyoCompiler
     public function addComponentListeners($listeners = [])
     {
         $this->listeners = $listeners;
+
+        return $this;
+    }
+
+    public function addComponentProps($props = [])
+    {
+        $this->props = $props;
 
         return $this;
     }
@@ -143,7 +152,9 @@ class YoyoCompiler
         $elements = $xpath->query('//form');
 
         foreach ($elements as $key => $element) {
-            $this->addFormBehavior($element);
+            if (! $element->hasAttribute(self::yoprefix('ignore'))) {
+                $this->addFormBehavior($element);
+            }
         }
 
         // Prevent infinite loop with on 'load' event on root node with outerHTML swap
@@ -238,24 +249,21 @@ class YoyoCompiler
 
         // Process public props
 
-        $props = $element->getAttribute(self::yoprefix('props')) ?: '';
-
-        if ($this->componentType == 'anonymous' || $props) {
-            // For anonymous components, only include props specified using yoyo:props attribute
+        if ($props = $element->getAttribute(self::yoprefix('props')) ?: []) {
             $props = explode(',', str_replace(' ', '', $props));
-        } else {
-            // For dynamic components, only include props specified using $props property
-            $props = array_keys($this->variables);
+            $element->removeAttribute(self::yoprefix('props'));
         }
 
-        $element->removeAttribute(self::yoprefix('props'));
-
-        $props = array_flip(array_merge($props, [
+        $props = array_merge($props, $this->props, [
             self::yoprefix('resolver'),
             self::yoprefix('source'),
-        ]));
-
-        $attributes['vals'] = array_merge($attributes['vals'], array_intersect_key($this->variables, $props));
+        ]);
+        
+        $variables = array_filter($this->variables, function ($key) use ($props) {
+            return in_array($key, $props);
+        }, ARRAY_FILTER_USE_KEY);
+                
+        $attributes['vals'] = array_merge($attributes['vals'], $variables);
         
         // Add all attributes
 

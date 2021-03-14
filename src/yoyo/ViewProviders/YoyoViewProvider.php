@@ -2,13 +2,15 @@
 
 namespace Clickfwd\Yoyo\ViewProviders;
 
+use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
+use InvalidArgumentException;
 
-class YoyoViewProvider implements ViewProviderInterface
+class YoyoViewProvider extends BaseViewProvider implements ViewProviderInterface
 {
     protected $view;
 
-    protected $template;
+    protected $name;
 
     protected $vars;
 
@@ -27,9 +29,9 @@ class YoyoViewProvider implements ViewProviderInterface
         //
     }
 
-    public function render($template, $vars = []): ViewProviderInterface
+    public function render($name, $vars = []): ViewProviderInterface
     {
-        $this->template = $template;
+        $this->name = $name;
 
         $this->vars = $vars;
 
@@ -41,18 +43,50 @@ class YoyoViewProvider implements ViewProviderInterface
         return $this->view->makeFromString($content, $vars);
     }
 
-    public function exists($template): bool
+    public function exists($name): bool
     {
-        return $this->view->exists($template);
+        try {
+            return $this->view->exists($name);
+        } catch (InvalidArgumentException $e) {
+            throw new ComponentNotFound($name);
+        }
     }
 
-    public function getProviderInstance()
+    public function addNamespace($namespace, $hints)
     {
-        return $this->view;
+        $this->view->addNamespace($namespace, $hints);
+
+        return $this;
+    }
+
+    public function prependNamespace($namespace, $hints)
+    {
+        $this->view->prependNamespace($namespace, $hints);
+
+        return $this;
+    }
+
+    public function addLocation($location)
+    {
+        $this->view->addLocation($location);
+
+        return $this;
+    }
+
+    public function prependLocation($location)
+    {
+        $this->view->prependLocation($location);
+
+        return $this;
+    }
+
+    public function __call(string $method, array $params)
+    {
+        return call_user_func_array([$this->view, $method], $params);
     }
 
     public function __toString()
     {
-        return $this->view->render($this->template, $this->vars);
+        return $this->view->render($this->name, $this->vars);
     }
 }

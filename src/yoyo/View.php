@@ -2,19 +2,24 @@
 
 namespace Clickfwd\Yoyo;
 
+use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
+use InvalidArgumentException;
+
 class View
 {
-    private $viewPath;
+    protected $paths;
 
-    private $templatePathsCache = [];
+    protected $views;
 
-    private $yoyoComponent;
+    protected $yoyoComponent;
+
+    protected static $hints;
 
     public function __construct($paths)
     {
-        $paths = is_array($paths) ? $paths : [$paths];
+        $paths = (array) $paths;
 
-        $this->viewPath = $paths;
+        $this->paths = array_map([$this, 'resolvePath'], $paths);
     }
 
     /**
@@ -33,12 +38,12 @@ class View
         return $this;
     }
 
-    public function render($template, $vars = []): string
+    public function render($name, $vars = []): string
     {
+        $path = $this->exists($name);
+
         ob_start();
-
-        $path = $this->templatePathsCache[$template];
-
+        
         \Closure::bind(function () use ($path, $vars) {
             extract($vars, EXTR_SKIP);
             include $path;
@@ -52,20 +57,93 @@ class View
         throw new \Exception('Views from strings are not supported with the native Yoyo view provider.');
     }
 
-    public function exists($template)
+    public function exists($name)
     {
-        $templatePath = str_replace('.', '/', $template);
+        if (isset($this->views[$name])) {
+            return $this->views[$name];
+        }
 
-        foreach ($this->viewPath as $path) {
-            if (file_exists("{$path}/{$templatePath}.php")) {
-                $this->templatePathsCache[$template] = "{$path}/{$templatePath}.php";
+        if ($this->hasHintInformation($name = trim($name))) {
+            return $this->views[$name] = $this->findNamespacedView($name);
+        }
 
-                return true;
+        return $this->views[$name] = $this->findInPaths($name, $this->paths);
+    }
+
+    public function addLocation($location)
+    {
+        $this->paths[] = $this->resolvePath($location);
+    }
+
+    public function prependLocation($location)
+    {
+        array_unshift($this->paths, $this->resolvePath($location));
+    }
+
+    protected function findInPaths($name, $paths)
+    {
+        $templatePath = str_replace('.', '/', $name);
+
+        foreach ($paths as $path) {
+            if (file_exists($location = "{$path}/{$templatePath}.php")) {
+                return $location;
             }
         }
 
-        $this->templatePathsCache[$template] = false;
+        throw new InvalidArgumentException("View [{$name}] not found.");
+    }
 
-        return false;
+    protected function findNamespacedView($name)
+    {
+        [$namespace, $view] = $this->parseNamespaceSegments($name);
+
+        return $this->findInPaths($view, static::$hints[$namespace]);
+    }
+
+    protected function parseNamespaceSegments($name)
+    {
+        $segments = explode(ViewProviderInterface::HINT_PATH_DELIMITER, $name);
+
+        if (count($segments) !== 2) {
+            throw new InvalidArgumentException("View [{$name}] has an invalid name.");
+        }
+
+        if (! isset(static::$hints[$segments[0]])) {
+            throw new InvalidArgumentException("No hint path defined for [{$segments[0]}].");
+        }
+
+        return $segments;
+    }
+
+    public function addNamespace($namespace, $hints)
+    {
+        $hints = (array) $hints;
+
+        if (isset(static::$hints[$namespace])) {
+            $hints = array_merge(static::$hints[$namespace], $hints);
+        }
+
+        static::$hints[$namespace] = $hints;
+    }
+
+    public function prependNamespace($namespace, $hints)
+    {
+        $hints = (array) $hints;
+
+        if (isset(static::$hints[$namespace])) {
+            $hints = array_merge($hints, static::$hints[$namespace]);
+        }
+
+        static::$hints[$namespace] = $hints;
+    }
+
+    public function hasHintInformation($name)
+    {
+        return strpos($name, ViewProviderInterface::HINT_PATH_DELIMITER) > 0;
+    }
+
+    protected function resolvePath($path)
+    {
+        return realpath($path) ?: $path;
     }
 }

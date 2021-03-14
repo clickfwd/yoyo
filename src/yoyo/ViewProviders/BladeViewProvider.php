@@ -4,7 +4,7 @@ namespace Clickfwd\Yoyo\ViewProviders;
 
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 
-class BladeViewProvider implements ViewProviderInterface
+class BladeViewProvider extends BaseViewProvider implements ViewProviderInterface
 {
     protected $view;
 
@@ -52,11 +52,44 @@ class BladeViewProvider implements ViewProviderInterface
         return $this->view->exists($template);
     }
 
-    public function getProviderInstance()
+    public function getFinder()
     {
-        return $this->view;
+        return $this->view->getFinder();
     }
 
+    public function addNamespace($namespace, $hints)
+    {
+        $this->getFinder()->addNamespace($namespace, $hints);
+
+        return $this;
+    }
+
+    public function prependNamespace($namespace, $hints)
+    {
+        $this->getFinder()->prependNamespace($namespace, $hints);
+
+        return $this;
+    }
+
+    public function addLocation($location)
+    {
+        $this->getFinder()->addLocation($location);
+
+        return $this;
+    }
+
+    public function prependLocation($location)
+    {
+        $this->getFinder()->prependLocation($location);
+
+        return $this;
+    }
+
+    public function __call(string $method, array $params)
+    {
+        return call_user_func_array([$this->view, $method], $params);
+    }
+        
     public function __toString()
     {
         $output = (string) $this->view->make($this->template, $this->vars);

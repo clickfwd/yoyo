@@ -9,5 +9,7 @@ trait Redirector
     public function redirect($url)
     {
         $this->redirectTo = $url;
+
+        return $this;
     }
 }

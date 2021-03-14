@@ -1,17 +1,17 @@
 <?php
 
 use function Tests\headers;
-use function Tests\initYoyo;
 use function Tests\mockYoyoGetRequest;
 use function Tests\yoyo_update;
+use function Tests\yoyo_view;
 
 beforeAll(function () {
-    $yoyo = initYoyo(['Counter']);
+    yoyo_view();
 });
 
-test('emitted browser event', function () {
+it('emits browser event', function () {
     mockYoyoGetRequest('http://example.com/', 'counter/increment');
-
+    
     yoyo_update();
 
     $headers = headers();

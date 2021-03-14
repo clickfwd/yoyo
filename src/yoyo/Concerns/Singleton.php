@@ -18,7 +18,7 @@ trait Singleton
     final public static function getInstance(...$params)
     {
         if (! isset(static::$instance)) {
-            static::$instance = new static(...$params);
+            static::$instance = new self(...$params);
         }
 
         return static::$instance;

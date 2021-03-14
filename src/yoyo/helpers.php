@@ -8,7 +8,7 @@ use Clickfwd\Yoyo\Yoyo;
 if (! function_exists('Yoyo\yoyo_render')) {
     function yoyo_render($name, $variables = [], $attributes = []): string
     {
-        $yoyo = new Yoyo();
+        $yoyo = Yoyo::getInstance();
 
         return $yoyo->mount($name, $variables, $attributes)->render();
     }
@@ -30,6 +30,25 @@ function yoyo_styles($return = false)
         return $output;
     }
     echo $output;
+}
+
+function abort($code, $message = '', array $headers = [])
+{
+    Yoyo::abort($code, $message, $headers);
+}
+
+function abort_if($boolean, $code, $message = '', array $headers = [])
+{
+    if ($boolean) {
+        Yoyo::abort($code, $message, $headers);
+    }
+}
+
+function abort_unless($boolean, $code, $message = '', array $headers = [])
+{
+    if (! $boolean) {
+        Yoyo::abort($code, $message, $headers);
+    }
 }
 
 function encode_vals($vals)
@@ -65,30 +84,4 @@ function not_spinning($expression = null)
     } elseif (! $expression) {
         return false;
     }
-}
-
-function d(...$params)
-{
-    var_dump(...$params);
-}
-
-function dd(...$params)
-{
-    d(...$params);
-
-    exit;
-}
-
-function prx(...$params)
-{
-    foreach ($params as $param) {
-        echo '<pre>';
-        print_r($param);
-        echo '</pre>';
-    }
-}
-
-function cm($class)
-{
-    dd(get_class_methods($class));
 }

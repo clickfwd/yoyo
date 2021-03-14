@@ -4,9 +4,9 @@ namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Concerns\BrowserEvents;
 use Clickfwd\Yoyo\Concerns\Redirector;
+use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\MissingComponentTemplate;
-use Clickfwd\Yoyo\Interfaces\ComponentResolverInterface;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\Services\Response;
 use Closure;
@@ -27,6 +27,8 @@ abstract class Component
 
     protected $request;
 
+    protected $response;
+
     protected $spinning;
 
     protected $queryString = [];
@@ -35,7 +37,7 @@ abstract class Component
 
     protected $listeners = [];
 
-    protected $noResponse = false;
+    protected $omitResponse = false;
 
     protected $computedPropertyCache = [];
 
@@ -50,7 +52,7 @@ abstract class Component
         'spinning',
     ];
 
-    public function __construct(string $id, string $name, ComponentResolverInterface $resolver)
+    public function __construct(ComponentResolver $resolver, string $id, string $name)
     {
         $this->yoyo_id = $id;
 
@@ -87,14 +89,6 @@ abstract class Component
         return $this;
     }
 
-    public function mount()
-    {
-    }
-
-    public function beforeRender()
-    {
-    }
-
     public function getName()
     {
         return $this->componentName;
@@ -122,6 +116,11 @@ abstract class Component
         return $this->props;
     }
 
+    public function setAction($action)
+    {
+        $this->componentAction = $action;
+    }
+
     public function getListeners()
     {
         $listeners = [];
@@ -142,18 +141,6 @@ abstract class Component
         return $this->yoyo_id;
     }
 
-    public function parameters($array = [])
-    {
-        return $this->buildParametersForView($array);
-    }
-
-    public function callActionWithArguments($action, $args)
-    {
-        $this->componentAction = $action;
-
-        return call_user_func_array([$this, $action], $args);
-    }
-
     public function set($key, $value = null)
     {
         if (is_array($key)) {
@@ -167,19 +154,37 @@ abstract class Component
 
     public function render()
     {
-        if (! $this->noResponse) {
-            return $this->view($this->componentName);
+        if ($this->omitResponse) {
+            throw new BypassRenderMethod($this->response->getStatusCode());
         }
 
-        // No Content
-        $this->response->status(204);
-
-        return null;
+        return $this->view($this->componentName);
     }
 
+    public function addSwapModifiers($modifier)
+    {
+        $this->response->header('Yoyo-Swap-Modifier', $modifier);
+
+        return $this;
+    }
+    
     public function skipRender()
     {
-        $this->noResponse = true;
+        $this->response->status(204);
+        $this->omitResponse = true;
+
+        return $this;
+    }
+
+    public function skipRenderAndRemove($modifier = 'swap:1s')
+    {   
+        if ($modifier) {
+            $this->addSwapModifiers($modifier);
+        }
+        
+        $this->response->status(200);
+        $this->omitResponse = true;
+        return $this;
     }
 
     protected function view($template, $vars = []): ViewProviderInterface
@@ -203,7 +208,7 @@ abstract class Component
 
     public function createViewFromString($content): string
     {
-        $view = $this->resolve->resolveViewProvider();
+        $view = $this->resolver->resolveViewProvider();
 
         $view->startYoyoRendering($this);
 
@@ -289,11 +294,13 @@ abstract class Component
         }
     }
 
-    public function forgetComputedWithArgs($name, ...$args) {
+    public function forgetComputedWithArgs($name, ...$args)
+    {
         $this->forgetComputed(static::makeCacheKey($name, $args));
     }
 
-    protected static function makeCacheKey($name, $arguments) {
-        return md5($name.json_encode($arguments));        
+    protected static function makeCacheKey($name, $arguments)
+    {
+        return md5($name.json_encode($arguments));
     }
 }

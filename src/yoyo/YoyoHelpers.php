@@ -6,7 +6,13 @@ class YoyoHelpers
 {
     public static function encode_vals(array $vars): string
     {
-        return json_encode($vars, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        $adjusted = [];
+        foreach ($vars as $key => $val) {
+            $newKey = is_array($val) ? $key.'[]' : $key;
+            $adjusted[$newKey] = $val;
+        }
+
+        return json_encode($adjusted, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 
     public static function decode_vals(string $string): array
@@ -25,49 +31,6 @@ class YoyoHelpers
         }
 
         return $string === '0' ? 0 : $string;
-    }
-
-    /**
-     * $expresionKeys allows the output of values as javascript expression, without quotes.
-     */
-    public static function encode_vars(array $vars, array $expressionKeys = []): string
-    {
-        $output = [];
-
-        foreach ($vars as $key => $val) {
-            if (in_array($key, $expressionKeys) || is_numeric($val)) {
-                $output[] = "'$key':$val";
-            } elseif (is_array($val)) {
-                $output[] = "'$key':'".json_encode($val)."'";
-            } else {
-                $output[] = "'$key':'$val'";
-            }
-        }
-
-        return implode(',', $output);
-    }
-
-    public static function decode_vars($string): array
-    {
-        if (empty($string)) {
-            return [];
-        }
-
-        $vars = [];
-
-        foreach (explode(',', $string) as $var) {
-            [$key, $value] = explode(':', $var);
-
-            $key = ltrim(rtrim($key, "'"), "'");
-
-            if ($decoded = static::test_json($value[0])) {
-                $vars[$key] = $decoded;
-            } else {
-                $vars[$key] = $value;
-            }
-        }
-
-        return $vars;
     }
 
     public static function test_json($string)

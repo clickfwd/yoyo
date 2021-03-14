@@ -9,6 +9,10 @@ class BrowserEventsService
 {
     use Singleton;
 
+    private $request;
+
+    private $response;
+
     private $eventQueue = [];
 
     private $browserEventQueue = [];
@@ -27,45 +31,40 @@ class BrowserEventsService
 
     public function emitTo($target, $event, ...$params)
     {
-        $selector = null;
-        $component = null;
+        $this->queue($event, $params, null, $target);
+    }
 
-        if (in_array($target[0], ['.', '#'])) {
-            $selector = $target;
-        } else {
-            $component = $target;
-        }
-
-        $this->queue($event, $params, $selector, $component);
+    public function emitToWithSelector($target, $event, ...$params)
+    {
+        $this->queue($event, $params, $target);
     }
 
     public function emitSelf($event, ...$params)
     {
-        if ($targetId = $this->request->triggerId()) {
-            $this->emitTo("#{$targetId}", $event, $params);
+        if ($component = $this->getComponentNameFromRequest()) {
+            $this->queue($event, $params, $selector = null, $component, 'self');
         }
     }
 
     public function emitUp($event, ...$params)
     {
-        if ($targetId = $this->request->triggerId()) {
-            $this->queue($event, $params, "#{$targetId}", $component = null, $ancestorsOnly = true);
+        $targetId = $this->request->triggerId();
+        if ($component = $this->getComponentNameFromRequest()) {
+            $this->queue($event, $params, "#{$targetId}", $component, 'ancestorsOnly');
         }
     }
 
-    public function queue($event, $params, $selector = null, $component = null, $ancestorsOnly = null)
+    public function queue($event, $params, $selector = null, $component = null, $propagation = null)
     {
-        $params = is_array($params[0]) ? array_filter($params[0]) : $params[0];
+        $params = $params[0];
 
-        $payload = array_filter(compact('event', 'params', 'selector', 'component', 'ancestorsOnly'));
+        $payload = array_filter(compact('event', 'params', 'selector', 'component', 'propagation'));
 
         $this->eventQueue[] = $payload;
     }
 
     public function dispatchBrowserEvent($event, $params = [])
     {
-        $params = is_array($params) ? array_filter($params) : $params;
-
         $this->browserEventQueue[] = compact('event', 'params');
     }
 
@@ -74,5 +73,14 @@ class BrowserEventsService
         $this->response->header('Yoyo-Emit', json_encode($this->eventQueue));
 
         $this->response->header('Yoyo-Browser-Event', json_encode($this->browserEventQueue));
+    }
+
+    protected function getComponentNameFromRequest()
+    {
+        if ($name = $this->request->get('component')) {
+            return explode('/', $name)[0];
+        }
+
+        return false;
     }
 }

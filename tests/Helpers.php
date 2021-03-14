@@ -9,56 +9,54 @@ use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\YoyoCompiler;
 use Clickfwd\Yoyo\YoyoHelpers;
 
-function initYoyo($components = [])
+require_once __DIR__.'/HelpersBlade.php';
+require_once __DIR__.'/HelpersTwig.php';
+
+function yoyo_view()
 {
-    foreach ($components as $component) {
-        require_once __DIR__."/app/Yoyo/{$component}.php";
-    }
-
-    $yoyo = new Yoyo();
-
-    $yoyo->configure([
-        'namespace' => 'Tests\\App\\Yoyo\\',
-    ]);
-
-    $yoyo->registerViewProvider(function () {
+    yoyo_instance()->registerViewProvider(function () {
         return new YoyoViewProvider(new View(__DIR__.'/app/resources/views/yoyo'));
     });
+}
+
+function yoyo_instance()
+{
+    $yoyo = Yoyo::getInstance();
 
     return $yoyo;
 }
 
 function compile_html($name, $html, $spinning = false)
 {
-    $yoyo = new Yoyo();
+    $yoyo = yoyo_instance();
 
     return $yoyo->mount($name)->compile('anonymous', $html, $spinning);
 }
 
 function compile_html_with_vars($name, $html, $vars, $spinning = false)
 {
-    $yoyo = new Yoyo();
+    $yoyo = yoyo_instance();
 
     return $yoyo->mount($name, $vars)->compile('anonymous', $html, $spinning);
 }
 
 function render($name, $variables = [], $attributes = [])
 {
-    $yoyo = new Yoyo();
-
+    $yoyo = yoyo_instance();
+    
     return $yoyo->mount($name, $variables, $attributes)->render();
 }
 
 function update($name, $action = 'render', $variables = [], $attributes = [])
 {
-    $yoyo = new Yoyo();
+    $yoyo = yoyo_instance();
 
     return $yoyo->mount($name, $variables, $attributes, $action)->refresh();
 }
 
 function yoyo_update()
 {
-    return (new Yoyo())->update();
+    return (yoyo_instance())->update();
 }
 
 function mockYoyoGetRequest($url, $component, $target = '', $parameters = [])

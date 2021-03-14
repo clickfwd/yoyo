@@ -10,6 +10,7 @@ class Application extends Container
     {
         return '';
     }
+
     // public function runningInConsole()
     // {
     //     return false;

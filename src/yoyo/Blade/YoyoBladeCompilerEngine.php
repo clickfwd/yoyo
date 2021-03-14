@@ -40,7 +40,7 @@ class YoyoBladeCompilerEngine extends LaravelCompilerEngine
                 extract($__data, EXTR_SKIP);
                 include $__path;
             }, $this->yoyoComponent ? $this->yoyoComponent : $this)();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->handleViewException($e, $obLevel);
         }
 

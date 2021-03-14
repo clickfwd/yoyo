@@ -56,7 +56,7 @@ class ClassHelpers
 
     public static function getPublicMethods($instance, $exceptions = [])
     {
-        $class = new ReflectionClass(get_class($instance));
+        $class = new ReflectionClass(is_string($instance) ? $instance : get_class($instance));
 
         $className = $class->getName();
 
@@ -71,34 +71,76 @@ class ClassHelpers
         return $publicMethods ?? [];
     }
 
-    public static function getPublicMethodsBaseClass($instance, $exceptions = [])
-    {
-        $class_tmp = new ReflectionClass(get_class($instance));
-
-        $className = $class_tmp->getName();
-
-        $methods = $class_tmp->getMethods(ReflectionMethod::IS_PUBLIC);
-
-        foreach ($methods as $method) {
-            if ($method->class !== $className && ! in_array($method->name, $exceptions)) {
-                $publicMethods[] = $method->name;
-            }
-        }
-
-        return $publicMethods ?? [];
-    }
-
     public static function methodIsPrivate($instance, $method)
     {
         $reflection = new ReflectionMethod($instance, $method);
 
         return ! $reflection->isPublic();
     }
-
+    
     public static function classImplementsInterface($name, $instance)
     {
         $class = new ReflectionClass($name);
 
         return in_array($instance, $class->getInterfaceNames());
+    }
+
+    /**
+     * Laravel Support helper
+     */
+    public static function classUsesRecursive($class)
+    {
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
+
+        $results = [];
+
+        foreach (array_reverse(class_parents($class)) + [$class => $class] as $class) {
+            $results += static::traitUsesRecursive($class);
+        }
+
+        return array_unique($results);
+    }
+
+    /**
+     * Laravel Support helper
+     */
+    public static function traitUsesRecursive($trait)
+    {
+        $traits = class_uses($trait);
+
+        foreach ($traits as $trait) {
+            $traits += static::traitUsesRecursive($trait);
+        }
+
+        return $traits;
+    }
+
+    /**
+     * Laravel Support helper
+     */
+    public static function classBasename($class)
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+
+        return basename(str_replace('\\', '/', $class));
+    }
+
+    public static function getMethodParameterNames($class, $method)
+    {
+        $names = [];
+
+        $reflector = new ReflectionClass($class);
+
+        $method = $reflector->getMethod($method);
+
+        foreach ($method->getParameters() as $parameter) {
+            if (! $parameter->getClass()) {
+                $names[] = $parameter->getName();
+            }
+        }
+
+        return $names;
     }
 }

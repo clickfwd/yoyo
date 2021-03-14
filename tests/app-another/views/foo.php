@@ -1,0 +1,1 @@
+<div>other foo from another app</div>

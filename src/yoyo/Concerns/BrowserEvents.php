@@ -16,6 +16,11 @@ trait BrowserEvents
         (BrowserEventsService::getInstance())->emitTo($target, $event, $params);
     }
 
+    public function emitToWithSelector($target, $event, ...$params)
+    {
+        (BrowserEventsService::getInstance())->emitToWithSelector($target, $event, $params);
+    }
+    
     public function emitSelf($event, ...$params)
     {
         (BrowserEventsService::getInstance())->emitSelf($event, $params);

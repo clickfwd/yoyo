@@ -8,6 +8,8 @@ class PageRedirectService
 {
     use Singleton;
 
+    private $response;
+
     public function __construct()
     {
         $this->response = Response::getInstance();

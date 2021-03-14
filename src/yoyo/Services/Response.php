@@ -8,9 +8,13 @@ class Response
 {
     use Singleton;
 
-    private $headers = [];
+    protected $headers = [];
 
-    private $status = 200;
+    protected $statusCode = 200;
+
+    public function __construct()
+    {
+    }
 
     public function header($name, $value)
     {
@@ -19,26 +23,42 @@ class Response
         return $this;
     }
 
-    public function status($code)
+    public function status($statusCode)
     {
-        $this->status = $code;
+        $this->statusCode = $statusCode;
 
         return $this;
     }
 
-    public function send($content = '')
+    public function send(string $content = ''): string
     {
         foreach ($this->headers as $key => $value) {
             header("$key: $value");
         }
 
-        http_response_code($this->status);
+        if ($this->statusCode == 204) {
+            http_response_code(204);
+        }
 
-        return $content ?: null;
+        http_response_code($this->statusCode ?? 200);
+
+        return $content ?: '';
+    }
+
+    public function setHeaders($headers)
+    {
+        $this->headers = array_merge($this->headers, $headers);
+
+        return $this;
     }
 
     public function getHeaders()
     {
         return $this->headers;
+    }
+
+    public function getStatusCode()
+    {
+        return $this->statusCode;
     }
 }
