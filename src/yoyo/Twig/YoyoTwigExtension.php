@@ -19,6 +19,7 @@ class YoyoTwigExtension extends AbstractExtension implements GlobalsInterface
             $this->yoyo(),
             $this->emit(),
             $this->emitTo(),
+            $this->emitToWithSelector(),
             $this->emitSelf(),
             $this->emitUp(),
         ];
