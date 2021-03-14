@@ -177,13 +177,14 @@ abstract class Component
     }
 
     public function skipRenderAndRemove($modifier = 'swap:1s')
-    {   
+    {
         if ($modifier) {
             $this->addSwapModifiers($modifier);
         }
         
         $this->response->status(200);
         $this->omitResponse = true;
+
         return $this;
     }
 
