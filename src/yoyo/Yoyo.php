@@ -316,7 +316,13 @@ class Yoyo
             throw $e;
         }
 
-        $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props);
+        $cacheHistory = ! empty(array_filter($componentManager->getQueryString(),
+            function($key) {
+                return strpos($key, 'yoyo-id') !== 0;
+            })
+        );
+        
+        $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props, $cacheHistory);
 
         if ($spinning) {
             $postComponentProcessingActions();
@@ -325,13 +331,14 @@ class Yoyo
         return (Response::getInstance())->send($compiledHtml);
     }
 
-    public function compile($componentType, $html, $spinning = null, $variables = [], $listeners = [], $props = []): string
+    public function compile($componentType, $html, $spinning = null, $variables = [], $listeners = [], $props = [], $cacheHistory = false): string
     {
         $spinning = $spinning ?? $this->is_spinning();
 
         $variables = array_merge($this->variables, $variables);
 
         $output = (new YoyoCompiler($componentType, $this->id, $this->name, $variables, $this->attributes, $spinning))
+                    ->withHistory($cacheHistory)
                     ->addComponentListeners($listeners)
                     ->addComponentProps($props)
                     ->compile($html);

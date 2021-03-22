@@ -23,6 +23,8 @@ class YoyoCompiler
 
     protected $props;
 
+    protected $withHistory;
+
     protected $idCounter = 1;
 
     /**
@@ -107,6 +109,13 @@ class YoyoCompiler
     public function addComponentProps($props = [])
     {
         $this->props = $props;
+
+        return $this;
+    }
+
+    public function withHistory($cacheHistory = false)
+    {
+        $this->withHistory = $cacheHistory;
 
         return $this;
     }
@@ -228,6 +237,10 @@ class YoyoCompiler
         $element->setAttribute('class', self::COMPONENT_WRAPPER_CLASS.($class ? ' '.$class : ''));
 
         $element->setAttribute(self::yoprefix('name'), $this->name);
+
+        if ($this->withHistory) {
+            $element->setAttribute(self::yoprefix('history'), 1);
+        }
 
         if ($trigger = $element->getAttribute(self::yoprefix('on'))) {
             $attributes['on'] .= ', '.$trigger;

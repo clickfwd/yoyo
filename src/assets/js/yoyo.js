@@ -157,8 +157,7 @@
 				const pushedUrl = xhr.getResponseHeader('Yoyo-Push')
 
 				// Browser history support only works with components modifing the URL queryString
-
-				if (!pushedUrl || component?.__yoyo?.replayingHistory) {
+				if (!component.hasAttribute('yoyo:history') || !pushedUrl || component?.__yoyo?.replayingHistory) {
 					if (component.yoyo) {
 						component.__yoyo.replayingHistory = false
 					}
