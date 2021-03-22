@@ -316,10 +316,12 @@ class Yoyo
             throw $e;
         }
 
-        $cacheHistory = ! empty(array_filter($componentManager->getQueryString(),
-            function($key) {
+        $cacheHistory = ! empty(array_filter(
+            $componentManager->getQueryString(),
+            function ($key) {
                 return strpos($key, 'yoyo-id') !== 0;
-            })
+            }
+        )
         );
         
         $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props, $cacheHistory);
