@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.1...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.2...develop)
+
+## [0.7.1 (2021-03-22)](https://github.com/clickfwd/yoyo/compare/0.7.1...0.7.2)
+
+### Fixed
+
+- Initial component history snapshot taken even for components that don't push changes to the URL via `queryString`.
 
 ## [0.7.1 (2021-03-14)](https://github.com/clickfwd/yoyo/compare/0.7.0...0.7.1)
 
@@ -34,7 +40,6 @@
 - Refactored component resolver
 - Events are sent to the browser even when throwing an exception within a component.
 - Components are resolved from the container.
-
 
 ### Fixed
 
