@@ -150,7 +150,7 @@ class ComponentManager
             }
         }
 
-        if ($action !== 'render') {
+        if (! in_array($action, ['render', 'refresh'])) {
             $parameters = $isEventListenerAction ? $eventParams : $this->parseActionArguments();
             
             $parameterNames = ClassHelpers::getMethodParameterNames($this->component, $action);
