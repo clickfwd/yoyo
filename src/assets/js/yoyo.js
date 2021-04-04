@@ -626,7 +626,7 @@
 
 		function componentCopyYoyoDataFromTo(from, to) {
 			to.__yoyo = from?.__yoyo || {}
-			to.__yoyo_on_finish_loading = from?.__yoyo_on_finish_loading
+			to.__yoyo_on_finish_loading = from?.__yoyo_on_finish_loading || []
 		}
 
 		function componentAddYoyoData(component, data) {
