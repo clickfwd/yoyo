@@ -1,8 +1,18 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.2...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.3...develop)
 
-## [0.7.1 (2021-03-22)](https://github.com/clickfwd/yoyo/compare/0.7.1...0.7.2)
+## [0.7.3 (2021-04-04)](https://github.com/clickfwd/yoyo/compare/0.7.2...0.7.3)
+
+### Fixed
+
+- Allow component listeners to trigger the default `refresh` action.
+
+    ```php
+    protected $listeners = ['updated' => 'refresh'];
+    ```
+
+## [0.7.2 (2021-03-22)](https://github.com/clickfwd/yoyo/compare/0.7.1...0.7.2)
 
 ### Fixed
 
