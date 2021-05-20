@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.3...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.4...develop)
+
+## [0.7.4 (2021-05-20)](https://github.com/clickfwd/yoyo/compare/0.7.3...0.7.4)
+
+### Fixed
+
+- Various fixes
 
 ## [0.7.3 (2021-04-04)](https://github.com/clickfwd/yoyo/compare/0.7.2...0.7.3)
 
