@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.4...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.5...develop)
+
+## [0.7.5 (2021-05-28)](https://github.com/clickfwd/yoyo/compare/0.7.4...0.7.5)
+
+### Fixed
+
+- Error retrieving parameter names for component action.
 
 ## [0.7.4 (2021-05-20)](https://github.com/clickfwd/yoyo/compare/0.7.3...0.7.4)
 
