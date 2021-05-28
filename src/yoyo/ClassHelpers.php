@@ -136,7 +136,7 @@ class ClassHelpers
         $method = $reflector->getMethod($method);
 
         foreach ($method->getParameters() as $parameter) {
-            if (! $parameter->getType() || ($parameter->getType() && ! $parameter->getType()->getName())) {
+            if (! $parameter->getType() || ($parameter->getType() && $parameter->getType()->isBuiltin())) {
                 $names[] = $parameter->getName();
             }
         }
