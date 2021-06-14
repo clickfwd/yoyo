@@ -154,10 +154,19 @@
 				if (!component) return
 
 				const xhr = evt.detail.xhr
-				const pushedUrl = xhr.getResponseHeader('Yoyo-Push')
-
-				// Browser history support only works with components modifing the URL queryString
-				if (!component.hasAttribute('yoyo:history') || !pushedUrl || component?.__yoyo?.replayingHistory) {
+				// Browser history automatically enabled for components with queryStrings
+				let history = component.hasAttribute('yoyo:history')
+				let pushedUrl = xhr.getResponseHeader('Yoyo-Push')
+				let triggerId = evt.detail.requestConfig.headers['HX-Trigger'] || null
+				let href = htmx.find(`#${triggerId}`).getAttribute('href')
+				
+				// If reactive element has an href tag, override history setting and add the component and href to browser history
+				if (triggerId && href) {
+					pushedUrl = href
+					history = true
+				}
+				
+				if (!history || !pushedUrl || component?.__yoyo?.replayingHistory) {
 					if (component.yoyo) {
 						component.__yoyo.replayingHistory = false
 					}
