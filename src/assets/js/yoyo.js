@@ -134,7 +134,7 @@
 				if (!component) return
 
 				componentCopyYoyoDataFromTo(evt.detail.target, component)
-
+				
 				// This isn't needed at this time because the CSS classes/attributes are
 				// automatically removed when a component is updated from the server
 				// however, could be useful to improve transitions in the future. It would
@@ -157,9 +157,8 @@
 				// Browser history automatically enabled for components with queryStrings
 				let history = component.hasAttribute('yoyo:history')
 				let pushedUrl = xhr.getResponseHeader('Yoyo-Push')
-				let triggerId = evt.detail.requestConfig.headers['HX-Trigger'] || null
-				let href = htmx.find(`#${triggerId}`).getAttribute('href')
-				
+				let triggerId = evt.detail?.triggerEltInfo?.id || evt.detail.requestConfig.headers['HX-Trigger']
+				let href = triggerId ? evt.detail?.triggerEltInfo?.href : false
 				// If reactive element has an href tag, override history setting and add the component and href to browser history
 				if (triggerId && href) {
 					pushedUrl = href
@@ -737,6 +736,14 @@ YoyoEngine.defineExtension('yoyo', {
 
 		if (name === 'htmx:beforeSwap') {
 			if (!evt.target) return
+
+			// Add triggering element info to event detail so it can be read in after swap events
+			// For example to push the href url to browser history using the href from the element that's no longer present on the page
+			let triggerId = evt.detail.requestConfig.headers['HX-Trigger'] || null
+			let triggeringElt = htmx.find(`#${triggerId}`)
+			if (triggerId && triggeringElt) {
+				evt.detail.triggerEltInfo = { id: triggerId, href: triggeringElt.getAttribute('href') }
+			}
 
 			const modifier = evt.detail.xhr.getResponseHeader(
 				'Yoyo-Swap-Modifier'
