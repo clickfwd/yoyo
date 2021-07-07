@@ -65,6 +65,11 @@ class Request implements RequestInterface
         return $output;
     }
 
+    public function only($keys)
+    {
+        return array_intersect_key($this->all(),array_flip($keys));
+    }
+
     public function get($key, $default = null)
     {
         if (in_array($key, $this->dropped)) {
