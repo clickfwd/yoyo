@@ -125,3 +125,16 @@ it('it aborts component execution and throws an exception', function () {
 it('renders dynamic component in sub-directory', function () {
     expect(render('account.register'))->toContain('Please register to access this page');
 });
+
+it('renders component using dynamic properties', function () {
+    $vars = encode_vals([
+        yoprefix_value('id') => 'counter',
+        'count' => '',
+    ]);
+
+    expect(render('counter_dynamic_properties'))->toContain(hxattr('vals', $vars));
+});
+
+it('updates component with dynamic properties', function () {
+    expect(update('counter_dynamic_properties', 'increment'))->toContain('The count is now 1');
+});

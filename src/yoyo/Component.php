@@ -80,10 +80,17 @@ abstract class Component
 
         $this->attributes = $attributes;
 
-        foreach (ClassHelpers::getPublicProperties($this) as $property) {
-            $value = $data[$property] ?? $this->{$property};
+        $publicProperties = ClassHelpers::getPublicProperties($this);
+        
+        $publicProperties = array_merge($this->addDynamicProperties(), $publicProperties);
 
-            $this->{$property} = $value;
+        foreach ($publicProperties as $property) {
+            // Use property_exists check to prevent triggering of magic __get method used for computed properties
+            if (property_exists($this, $property)) {
+                $value = $data[$property] ?? $this->{$property};
+            }
+
+            $this->{$property} = $value ?? null;
         }
 
         return $this;
@@ -92,6 +99,11 @@ abstract class Component
     public function getName()
     {
         return $this->componentName;
+    }
+
+    public function addDynamicProperties()
+    {
+        return [];
     }
 
     public function getInitialAttributes()
@@ -104,6 +116,11 @@ abstract class Component
     public function getVariables()
     {
         return $this->variables;
+    }
+
+    public function getQueryParam($key, $default = null)
+    {
+        return $this->request->get($key, $default);
     }
 
     public function getQueryString()
@@ -227,6 +244,8 @@ abstract class Component
         $vars['spinning'] = $this->spinning;
 
         $properties = ClassHelpers::getPublicVars($this);
+
+        $properties = array_merge($properties, array_fill_keys($this->addDynamicProperties(), null));
 
         return array_merge($this->viewData, $vars, $properties);
     }
