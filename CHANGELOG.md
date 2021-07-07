@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.7.5...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.8.0...develop)
+
+## [0.8.0 (2021-07-07)](https://github.com/clickfwd/yoyo/compare/0.7.5...0.8.0)
+
+### Changed
+
+- Links that trigger Yoyo requests now automatically update the browser URL and push the component state to the browser history.
 
 ## [0.7.5 (2021-05-28)](https://github.com/clickfwd/yoyo/compare/0.7.4...0.7.5)
 
