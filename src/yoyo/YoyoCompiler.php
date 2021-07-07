@@ -137,6 +137,7 @@ class YoyoCompiler
         // U modifier needed to match children tags when there are no line breaks in the HTML code
 
         $html = preg_replace('/'.$prefix.':(.*)="(.*)"/U', "$prefix_finder $prefix:\$1=\"\$2\"", $html);
+        $html = preg_replace('/' . $prefix . ':(.*)=\'(.*)\'/U', "{$prefix_finder} {$prefix}:\$1='\$2'", $html);
 
         $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
 
