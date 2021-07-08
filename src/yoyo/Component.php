@@ -82,15 +82,13 @@ abstract class Component
 
         $publicProperties = ClassHelpers::getPublicProperties($this);
         
-        $publicProperties = array_merge($this->addDynamicProperties(), $publicProperties);
-
         foreach ($publicProperties as $property) {
-            // Use property_exists check to prevent triggering of magic __get method used for computed properties
-            if (property_exists($this, $property)) {
-                $value = $data[$property] ?? $this->{$property};
-            }
+            $this->{$property} = $data[$property] ?? $this->{$property};
+        }
 
-            $this->{$property} = $value ?? null;
+        // Set an initial value for dynamic properties
+        foreach ($this->getDynamicProperties() as $property) {
+            $this->{$property} = $data[$property] ?? null;
         }
 
         return $this;
@@ -101,7 +99,7 @@ abstract class Component
         return $this->componentName;
     }
 
-    public function addDynamicProperties()
+    public function getDynamicProperties()
     {
         return [];
     }
@@ -245,7 +243,7 @@ abstract class Component
 
         $properties = ClassHelpers::getPublicVars($this);
 
-        $properties = array_merge($properties, array_fill_keys($this->addDynamicProperties(), null));
+        $properties = array_merge($properties, array_fill_keys($this->getDynamicProperties(), null));
 
         return array_merge($this->viewData, $vars, $properties);
     }

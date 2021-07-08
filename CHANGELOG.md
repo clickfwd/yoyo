@@ -2,11 +2,19 @@
 
 ## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.8.1...develop)
 
+### Changed
+
+    - Renamed `Component::addDynamicProperties` to `Component::getDynamicProperties` to make it consistent with other component methods.
+
+### Fixed
+
+    - Issues working with dynamic properties.
+
 ## [0.8.0 (2021-07-07)](https://github.com/clickfwd/yoyo/compare/0.8.0...0.8.1)
 
 ### Added
 
-- Support for adding dynamic properties to components via Component::addDynamicProperties method, which returns an array of property names. 
+- Support for adding dynamic properties to components via Component::addDynamicProperties method, which returns an array of property names. NOTE: `renamed to Component::getDynamicProperties` in next update.
 
     This can be useful when the names of the properties are not known in advanced (i.e. coming from the database). The code below shows how to use this together with queryStrings to push the dynamic property values to the URL. The dynamic properties are also available in templates like regular public properties.
 

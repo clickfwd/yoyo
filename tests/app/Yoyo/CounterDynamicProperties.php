@@ -8,10 +8,10 @@ class CounterDynamicProperties extends Component
 {
     public function getQueryString()
     {
-        return $this->addDynamicProperties();
+        return $this->getDynamicProperties();
     }
 
-    public function addDynamicProperties()
+    public function getDynamicProperties()
     {
         return ['count'];
     }

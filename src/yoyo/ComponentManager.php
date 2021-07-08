@@ -42,7 +42,9 @@ class ComponentManager
 
         $vars = ClassHelpers::getPublicVars($this->component);
 
-        $vars = array_merge($vars, array_fill_keys($this->component->addDynamicProperties(), null));
+        foreach ($this->component->getDynamicProperties() as $name) {
+            $vars[$name] = property_exists($this->component, $name) ? $this->component->{$name} : null;
+        }
 
         $vars = array_merge($vars, $this->request->startsWith(YoyoCompiler::yoprefix('')));
 
