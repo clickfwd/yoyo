@@ -72,7 +72,7 @@ class ComponentManager
         return $this->component->getListeners();
     }
 
-    public function process($id, $name, $action, $variables, $attributes): string
+    public function process($id, $name, $action, $variables, $attributes)
     {
         if (! ($this->component = $this->resolver->resolveComponent($id, $name, $variables))) {
             throw new ComponentNotFound($name);
@@ -95,7 +95,7 @@ class ComponentManager
         return ! $this->isAnonymousComponent();
     }
 
-    private function processDynamicComponent($action, $variables = [], $attributes = []): string
+    private function processDynamicComponent($action, $variables = [], $attributes = [])
     {
         $class = get_class($this->component);
 
@@ -197,7 +197,7 @@ class ComponentManager
             }
         }
 
-        return $view;
+        return (string) $view;
     }
 
     private function parseActionArguments()
@@ -207,7 +207,7 @@ class ComponentManager
         return $args;
     }
 
-    private function processAnonymousComponent($variables = [], $attributes = []): string
+    private function processAnonymousComponent($variables = [], $attributes = [])
     {
         $this->component->spinning($this->spinning)->boot($variables, $attributes);
 
