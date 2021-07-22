@@ -131,7 +131,14 @@
 			afterOnLoadActions(evt) {
 				const component = getComponentById(evt.detail.target.id)
 
-				if (!component) return
+				if (!component) {
+					// Needed when using yoyo:select to replace a specific part of the response
+					// so stop spinning callbacks are run to remove animations in the parts of the component
+					// that were not replaced
+					component = getComponent(evt.target);
+					spinningStop(component)
+					return;
+				}
 
 				componentCopyYoyoDataFromTo(evt.detail.target, component)
 				
