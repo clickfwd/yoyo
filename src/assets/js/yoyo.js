@@ -136,7 +136,9 @@
 					// so stop spinning callbacks are run to remove animations in the parts of the component
 					// that were not replaced
 					component = getComponent(evt.target);
-					spinningStop(component)
+					if (component) {
+						spinningStop(component)
+					}
 					return;
 				}
 
