@@ -80,7 +80,7 @@ abstract class Component
 
         $this->attributes = $attributes;
 
-        $publicProperties = ClassHelpers::getPublicProperties($this);
+        $publicProperties = ClassHelpers::getPublicProperties($this, __CLASS__);
         
         foreach ($publicProperties as $property) {
             $this->{$property} = $data[$property] ?? $this->{$property};
@@ -241,7 +241,7 @@ abstract class Component
 
         $vars['spinning'] = $this->spinning;
 
-        $properties = ClassHelpers::getPublicVars($this);
+        $properties = ClassHelpers::getPublicVars($this, __CLASS__);
 
         $properties = array_merge($properties, array_fill_keys($this->getDynamicProperties(), null));
 

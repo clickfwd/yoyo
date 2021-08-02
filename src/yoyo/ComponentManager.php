@@ -31,7 +31,7 @@ class ComponentManager
 
     public function getDefaultPublicVars()
     {
-        return ClassHelpers::getDefaultPublicVars($this->component);
+        return ClassHelpers::getDefaultPublicVars($this->component, Component::class);
     }
 
     public function getPublicVars()
@@ -40,7 +40,7 @@ class ComponentManager
             return $this->request->except(['component', YoyoCompiler::yoprefix('id')]);
         }
 
-        $vars = ClassHelpers::getPublicVars($this->component);
+        $vars = ClassHelpers::getPublicVars($this->component, Component::class);
 
         foreach ($this->component->getDynamicProperties() as $name) {
             $vars[$name] = property_exists($this->component, $name) ? $this->component->{$name} : null;
