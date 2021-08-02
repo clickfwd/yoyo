@@ -129,7 +129,7 @@
 				spinningStart(component)
 			},
 			afterOnLoadActions(evt) {
-				const component = getComponentById(evt.detail.target.id)
+				let component = getComponentById(evt.detail.target.id)
 
 				if (!component) {
 					// Needed when using yoyo:select to replace a specific part of the response
