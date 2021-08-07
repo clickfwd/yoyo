@@ -10,7 +10,7 @@ class Configuration
 
     private static $options;
 
-    public static $htmx = '1.3.1';
+    public static $htmx = '1.5.0';
 
     public function __construct($options)
     {
