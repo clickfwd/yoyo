@@ -44,9 +44,10 @@
 				}
 			},
 			afterProcessNode(evt) {
-				this.createNonExistentIdTarget(
-					evt.srcElement.getAttribute('hx-target')
-				)
+				// Create non-existent target
+				if (evt.srcElement) {
+					this.createNonExistentIdTarget(evt.srcElement.getAttribute('hx-target'))
+				}
 
 				// Initialize spinners
 				let component
@@ -132,6 +133,9 @@
 				let component = getComponentById(evt.detail.target.id)
 
 				if (!component) {
+					if (!evt.target) {
+						return;
+					}
 					// Needed when using yoyo:select to replace a specific part of the response
 					// so stop spinning callbacks are run to remove animations in the parts of the component
 					// that were not replaced
@@ -143,7 +147,7 @@
 				}
 
 				componentCopyYoyoDataFromTo(evt.detail.target, component)
-				
+
 				// This isn't needed at this time because the CSS classes/attributes are
 				// automatically removed when a component is updated from the server
 				// however, could be useful to improve transitions in the future. It would
@@ -168,21 +172,20 @@
 				let pushedUrl = xhr.getResponseHeader('Yoyo-Push')
 				let triggerId = evt.detail?.triggerEltInfo?.id || evt.detail.requestConfig.headers['HX-Trigger']
 				let href = triggerId ? evt.detail?.triggerEltInfo?.href : false
+
 				// If reactive element has an href tag, override history setting and add the component and href to browser history
 				if (triggerId && href) {
 					pushedUrl = href
 					history = true
 				}
-				
+
+				const url = pushedUrl !== null ? pushedUrl : window.location.href
+
 				if (!history || !pushedUrl || component?.__yoyo?.replayingHistory) {
-					if (component.yoyo) {
-						component.__yoyo.replayingHistory = false
-					}
+					component.__yoyo.replayingHistory = false
 					return
 				}
 
-				const url =
-					pushedUrl !== null ? pushedUrl : window.location.href
 
 				componentAddYoyoData(component, {
 					effects: {
