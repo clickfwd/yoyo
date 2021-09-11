@@ -195,6 +195,8 @@
 
 				const componentName = getComponentName(component)
 
+				YoyoEngine.findAll(evt.detail.target, '[yoyo\\:history=remove]').forEach(node => node.remove())
+
 				// Before pushing a component to the browser history, we need to take a snapshot
 				// of its initial rendered-HTML to store it in the current state
 				// This also works for components loaded dynamically onto the page, like modals
