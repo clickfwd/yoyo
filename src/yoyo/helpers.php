@@ -85,16 +85,3 @@ function not_spinning($expression = null)
         return false;
     }
 }
-
-/**
- * Returns unencoded square brackets for array syntax in urls
- *
- * @param [type] $queryParams
- * @return void
- */
-function http_build_query($queryParams)
-{
-    $queryString = \http_build_query($queryParams);
-
-    return preg_replace('/%5B[0-9]+%5D/simU', '[]', $queryString);
-}
