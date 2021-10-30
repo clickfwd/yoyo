@@ -27,7 +27,7 @@ class UrlStateManagerService
 
         $parsedUrl = parse_url($this->currentUrl);
 
-        $url = $parsedUrl['scheme'].'://'.$parsedUrl['host'].$parsedUrl['path'].($queryParams ? '?'.http_build_query($queryParams) : '');
+        $url = $parsedUrl['scheme'].'://'.$parsedUrl['host'].$parsedUrl['path'].($queryParams ? '?'.\Yoyo\http_build_query($queryParams) : '');
 
         if ($url !== $this->currentUrl) {
             $response->header('Yoyo-Push', $url);
