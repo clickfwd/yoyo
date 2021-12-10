@@ -46,7 +46,9 @@
 			afterProcessNode(evt) {
 				// Create non-existent target
 				if (evt.srcElement) {
-					this.createNonExistentIdTarget(evt.srcElement.getAttribute('hx-target'))
+					this.createNonExistentIdTarget(
+						evt.srcElement.getAttribute('hx-target')
+					)
 				}
 
 				// Initialize spinners
@@ -134,16 +136,16 @@
 
 				if (!component) {
 					if (!evt.target) {
-						return;
+						return
 					}
 					// Needed when using yoyo:select to replace a specific part of the response
 					// so stop spinning callbacks are run to remove animations in the parts of the component
 					// that were not replaced
-					component = getComponent(evt.target);
+					component = getComponent(evt.target)
 					if (component) {
 						spinningStop(component)
 					}
-					return;
+					return
 				}
 
 				componentCopyYoyoDataFromTo(evt.detail.target, component)
@@ -170,7 +172,9 @@
 				// Browser history automatically enabled for components with queryStrings
 				let history = component.hasAttribute('yoyo:history')
 				let pushedUrl = xhr.getResponseHeader('Yoyo-Push')
-				let triggerId = evt.detail?.triggerEltInfo?.id || evt.detail.requestConfig.headers['HX-Trigger']
+				let triggerId =
+					evt.detail?.triggerEltInfo?.id ||
+					evt.detail.requestConfig.headers['HX-Trigger']
 				let href = triggerId ? evt.detail?.triggerEltInfo?.href : false
 
 				// If reactive element has an href tag, override history setting and add the component and href to browser history
@@ -179,26 +183,32 @@
 					history = true
 				}
 
-				const url = pushedUrl !== null ? pushedUrl : window.location.href
+				const url =
+					pushedUrl !== null ? pushedUrl : window.location.href
 
-				if (!history || !pushedUrl || component?.__yoyo?.replayingHistory) {
+				if (
+					!history ||
+					!pushedUrl ||
+					component?.__yoyo?.replayingHistory
+				) {
 					component.__yoyo.replayingHistory = false
 					return
 				}
 
-
 				componentAddYoyoData(component, {
 					effects: {
-						browserEvents: xhr.getResponseHeader(
-							'Yoyo-Browser-Event'
-						),
+						browserEvents:
+							xhr.getResponseHeader('Yoyo-Browser-Event'),
 						emitEvents: xhr.getResponseHeader('Yoyo-Emit'),
 					},
 				})
 
 				const componentName = getComponentName(component)
 
-				YoyoEngine.findAll(evt.detail.target, '[yoyo\\:history=remove]').forEach(node => node.remove())
+				YoyoEngine.findAll(
+					evt.detail.target,
+					'[yoyo\\:history=remove]'
+				).forEach((node) => node.remove())
 
 				// Before pushing a component to the browser history, we need to take a snapshot
 				// of its initial rendered-HTML to store it in the current state
@@ -255,7 +265,11 @@
 		}
 
 		function getComponent(elt) {
-			return elt.closest('[yoyo\\:name]')
+			let component = elt.closest('[yoyo\\:name]')
+			if (component) {
+				component.__yoyo = component?.__yoyo || {}
+			}
+			return component
 		}
 
 		function getAllcomponents() {
@@ -653,8 +667,6 @@
 
 		function componentAddYoyoData(component, data) {
 			if (!data) return
-
-			component.__yoyo = component?.__yoyo || {}
 			component.__yoyo = Object.assign(component.__yoyo, data)
 		}
 
@@ -753,15 +765,18 @@ YoyoEngine.defineExtension('yoyo', {
 
 			// Add triggering element info to event detail so it can be read in after swap events
 			// For example to push the href url to browser history using the href from the element that's no longer present on the page
-			let triggerId = evt.detail.requestConfig.headers['HX-Trigger'] || null
+			let triggerId =
+				evt.detail.requestConfig.headers['HX-Trigger'] || null
 			let triggeringElt = htmx.find(`#${triggerId}`)
 			if (triggerId && triggeringElt) {
-				evt.detail.triggerEltInfo = { id: triggerId, href: triggeringElt.getAttribute('href') }
+				evt.detail.triggerEltInfo = {
+					id: triggerId,
+					href: triggeringElt.getAttribute('href'),
+				}
 			}
 
-			const modifier = evt.detail.xhr.getResponseHeader(
-				'Yoyo-Swap-Modifier'
-			)
+			const modifier =
+				evt.detail.xhr.getResponseHeader('Yoyo-Swap-Modifier')
 
 			if (modifier) {
 				const swap =
