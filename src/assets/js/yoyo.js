@@ -173,9 +173,11 @@
 				let history = component.hasAttribute('yoyo:history')
 				let pushedUrl = xhr.getResponseHeader('Yoyo-Push')
 				let triggerId =
-					evt.detail?.triggerEltInfo?.id ||
+					evt.detail.requestConfig?.triggerEltInfo?.id ||
 					evt.detail.requestConfig.headers['HX-Trigger']
-				let href = triggerId ? evt.detail?.triggerEltInfo?.href : false
+				let href = triggerId
+					? evt.detail.requestConfig?.triggerEltInfo?.href
+					: false
 
 				// If reactive element has an href tag, override history setting and add the component and href to browser history
 				if (triggerId && href) {
@@ -769,7 +771,7 @@ YoyoEngine.defineExtension('yoyo', {
 				evt.detail.requestConfig.headers['HX-Trigger'] || null
 			let triggeringElt = htmx.find(`#${triggerId}`)
 			if (triggerId && triggeringElt) {
-				evt.detail.triggerEltInfo = {
+				evt.detail.requestConfig.triggerEltInfo = {
 					id: triggerId,
 					href: triggeringElt.getAttribute('href'),
 				}
