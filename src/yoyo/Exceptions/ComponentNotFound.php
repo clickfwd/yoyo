@@ -6,6 +6,6 @@ class ComponentNotFound extends \Exception
 {
     public function __construct($alias)
     {
-        parent::__construct("Component [$alias] not found.");
+        parent::__construct("Yoyo component with alias [$alias] not found.");
     }
 }
