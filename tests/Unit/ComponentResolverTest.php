@@ -15,7 +15,10 @@ it('resolves anonymous component', function () {
 });
 
 it('resolves namespaced dynamic component', function () {
-    $namespaces = ['packagename' => 'Tests\\AppAnother\\Yoyo'];
+    $namespaces = ['packagename' => [
+        'Tests\\AppAnother\\Yoyo',
+    ]];
+    
     $resolver = (new Clickfwd\Yoyo\ComponentResolver())(Container::getInstance(), [], $namespaces);
 
     expect($resolver->resolveDynamic('foo', 'packagename::counter'))

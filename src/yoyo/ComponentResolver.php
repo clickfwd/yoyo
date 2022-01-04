@@ -3,7 +3,6 @@
 namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
-use Clickfwd\Yoyo\Services\Configuration;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 
@@ -52,7 +51,7 @@ class ComponentResolver
 
     public function resolveDynamic($id, $name): ?Component
     {
-        $className = null;
+        $classNames = [];
         
         $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
 
@@ -60,16 +59,26 @@ class ComponentResolver
         if (strpos($name, ViewProviderInterface::HINT_PATH_DELIMITER) > 0) {
             [$namespaceAlias, $name] = explode(ViewProviderInterface::HINT_PATH_DELIMITER, $name);
             if (isset($this->hints[$namespaceAlias])) {
-                $className = $this->hints[$namespaceAlias].'\\'.$this->dotNotationToClass($name);
+                foreach ($this->hints[$namespaceAlias] as $namespaceHint) {
+                    $classNames[] = $namespaceHint . '\\' . $this->dotNotationToClass($name);
+                }
             }
         }
 
-        if (! $className) {
-            $className = $this->registered[$name] ?? null;
+        $classNames[] = $this->registered[$name] ?? null;
+
+        $configurationNamespaces = (array) \Clickfwd\Yoyo\Services\Configuration::get('namespace');
+
+        foreach ($configurationNamespaces as $namespaceHint) {
+            $classNames[] = $namespaceHint . $this->dotNotationToClass($name);
         }
-        
-        if (! $className) {
-            $className = Configuration::get('namespace').$this->dotNotationToClass($name);
+
+        $classNames = array_filter(array_unique($classNames));
+
+        foreach ($classNames as $className) {
+            if (class_exists($className)) {
+                break;
+            }
         }
         
         try {
