@@ -1094,7 +1094,7 @@ Yoyo implements several Blade directives that can be used within Yoyo component 
 
 ## Using Twig
 
-You can use Yoyo with Symphony's [Twig](https://twig.symfony.com/) templating engine.
+You can use Yoyo with Symfony's [Twig](https://twig.symfony.com/) templating engine.
 
 ### Installation
 
@@ -1214,7 +1214,7 @@ public function render()
 
 Yoyo adds a few functions and variables that can be used within Yoyo component templates.
 
-- The `spinning` variable can be used to heck if a component is being re-rendered. 
+- The `spinning` variable can be used to check if a component is being re-rendered. 
 
 	```twig
 	{% if spinning %}
