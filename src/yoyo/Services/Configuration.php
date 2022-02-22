@@ -10,7 +10,7 @@ class Configuration
 
     private static $options;
 
-    public static $htmx = '1.6.1';
+    public static $htmx = '1.7.0';
 
     public function __construct($options)
     {
@@ -39,7 +39,7 @@ class Configuration
     public static function htmxSrc(): string
     {
         if (empty($htmxSrc = self::get('htmx'))) {
-            $htmxSrc = 'https://unpkg.com/htmx.org@'.self::$htmx.'/dist/htmx.js';
+            $htmxSrc = 'https://unpkg.com/htmx.org@'.self::$htmx.'/dist/htmx.min.js';
         }
 
         return $htmxSrc;
