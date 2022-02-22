@@ -50,22 +50,26 @@ class YoyoCompiler
     ];
 
     public const YOYO_ATTRIBUTES = [
-        // 'boost', // Has a conflict with component history cache
         'confirm',
+        'disable',
+        'disinherit',
         'encoding',
         'ext',
         'headers',
         'history-elt',
         'include',
         'indicator',
+        'trigger',
         'on',
         'params',
         'preserve',
         'prompt',
         'push-url',
+        'request',
         'select',
         'swap-oob',
         'swap',
+        'sync',
         'target',
         'vals',
     ];
