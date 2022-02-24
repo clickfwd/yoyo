@@ -27,17 +27,6 @@ class YoyoCompiler
 
     protected $idCounter = 1;
 
-    /**
-     * These will automatically receive a `method` attribute.
-     */
-    protected $reactiveTags = [
-        'a',
-        'button',
-        'input',
-        'select',
-        'textarea',
-    ];
-
     public const HTMX_REQUEST_METHOD_ATTRIBUTES = [
         'boost',
         'delete',
@@ -441,11 +430,10 @@ class YoyoCompiler
             }
         }
 
-        // Automatically make element reactive if it has the yoyo attribute, or if it's a clickable element
-        if ($element->hasAttribute(self::YOYO_PREFIX) || in_array($element->tagName, $this->reactiveTags)) {
+        // Automatically add the default hx-get="render" request to component root nodes and any child with the `yoyo` attribute
+        if ($element->hasAttribute(self::YOYO_PREFIX)) {
             $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
-
-            if (! $isRootNode) {
+            if (!$isRootNode) {
                 // Ensure re-active tags have an ID to improve swapping
                 $this->checkForIdAttribute($element);
             }
