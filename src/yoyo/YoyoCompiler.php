@@ -433,7 +433,7 @@ class YoyoCompiler
         // Automatically add the default hx-get="render" request to component root nodes and any child with the `yoyo` attribute
         if ($element->hasAttribute(self::YOYO_PREFIX)) {
             $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
-            if (!$isRootNode) {
+            if (! $isRootNode) {
                 // Ensure re-active tags have an ID to improve swapping
                 $this->checkForIdAttribute($element);
             }
