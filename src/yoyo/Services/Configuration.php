@@ -40,13 +40,13 @@ class Configuration
     public function __construct($options)
     {
         self::$options = array_merge([
-            'namespace' => 'App\\Yoyo\\', 
-            'defaultSwapStyle' => 'outerHTML', 
+            'namespace' => 'App\\Yoyo\\',
+            'defaultSwapStyle' => 'outerHTML',
             'historyEnabled' => false,
             'indicatorClass' => 'yoyo-indicator',
             'requestClass' => 'yoyo-request',
             'settlingClass' => 'yoyo-settling',
-            'swappingClass' => 'yoyo-swapping'            
+            'swappingClass' => 'yoyo-swapping',
         ], $options);
     }
 
