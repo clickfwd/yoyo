@@ -12,12 +12,41 @@ class Configuration
 
     public static $htmx = '1.7.0';
 
+    protected static $allowedConfigOptions = [
+        'addedClass',
+        'allowEval',
+        'attributesToSettle',
+        'defaultFocusScroll',
+        'defaultSettleDelay',
+        'defaultSwapDelay',
+        'defaultSwapStyle',
+        'disableSelector',
+        'historyCacheSize',
+        'historyEnabled',
+        'includeIndicatorStyles',
+        'indicatorClass',
+        'inlineScriptNonce',
+        'refreshOnHistoryMiss',
+        'requestClass',
+        'scrollBehavior',
+        'settlingClass',
+        'swappingClass',
+        'timeout',
+        'useTemplateFragments',
+        'withCredentials',
+        'wsReconnectDelay',
+    ];
+        
     public function __construct($options)
     {
         self::$options = array_merge([
-            'namespace' => 'App\\Yoyo\\',
-            'defaultSwap' => 'outerHTML',
+            'namespace' => 'App\\Yoyo\\', 
+            'defaultSwapStyle' => 'outerHTML', 
             'historyEnabled' => false,
+            'indicatorClass' => 'yoyo-indicator',
+            'requestClass' => 'yoyo-request',
+            'settlingClass' => 'yoyo-settling',
+            'swappingClass' => 'yoyo-swapping'            
         ], $options);
     }
 
@@ -66,19 +95,12 @@ HTML;
     public static function javascriptInitCode($includeScriptTag = true): string
     {
         $yoyoRoute = self::get('url', '');
-        $defaultSwap = self::get('defaultSwap', 'outerHTML');
-        $historyEnabled = self::get('historyEnabled', false) ? 'true' : 'false';
+        $configuration = array_intersect_key(static::$options, array_flip(static::$allowedConfigOptions));
+        $yoyoConfig = json_encode($configuration);
 
         $script = <<<HTML
         Yoyo.url = '{$yoyoRoute}';
-        Yoyo.config({
-            defaultSwapStyle: '{$defaultSwap}',
-            historyEnabled: {$historyEnabled},
-            indicatorClass:	'yoyo-indicator',
-            requestClass:	'yoyo-request',
-            settlingClass:	'yoyo-settling',
-            swappingClass:	'yoyo-swapping'
-        });
+        Yoyo.config($yoyoConfig);
 HTML;
 
         if ($includeScriptTag) {
