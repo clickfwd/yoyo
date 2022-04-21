@@ -52,7 +52,13 @@ class QueryString
 
         // Get current query string values and merge them with new ones
 
-        parse_str(parse_url(htmlspecialchars_decode($currentUrl), PHP_URL_QUERY), $args);
+        $queryString = parse_url(htmlspecialchars_decode($currentUrl), PHP_URL_QUERY);
+
+        if (! $queryString) {
+            return [];
+        }
+
+        parse_str($queryString, $args);
 
         $queryParams = array_merge($args, $new);
 
