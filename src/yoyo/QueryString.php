@@ -44,7 +44,9 @@ class QueryString
      */
     public function getPageQueryParams()
     {
-        $currentUrl = $this->currentUrl;
+        if (! $this->currentUrl) {
+            return [];
+        }
 
         // Filter out keys that are not explicitly set in the component queryString property
 
@@ -52,7 +54,7 @@ class QueryString
 
         // Get current query string values and merge them with new ones
 
-        $queryString = parse_url(htmlspecialchars_decode($currentUrl), PHP_URL_QUERY) ?? '';
+        $queryString = parse_url(htmlspecialchars_decode($this->currentUrl), PHP_URL_QUERY) ?? '';
 
         parse_str($queryString, $args);
 
