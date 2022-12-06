@@ -20,7 +20,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^7.3|^8.0|^8.1",
         "illuminate/container": "^8.0"
     },
     "require-dev": {
@@ -43,6 +43,11 @@
         "psr-4": {
             "Tests\\App\\": "tests/app",
             "Tests\\AppAnother\\": "tests/app-another"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": false
         }
     }
 }
