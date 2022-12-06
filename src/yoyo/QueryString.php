@@ -68,8 +68,6 @@ class QueryString
             }
         }
 
-        $queryParams = array_filter($queryParams);
-
         return $queryParams;
     }
 }
