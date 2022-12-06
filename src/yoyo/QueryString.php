@@ -61,7 +61,7 @@ class QueryString
         // If a query string value matches the default value, remove it from the URL
 
         foreach ($queryParams as $key => $val) {
-            if (isset($this->defaults[$key]) && $val == $this->defaults[$key]) {
+            if (isset($this->defaults[$key]) && $val === $this->defaults[$key] || $val === '') {
                 unset($queryParams[$key]);
             }
         }
