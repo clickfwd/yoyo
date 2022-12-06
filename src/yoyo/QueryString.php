@@ -51,10 +51,14 @@ class QueryString
         $new = array_intersect_key($this->new, array_flip($this->keys));
 
         // Get current query string values and merge them with new ones
-
-        $queryString = parse_url(htmlspecialchars_decode($currentUrl), PHP_URL_QUERY) ?? '';
-
-        parse_str($queryString, $args);
+        
+        $args=[];
+        if ($currentUrl){
+            $data = parse_url(htmlspecialchars_decode($currentUrl), PHP_URL_QUERY);
+            if ($data){
+                parse_str($data, $args);
+            }
+        }
 
         $queryParams = array_merge($args, $new);
 
