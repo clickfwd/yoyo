@@ -10,7 +10,7 @@ class Configuration
 
     private static $options;
 
-    public static $htmx = '1.7.0';
+    public static $htmx = '1.8.4';
 
     protected static $allowedConfigOptions = [
         'addedClass',
