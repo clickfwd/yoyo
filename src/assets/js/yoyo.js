@@ -26,9 +26,7 @@
 			on(name, callback) {
 				YoyoEngine.on(window, name, (event) => {
 					delete event.detail.elt
-					callback(
-						event.detail.length > 1 ? event.detail : event.detail[0]
-					)
+					callback(event.detail)
 				})
 			},
 			createNonExistentIdTarget(targetId) {
