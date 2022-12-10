@@ -141,9 +141,18 @@ class Yoyo
         static::$resolverInstances[$name] = $resolver;
     }
 
-    public static function componentNamespace($namespace, $class): void
+    /**
+     * Register component namespace hints
+     *
+     * @param string $namespace
+     * @param mixed $class
+     * @return void
+     */
+    public static function componentNamespace(string $namespace, $class) : void
     {
-        static::$componentNamespaces[$namespace] = $class;
+        $class = array_filter((array) $class);
+        
+        static::$componentNamespaces[$namespace] = array_merge(static::$componentNamespaces[$namespace] ?? [], $class);
     }
         
     public static function registerComponent($name, $class = null): void

@@ -7,20 +7,20 @@ use ReflectionMethod;
 
 class ClassHelpers
 {
-    public static function getDefaultPublicVars($instance)
+    public static function getDefaultPublicVars($instance, $baseClass = null)
     {
         $class = new ReflectionClass(get_class($instance));
 
-        $names = self::getPublicProperties($instance);
+        $names = self::getPublicProperties($instance, $baseClass);
 
         $values = $class->getDefaultProperties();
 
         return array_intersect_key($values, array_flip($names));
     }
 
-    public static function getPublicVars($instance)
+    public static function getPublicVars($instance, $baseClass = null)
     {
-        $publicProperties = self::getPublicProperties($instance);
+        $publicProperties = self::getPublicProperties($instance, $baseClass);
 
         $vars = call_user_func('get_object_vars', $instance);
 
@@ -35,7 +35,7 @@ class ClassHelpers
         return $publicVars;
     }
 
-    public static function getPublicProperties($instance)
+    public static function getPublicProperties($instance, $baseClass = null)
     {
         $class = new ReflectionClass(get_class($instance));
 
@@ -46,7 +46,9 @@ class ClassHelpers
         $publicProperties = [];
 
         foreach ($properties as $prop) {
-            if ($prop->class == $className) {
+            // Only include the property if it's different from the base class when passed as 2d parameter
+            // This allows extending component classes with public properties
+            if ($baseClass && $prop->class !== $baseClass || $prop->class == $className) {
                 $publicProperties[] = $prop->name;
             }
         }

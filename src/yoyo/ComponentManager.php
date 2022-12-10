@@ -31,7 +31,7 @@ class ComponentManager
 
     public function getDefaultPublicVars()
     {
-        return ClassHelpers::getDefaultPublicVars($this->component);
+        return ClassHelpers::getDefaultPublicVars($this->component, Component::class);
     }
 
     public function getPublicVars()
@@ -40,9 +40,11 @@ class ComponentManager
             return $this->request->except(['component', YoyoCompiler::yoprefix('id')]);
         }
 
-        $vars = ClassHelpers::getPublicVars($this->component);
+        $vars = ClassHelpers::getPublicVars($this->component, Component::class);
 
-        $vars = array_merge($vars, array_fill_keys($this->component->addDynamicProperties(), null));
+        foreach ($this->component->getDynamicProperties() as $name) {
+            $vars[$name] = property_exists($this->component, $name) ? $this->component->{$name} : null;
+        }
 
         $vars = array_merge($vars, $this->request->startsWith(YoyoCompiler::yoprefix('')));
 
@@ -70,7 +72,7 @@ class ComponentManager
         return $this->component->getListeners();
     }
 
-    public function process($id, $name, $action, $variables, $attributes): string
+    public function process($id, $name, $action, $variables, $attributes)
     {
         if (! ($this->component = $this->resolver->resolveComponent($id, $name, $variables))) {
             throw new ComponentNotFound($name);
@@ -93,7 +95,7 @@ class ComponentManager
         return ! $this->isAnonymousComponent();
     }
 
-    private function processDynamicComponent($action, $variables = [], $attributes = []): string
+    private function processDynamicComponent($action, $variables = [], $attributes = [])
     {
         $class = get_class($this->component);
 
@@ -195,7 +197,7 @@ class ComponentManager
             }
         }
 
-        return $view;
+        return (string) $view;
     }
 
     private function parseActionArguments()
@@ -205,7 +207,7 @@ class ComponentManager
         return $args;
     }
 
-    private function processAnonymousComponent($variables = [], $attributes = []): string
+    private function processAnonymousComponent($variables = [], $attributes = [])
     {
         $this->component->spinning($this->spinning)->boot($variables, $attributes);
 

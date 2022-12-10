@@ -9,9 +9,9 @@ class FailedToRegisterComponent extends \Exception
         $message = 'Component registration failed.';
 
         if ($componentClassName == 'Anonymous') {
-            $message = PHP_EOL."[$alias] template not found for [$componentClassName] component.";
+            $message = PHP_EOL."[$alias] template not found for Yoyo component [$componentClassName].";
         } else {
-            $message = PHP_EOL."Component class [$componentClassName] provided for alias [$alias] not found.";
+            $message = PHP_EOL."Yoyo component class [$componentClassName] provided for alias [$alias] not found.";
         }
 
         parent::__construct($message);
