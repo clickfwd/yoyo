@@ -1,16 +1,27 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.8.1...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.8.2...develop)
+
+## [0.8.0 (2021-07-07)](https://github.com/clickfwd/yoyo/compare/0.8.1...0.8.2)
 
 ### Changed
 
+    - Updated htmx to v1.8.4.
+    - Add support for new htmx attributes to the Yoyo compiler: `replace-url`, `select-oob`, `validate`.
+    - Add support for PHP 8.1 installs.
+    - Add `yoyo:history="remove"` attribute to allow excluding elements from browser history cache snapshot.
     - Renamed `Component::addDynamicProperties` to `Component::getDynamicProperties` to make it consistent with other component methods.
+    - Expose all htmx configuration options to Yoyo via `Clickfwd\Yoyo\Services\Configuration`.
+    - Breaking change! Compiler no longer makes buttons, links or inputs reactive by default. Previously any button, link or input would automatically receive the yoyo:get="render" attribute unless it already had a different request attribute. Now it's necessary to explicitly add the yoyo:{method} attribute if you want to make the element reactive. You can also just add an empty `yoyo` attribute if you want to make a request to the default yoyo:get="render" attribute on the component.    
 
 ### Fixed
 
+    - Allow queryString parameters with value of zero to be pushed to URL.
+    - Javascript `Yoyo.on` throws undefined error when event detail is of type object.
     - Issues working with dynamic properties.
+    - Lots of other changes and improvements.
 
-## [0.8.0 (2021-07-07)](https://github.com/clickfwd/yoyo/compare/0.8.0...0.8.1)
+## [0.8.1 (2021-07-07)](https://github.com/clickfwd/yoyo/compare/0.8.0...0.8.1)
 
 ### Added
 
