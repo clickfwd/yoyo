@@ -136,6 +136,15 @@ abstract class Component
         $this->componentAction = $action;
     }
 
+    public function actionMatches($action)
+    {
+        if (is_array($action)) {
+            return in_array($this->componentAction, $action);
+        }
+        
+        return $this->componentAction == $action;
+    }
+
     public function getListeners()
     {
         $listeners = [];
