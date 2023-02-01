@@ -2,11 +2,12 @@
 
 namespace Clickfwd\Yoyo\Services;
 
-use Clickfwd\Yoyo\Concerns\Singleton;
+use Clickfwd\Yoyo\Concerns;
 
 class Response
 {
-    use Singleton;
+    use Concerns\Singleton;
+    use Concerns\ResponseHeaders;
 
     protected $headers = [];
 
@@ -33,6 +34,10 @@ class Response
     public function send(string $content = ''): string
     {
         foreach ($this->headers as $key => $value) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+            
             header("$key: $value");
         }
 
