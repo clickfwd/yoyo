@@ -21,7 +21,7 @@ class YoyoServiceProvider extends ServiceProvider
 
     protected function registerBladeDirectives()
     {
-        if ( method_exists($this->app->get('view'), 'directive')) {
+        if (method_exists($this->app->get('view'), 'directive')) {
             $blade = $this->app->get('view');
         } else {
             $blade = $this->app->get('view')->getEngineResolver()->resolve('blade')->getCompiler();

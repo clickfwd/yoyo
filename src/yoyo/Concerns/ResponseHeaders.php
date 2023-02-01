@@ -32,20 +32,19 @@ trait ResponseHeaders
         return $this;
     }
 
-
     public function replace($url)
     {
         $this->header('HX-Replace-Url', $url);
 
         return $this;
-    }    
+    }
 
     public function reswap($swap)
     {
         $this->header('HX-Reswap', $swap);
 
         return $this;
-    }    
+    }
 
     public function retarget($selector)
     {
@@ -59,19 +58,19 @@ trait ResponseHeaders
         $this->header('HX-Trigger', $event);
 
         return $this;
-    }    
+    }
 
     public function triggerAfterSwap($event)
     {
         $this->header('HX-Trigger-After-Swap', $event);
 
         return $this;
-    }    
+    }
 
     public function triggerAfterSettle($event)
     {
         $this->header('HX-Trigger-After-Settle', $event);
 
         return $this;
-    }    
+    }
 }
