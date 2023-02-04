@@ -1,8 +1,33 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.8.2...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.9.0...develop)
 
-## [0.8.0 (2021-07-07)](https://github.com/clickfwd/yoyo/compare/0.8.1...0.8.2)
+## [0.9.0 (2023-04-02)](https://github.com/clickfwd/yoyo/compare/0.8.1...0.9.0)
+
+## New
+
+- Added Component::actionMatches method.
+- Add response HX header methods that can via accessed in Yoyo component via $this->response:
+    - location
+    - pushUrl
+    - redirect
+    - refresh
+    - replace
+    - reswap
+    - retarget
+    - trigger
+    - triggerAfterSwap
+    - triggerAfterSettle
+
+## Changed
+
+- Added composer support for illuminate/container v9.0
+
+## Fixed 
+
+- Regex replacement in Yoyo compiler causing issues due to incorrect replacements.
+
+## [0.8.2 (2021-07-07)](https://github.com/clickfwd/yoyo/compare/0.8.1...0.8.2)
 
 ### Changed
 
