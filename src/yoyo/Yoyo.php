@@ -204,6 +204,13 @@ class Yoyo
         return $this;
     }
 
+    public function actionArgs(...$args)
+    {
+        $this->request()->merge(['actionArgs' => $args]);
+
+        return $this;
+    }
+
     /**
      * Renders the component on initial page load.
      */
