@@ -193,6 +193,11 @@ class YoyoCompiler
             return;
         }
 
+        // Skip when component already compiled
+        if ($element->hasAttribute(self::yoprefix('name')) && $element->hasAttribute(self::hxprefix('vals'))) {
+            return;
+        }
+
         $element->setAttribute(self::YOYO_PREFIX, '');
 
         $element->setAttribute(self::YOYO_PREFIX_FINDER, '');
