@@ -164,6 +164,7 @@ class Request implements RequestInterface
     {
         return $this->server['HTTP_HX_TRIGGER_NAME'] ?? null;
     }
+
     public function header($name)
     {
         return $this->server['HTTP_'.strtoupper($name)] ?? null;
