@@ -8,6 +8,8 @@ use Tests\App\Post;
 
 class DependencyInjectionClassWithNamedArgumentMapping extends Component
 {
+    protected $id;
+
     protected $post;
 
     // $foo variable passed to component is automaticaly injected in Post::__constructor

@@ -135,8 +135,8 @@ class YoyoCompiler
         $html = preg_replace('/ '.$prefix.':(.*)="(.*)"/U', " $prefix_finder $prefix:\$1=\"\$2\"", $html);
         $html = preg_replace('/ ' . $prefix . ':(.*)=\'(.*)\'/U', " {$prefix_finder} {$prefix}:\$1='\$2'", $html);
 
-        $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
-
+        $html = htmlspecialchars_decode(iconv('UTF-8', 'ISO-8859-1', htmlentities($html, ENT_COMPAT, 'UTF-8')), ENT_QUOTES);
+        
         $dom = new DOMDocument();
 
         $internalErrors = libxml_use_internal_errors(true);
