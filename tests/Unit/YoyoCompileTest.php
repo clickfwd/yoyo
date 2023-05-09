@@ -126,3 +126,13 @@ it('includes declared props as vals', function () {
     expect(compile_html_with_vars('foo', '<div id="foo" yoyo:props="foo"></div>', ['foo' => 'bar']))
         ->toContain(hxattr('vals', encode_vals([yoprefix_value('id') => 'foo', 'foo' => 'bar'])));
 });
+
+it('correctly compiles component with non-ascii characters', function () {
+    expect(compile_html('foo', '<div><p>áéíóü</p></div>'))
+        ->toContain('áéíóü');
+});
+
+it('correctly compiles component with Chinese characters', function () {
+    expect(compile_html('foo', '<div><p>极简、极速、极致、 海豚PHP、PHP开发框架、后台框架</p></div>'))
+        ->toContain('极简、极速、极致、 海豚PHP、PHP开发框架、后台框架');
+});
