@@ -32,7 +32,7 @@ trait ResponseHeaders
         return $this;
     }
 
-    public function replace($url)
+    public function replaceUrl($url)
     {
         $this->header('HX-Replace-Url', $url);
 
