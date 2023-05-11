@@ -4,6 +4,7 @@ namespace Tests\App\Yoyo;
 
 use Clickfwd\Yoyo\Component;
 
+#[\AllowDynamicProperties]
 class CounterDynamicProperties extends Component
 {
     public function getQueryString()
@@ -11,6 +12,11 @@ class CounterDynamicProperties extends Component
         return $this->getDynamicProperties();
     }
 
+    /**
+     * The 'count' property value is not known ahead of time and can be set programatically;
+     *
+     * @return void
+     */
     public function getDynamicProperties()
     {
         return ['count'];

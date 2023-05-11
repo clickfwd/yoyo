@@ -131,11 +131,11 @@ class YoyoCompiler
         $prefix_finder = self::YOYO_PREFIX_FINDER;
 
         // U modifier needed to match children tags when there are no line breaks in the HTML code
-
         $html = preg_replace('/ '.$prefix.':(.*)="(.*)"/U', " $prefix_finder $prefix:\$1=\"\$2\"", $html);
         $html = preg_replace('/ ' . $prefix . ':(.*)=\'(.*)\'/U', " {$prefix_finder} {$prefix}:\$1='\$2'", $html);
 
-        $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
+        // Converts non-ascii characters to numeric html entities
+        $html = mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, ~0], 'UTF-8');
 
         $dom = new DOMDocument();
 
