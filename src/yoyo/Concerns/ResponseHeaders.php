@@ -27,7 +27,7 @@ trait ResponseHeaders
 
     public function refresh()
     {
-        $this->header('HX-Refresh');
+        $this->header('HX-Refresh', 'true');
 
         return $this;
     }
