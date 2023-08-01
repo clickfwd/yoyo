@@ -46,6 +46,13 @@ trait ResponseHeaders
         return $this;
     }
 
+    public function reselect($selector)
+    {
+        $this->header('HX-Reselect', $selector);
+
+        return $this;
+    }
+    
     public function retarget($selector)
     {
         $this->header('HX-Retarget', $selector);
