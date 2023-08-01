@@ -10,31 +10,35 @@ class Configuration
 
     private static $options;
 
-    public static $htmx = '1.8.4';
+    public static $htmx = '1.9.4';
 
     protected static $allowedConfigOptions = [
-        'addedClass',
-        'allowEval',
-        'attributesToSettle',
-        'defaultFocusScroll',
-        'defaultSettleDelay',
-        'defaultSwapDelay',
-        'defaultSwapStyle',
-        'disableSelector',
-        'historyCacheSize',
         'historyEnabled',
+        'historyCacheSize',
+        'refreshOnHistoryMiss',
+        'defaultSwapStyle',
+        'defaultSwapDelay',
+        'defaultSettleDelay',
         'includeIndicatorStyles',
         'indicatorClass',
-        'inlineScriptNonce',
-        'refreshOnHistoryMiss',
         'requestClass',
-        'scrollBehavior',
+        'addedClass',
         'settlingClass',
         'swappingClass',
-        'timeout',
-        'useTemplateFragments',
+        'allowEval',
+        'inlineScriptNonce',
+        'attributesToSettle',
         'withCredentials',
+        'timeout',
         'wsReconnectDelay',
+        'wsBinaryType',
+        'disableSelector',
+        'useTemplateFragments',
+        'scrollBehavior',
+        'defaultFocusScroll',
+        'getCacheBusterParam',
+        'globalViewTransitions',
+        'methodsThatUseUrlParams',
     ];
         
     public function __construct($options)
