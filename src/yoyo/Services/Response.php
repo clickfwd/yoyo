@@ -41,6 +41,7 @@ class Response
             header("$key: $value");
         }
 
+        // Prevent headers already sent error
         if (! headers_sent()) {
             http_response_code($this->statusCode ?? 200);
         }
