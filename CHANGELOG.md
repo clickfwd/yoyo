@@ -1,6 +1,19 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.9.0...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.9.1...develop)
+
+## [0.9.1 (2024-04-16)](https://github.com/clickfwd/yoyo/compare/0.9.0...0.9.1)
+
+- Fix Safari/iOS errors due to evt.target and evt.srcElement now being null.
+- Add support for port in UrlStateManagerService.php
+- PHP 8.2/8.3 compat
+- Fix ResponseHeaders::refresh error due to missing parameter.
+- Fix headers already sent error when setting status code in response
+- Ensure components are compiled only once.
+- Bump htmx to v1.9.4 and include new config options.
+- New Request::set, Request::triggerName and Request::header methods.
+- New Response::reselect method for the HX-Reselect header.
+- New New Yoyo::actionArgs method.
 
 ## [0.9.0 (2023-04-02)](https://github.com/clickfwd/yoyo/compare/0.8.1...0.9.0)
 
