@@ -43,23 +43,23 @@
 			},
 			afterProcessNode(evt) {
 				// Create non-existent target
-				if (evt.srcElement) {
+				if (evt.detail.elt) {
 					this.createNonExistentIdTarget(
-						evt.srcElement.getAttribute('hx-target')
+						evt.detail.elt.getAttribute('hx-target')
 					)
 				}
 
 				// Initialize spinners
 				let component
 
-				if (!evt.srcElement || !isComponent(evt.srcElement)) {
+				if (!evt.detail.elt || !isComponent(evt.detail.elt)) {
 					// For innerHTML swap find the component root node
 					component = YoyoEngine.closest(
 						evt.detail.elt,
 						'[hx-swap~=innerHTML]'
 					)
 				} else {
-					component = getComponent(evt.srcElement)
+					component = getComponent(evt.detail.elt)
 				}
 
 				if (!component) {
@@ -69,7 +69,7 @@
 				initializeComponentSpinners(component)
 			},
 			bootstrapRequest(evt) {
-				const elt = evt.target
+				const elt = evt.detail.elt
 				let component = getComponent(elt)
 				const componentName = getComponentName(component)
 
@@ -133,13 +133,13 @@
 				let component = getComponentById(evt.detail.target.id)
 
 				if (!component) {
-					if (!evt.target) {
+					if (!evt.detail.elt) {
 						return
 					}
 					// Needed when using yoyo:select to replace a specific part of the response
 					// so stop spinning callbacks are run to remove animations in the parts of the component
 					// that were not replaced
-					component = getComponent(evt.target)
+					component = getComponent(evt.detail.elt)
 					if (component) {
 						spinningStop(component)
 					}
@@ -713,7 +713,7 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:configRequest') {
-			if (!evt.target) return
+			if (!evt.detail.elt) return
 
 			Yoyo.bootstrapRequest(evt)
 		}
@@ -761,7 +761,7 @@ YoyoEngine.defineExtension('yoyo', {
 		}
 
 		if (name === 'htmx:beforeSwap') {
-			if (!evt.target) return
+			if (!evt.detail.elt) return
 
 			// Add triggering element info to event detail so it can be read in after swap events
 			// For example to push the href url to browser history using the href from the element that's no longer present on the page
@@ -794,7 +794,7 @@ YoyoEngine.defineExtension('yoyo', {
 			// Push component response to history cache
 			// Make sure we trigger once for the new element - this was failing in Safari mobile
 			// Causing a duplicate snapshot
-			if (!evt.target || !evt.target.isConnected) return
+			if (!evt.detail.elt || !evt.detail.elt.isConnected) return
 
 			Yoyo.afterSettleActions(evt)
 		}
