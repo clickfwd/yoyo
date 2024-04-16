@@ -41,11 +41,10 @@ class Response
             header("$key: $value");
         }
 
-        if ($this->statusCode == 204) {
-            http_response_code(204);
+        // Prevent headers already sent error
+        if (! headers_sent()) {
+            http_response_code($this->statusCode ?? 200);
         }
-
-        http_response_code($this->statusCode ?? 200);
 
         return $content ?: '';
     }

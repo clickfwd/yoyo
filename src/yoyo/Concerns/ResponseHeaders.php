@@ -27,12 +27,12 @@ trait ResponseHeaders
 
     public function refresh()
     {
-        $this->header('HX-Refresh');
+        $this->header('HX-Refresh', 'true');
 
         return $this;
     }
 
-    public function replace($url)
+    public function replaceUrl($url)
     {
         $this->header('HX-Replace-Url', $url);
 
@@ -46,6 +46,13 @@ trait ResponseHeaders
         return $this;
     }
 
+    public function reselect($selector)
+    {
+        $this->header('HX-Reselect', $selector);
+
+        return $this;
+    }
+    
     public function retarget($selector)
     {
         $this->header('HX-Retarget', $selector);

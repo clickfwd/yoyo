@@ -98,6 +98,20 @@ class Request implements RequestInterface
         return $vars;
     }
 
+    public function set($key, $value)
+    {
+        $this->request[$key] = $value;
+
+        return $this;
+    }
+        
+    public function merge($data)
+    {
+        $this->request = array_merge($this->request, $data);
+
+        return $this;
+    }
+        
     public function drop($key)
     {
         $this->dropped[] = $key;
@@ -144,5 +158,15 @@ class Request implements RequestInterface
     public function triggerId()
     {
         return $this->server['HTTP_HX_TRIGGER'];
+    }
+
+    public function triggerName()
+    {
+        return $this->server['HTTP_HX_TRIGGER_NAME'] ?? null;
+    }
+
+    public function header($name)
+    {
+        return $this->server['HTTP_'.strtoupper($name)] ?? null;
     }
 }
