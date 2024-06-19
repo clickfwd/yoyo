@@ -96,6 +96,26 @@ Yes, it's that simple! One thing to note above is the use of the protected prope
 composer require clickfwd/yoyo
 ```
 
+#### Phalcon Framework Installation
+
+For phalcon, you need to add di
+
+```php
+$di->register(new \Clickfwd\Yoyo\YoyoPhalconServiceProvider());	
+```
+
+and you need to add router:
+
+```php
+$router->add('/yoyo', [
+            'controller' => 'yoyo',
+            'action' => 'handle',
+        ]);
+```
+
+and you should create a controller and inherit from `Clickfwd\Yoyo\PhalconController` class.
+
+
 ## Updating
 
 After performing the usual `composer update`, remember to also update the `yoyo.js` script per the [Load Assets](#load-assets) instructions.
