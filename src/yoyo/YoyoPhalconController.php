@@ -3,8 +3,6 @@
 namespace Clickfwd\Yoyo;
 
 use Phalcon\Mvc\Controller;
-use Clickfwd\Yoyo\Request;
-use Clickfwd\Yoyo\Yoyo;
 
 class YoyoPhalconController extends Controller
 {

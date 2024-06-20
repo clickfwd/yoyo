@@ -3,8 +3,6 @@
 namespace Clickfwd\Yoyo\ViewProviders;
 
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
-use Clickfwd\Yoyo\ViewProviders\BaseViewProvider;
-use Phalcon\Mvc\View;
 
 class PhalconViewProvider extends BaseViewProvider implements ViewProviderInterface
 {
@@ -40,6 +38,7 @@ class PhalconViewProvider extends BaseViewProvider implements ViewProviderInterf
 
         return $this;
     }
+
     public function makeFromString($content, $vars = []): string
     {
         $this->view->start();

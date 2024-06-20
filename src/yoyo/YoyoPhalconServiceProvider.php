@@ -46,7 +46,7 @@ class YoyoPhalconServiceProvider implements ServiceProviderInterface
                 $simpleView->setViewsDir($view->getViewsDir());
                 /** @var PhalconViewProvider $viewProvider */
                 $viewProvider = new PhalconViewProvider($simpleView);
-                if($viewExtention){
+                if ($viewExtention) {
                     $viewProvider->setViewExtention($this->viewExtention);
                 }
 
