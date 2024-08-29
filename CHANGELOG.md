@@ -1,10 +1,14 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.10.0...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.10.1...develop)
 
-## [0.10.0 (2024-08-28)](https://github.com/clickfwd/yoyo/compare/0.9.1...0.10.0)
+## [0.10.1 (2024-08-29)](https://github.com/clickfwd/yoyo/compare/0.10.0...0.10.1)
 
 - Change default hx-include to `this` to improve event-to-request delay on forms with large number of elements.
+
+## [0.10.0 (2024-06-20)](https://github.com/clickfwd/yoyo/compare/0.9.1...0.10.0)
+
+- Merge PR to add Falcon framework implementation.
 
 ## [0.9.1 (2024-04-16)](https://github.com/clickfwd/yoyo/compare/0.9.0...0.9.1)
 
