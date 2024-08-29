@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.9.1...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.10.0...develop)
+
+## [0.10.0 (2024-08-28)](https://github.com/clickfwd/yoyo/compare/0.9.1...0.10.0)
+
+- Change default hx-include to `this` to improve event-to-request delay on forms with large number of elements.
 
 ## [0.9.1 (2024-04-16)](https://github.com/clickfwd/yoyo/compare/0.9.0...0.9.1)
 

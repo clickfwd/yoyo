@@ -1,9 +1,9 @@
-<div yoyo="" hx-get="render" id="parent" class="yoyo-wrapper" yoyo:name="parent" hx-ext="yoyo" hx-include="#parent *"
+<div yoyo="" hx-get="render" id="parent" class="yoyo-wrapper" yoyo:name="parent" hx-ext="yoyo" hx-include="this"
     hx-trigger="refresh" hx-target="this" hx-vals='{"yoyo-id":"parent","data[]":[1,2,3]}'>
-    <p hx-get="render" id="child-1" class="yoyo-wrapper" yoyo:name="child" hx-ext="yoyo" hx-include="#child-1 *"
+    <p hx-get="render" id="child-1" class="yoyo-wrapper" yoyo:name="child" hx-ext="yoyo" hx-include="this"
         hx-trigger="refresh" hx-target="this" hx-vals='{"yoyo-id":"child-1","id":1}'>blade:1</p>
-    <p hx-get="render" id="child-2" class="yoyo-wrapper" yoyo:name="child" hx-ext="yoyo" hx-include="#child-2 *"
+    <p hx-get="render" id="child-2" class="yoyo-wrapper" yoyo:name="child" hx-ext="yoyo" hx-include="this"
         hx-trigger="refresh" hx-target="this" hx-vals='{"yoyo-id":"child-2","id":2}'>blade:2</p>
-    <p hx-get="render" id="child-3" class="yoyo-wrapper" yoyo:name="child" hx-ext="yoyo" hx-include="#child-3 *"
+    <p hx-get="render" id="child-3" class="yoyo-wrapper" yoyo:name="child" hx-ext="yoyo" hx-include="this"
         hx-trigger="refresh" hx-target="this" hx-vals='{"yoyo-id":"child-3","id":3}'>blade:3</p>
 </div>
