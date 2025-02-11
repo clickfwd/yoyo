@@ -2,6 +2,10 @@
 
 ## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.10.1...develop)
 
+## [0.11.0 (2025-02-06)](https://github.com/clickfwd/yoyo/compare/0.10.0...0.11.0)
+
+- Passing attributes to Yoyo\yoyo_render should only prefix HTMX attributes defined in `YoyoCompiler::YOYO_ATTRIBUTES`.
+
 ## [0.10.1 (2024-08-29)](https://github.com/clickfwd/yoyo/compare/0.10.0...0.10.1)
 
 - Change default hx-include to `this` to improve event-to-request delay on forms with large number of elements.
