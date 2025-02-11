@@ -401,11 +401,17 @@ class YoyoCompiler
 
     protected function remapAndReplaceAttribute($element, $attr, $value)
     {
-        $element->removeAttribute(self::yoprefix($attr));
-
-        $remappedAttr = self::YOYO_TO_HX_ATTRIBUTE_REMAP[$attr] ?? $attr;
-
-        $element->setAttribute(self::hxprefix($remappedAttr), $value);
+        if (str_starts_with($attr, self::YOYO_PREFIX) || in_array($attr, self::YOYO_ATTRIBUTES)) {
+            $element->removeAttribute(self::yoprefix($attr));
+            $remappedAttr = self::YOYO_TO_HX_ATTRIBUTE_REMAP[$attr] ?? $attr;
+            $element->setAttribute(self::hxprefix($remappedAttr), $value);
+        } elseif ($value) {
+            $currentValue = $element->getAttribute($attr);
+            if ($currentValue) {
+                $value = $currentValue . ' ' . $value;
+            }
+            $element->setAttribute($attr, $value);
+        }
     }
 
     protected function addRequestMethodAttribute($element, $isRootNode = false)
