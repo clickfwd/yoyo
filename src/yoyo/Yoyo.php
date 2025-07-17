@@ -36,7 +36,7 @@ class Yoyo
 
     private static $resolverInstances = [];
 
-    public function __construct(ContainerInterface $container = null)
+    public function __construct(?ContainerInterface $container = null)
     {
         static::$container = $container ?? Container::getInstance();
     }
