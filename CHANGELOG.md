@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.10.1...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.11.1...develop)
+
+## [0.11.1 (2025-05-28)](https://github.com/clickfwd/yoyo/compare/0.11.0...0.11.1)
+
+- Add compatibility up to illuminate/container v12
+- Fix deprecated error for  implicit nullable parameter value
+- Improve parsing of yoyo attribute action arguments and fix error where they are incorreclty converted to null.
 
 ## [0.11.0 (2025-02-06)](https://github.com/clickfwd/yoyo/compare/0.10.0...0.11.0)
 

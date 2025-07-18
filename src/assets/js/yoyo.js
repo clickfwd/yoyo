@@ -243,21 +243,38 @@
 		let yoyoSpinners = {}
 
 		function getActionAndParseArguments(detail) {
-			let path = detail.path
-			const match = path.match(/(.*)\((.*)\)/)
-			if (match) {
-				let args = match[2].split(',').map((value) => {
-					const val = value
-						.replace(/'(.*)'/, '$1')
-						.replace(/"(.*)"/, '$1')
-					return isNaN(val) ? val : parseFloat(val)
-				})
-				path = match[1]
-				detail.parameters['actionArgs'] = JSON.stringify(args)
+			const m = detail.path.match(/^(.+?)\((.*)\)$/);
+			if (!m) {
+				// no “(…)” → action is the full path
+				return detail.path;
 			}
 
-			const action = '' + path
-			return action
+			const [, actionName, rawArgs] = m;
+			const args = rawArgs.trim() === ''
+				? []
+				: rawArgs
+					.split(/\s*,\s*/)       // split on commas + trim
+					.map(parseArg);
+
+			detail.parameters.actionArgs = JSON.stringify(args);
+			return actionName;
+		}
+
+		function parseArg(token) {
+			// quoted string?
+			if (/^['"].*['"]$/.test(token)) {
+				return token.slice(1, -1);
+			}
+			// boolean literals?
+			if (token === 'true')  return true;
+			if (token === 'false') return false;
+			// try number
+			const num = Number(token);
+			if (!isNaN(num) && isFinite(num)) {
+				return num;
+			}
+			// fallback to raw string
+			return token;
 		}
 
 		function isComponent(elt) {
