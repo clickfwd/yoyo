@@ -42,6 +42,15 @@ class DependencyInjectionAction extends Component
         $this->result = "Post: {$post->title()}, Tags: " . json_encode($tags);
     }
     
+    /**
+     * Test action with typed and optional regular parameter
+     */
+    public function typedWithOptional(Post $post, ?string $status = null)
+    {
+        $statusText = $status ?? 'default';
+        $this->result = "Post: {$post->title()}, Status: {$statusText}";
+    }
+    
     public function render()
     {
         return $this->view('dependency-injection-action', ['result' => $this->result]);

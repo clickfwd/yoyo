@@ -191,9 +191,21 @@ class ComponentManager
                     throw new \InvalidArgumentException("Too few parameters passed to [{$this->name}::{$action}]");
                 }
             } else {
+                // Check if all regular parameters are optional
+                $requiredCount = 0;
+                foreach ($regularParams as $param) {
+                    if (! $param['optional']) {
+                        $requiredCount++;
+                    }
+                }
+                
                 // Only validate regular parameters (not typed/DI parameters)
-                if (count($parameterNames) == count($parameters)) {
-                    $args = array_combine($parameterNames, $parameters);
+                if (count($parameters) >= $requiredCount && count($parameters) <= count($parameterNames)) {
+                    // Parameters count is valid (between required and total)
+                    $args = [];
+                    for ($i = 0; $i < count($parameterNames); $i++) {
+                        $args[$parameterNames[$i]] = $parameters[$i] ?? null;
+                    }
                 } elseif (empty($parameterNames) && empty($parameters)) {
                     // Method has only typed parameters (or no parameters at all)
                     $args = [];

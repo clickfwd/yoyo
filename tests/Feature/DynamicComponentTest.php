@@ -205,3 +205,19 @@ it('handles action with typed and variadic parameters', function () {
     
     expect(yoyo_update())->toContain('Post: the comment title, Tags: ["php","laravel","yoyo"]');
 });
+
+it('handles action with typed and optional regular parameter without value', function () {
+    mockYoyoPostRequest('/', 'dependency-injection-action/typedWithOptional', 'dependency-injection-action', [
+        'actionArgs' => [],
+    ]);
+    
+    expect(yoyo_update())->toContain('Post: the comment title, Status: default');
+});
+
+it('handles action with typed and optional regular parameter with value', function () {
+    mockYoyoPostRequest('/', 'dependency-injection-action/typedWithOptional', 'dependency-injection-action', [
+        'actionArgs' => ['active'],
+    ]);
+    
+    expect(yoyo_update())->toContain('Post: the comment title, Status: active');
+});
