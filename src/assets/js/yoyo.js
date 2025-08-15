@@ -62,9 +62,17 @@
 					component = getComponent(evt.detail.elt)
 				}
 
-				if (!component) {
-					return
+				// Fallback: try to find the nearest component from evt.detail.elt or evt.detail.target
+				if (!component && evt.detail.elt) {
+					component = getComponent(evt.detail.elt);
 				}
+				if (!component && evt.detail.target) {
+					component = getComponent(evt.detail.target);
+				}
+
+				if (!component) {
+					return;
+				}			
 
 				initializeComponentSpinners(component)
 			},

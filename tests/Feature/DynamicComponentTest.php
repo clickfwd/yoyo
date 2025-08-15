@@ -9,6 +9,7 @@ use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
 use function Tests\mockYoyoGetRequest;
+use function Tests\mockYoyoPostRequest;
 use function Tests\render;
 use function Tests\resetYoyoRequest;
 use function Tests\response;
@@ -137,4 +138,70 @@ it('renders component using dynamic properties', function () {
 
 it('updates component with dynamic properties', function () {
     expect(update('counter_dynamic_properties', 'increment'))->toContain('The count is now 1');
+});
+
+// Variadic Parameters Tests
+it('handles variadic parameters with no arguments', function () {
+    mockYoyoPostRequest('/', 'variadic-parameters/onlyVariadic', 'variadic-parameters', [
+        'actionArgs' => [],
+    ]);
+    
+    expect(yoyo_update())->toContain('Received: []');
+});
+
+it('handles variadic parameters with multiple arguments', function () {
+    mockYoyoPostRequest('/', 'variadic-parameters/onlyVariadic', 'variadic-parameters', [
+        'actionArgs' => ['arg1', 'arg2', 'arg3'],
+    ]);
+    
+    expect(yoyo_update())->toContain('Received: ["arg1","arg2","arg3"]');
+});
+
+it('handles mixed regular and variadic parameters', function () {
+    mockYoyoPostRequest('/', 'variadic-parameters/mixedVariadic', 'variadic-parameters', [
+        'actionArgs' => ['first', 'second', 'third'],
+    ]);
+    
+    expect(yoyo_update())->toContain('First: first, Rest: ["second","third"]');
+});
+
+it('handles optional and variadic parameters', function () {
+    mockYoyoPostRequest('/', 'variadic-parameters/optionalAndVariadic', 'variadic-parameters', [
+        'actionArgs' => ['required_value', 'optional_value', 'extra1', 'extra2'],
+    ]);
+    
+    expect(yoyo_update())->toContain('Required: required_value, Optional: optional_value, Extra: ["extra1","extra2"]');
+});
+
+// Dependency Injection Tests
+it('handles action with only typed parameters', function () {
+    mockYoyoPostRequest('/', 'dependency-injection-action/onlyTyped', 'dependency-injection-action', [
+        'actionArgs' => [],
+    ]);
+    
+    expect(yoyo_update())->toContain('Post title: the comment title');
+});
+
+it('handles action with multiple typed parameters', function () {
+    mockYoyoPostRequest('/', 'dependency-injection-action/multipleTyped', 'dependency-injection-action', [
+        'actionArgs' => [],
+    ]);
+    
+    expect(yoyo_update())->toContain('Post: the comment title, Comment: the comment body');
+});
+
+it('handles action with mixed typed and regular parameters', function () {
+    mockYoyoPostRequest('/', 'dependency-injection-action/mixedTypedAndRegular', 'dependency-injection-action', [
+        'actionArgs' => [123, 'inactive'],
+    ]);
+    
+    expect(yoyo_update())->toContain('Post: the comment title, ID: 123, Status: inactive');
+});
+
+it('handles action with typed and variadic parameters', function () {
+    mockYoyoPostRequest('/', 'dependency-injection-action/typedWithVariadic', 'dependency-injection-action', [
+        'actionArgs' => ['php', 'laravel', 'yoyo'],
+    ]);
+    
+    expect(yoyo_update())->toContain('Post: the comment title, Tags: ["php","laravel","yoyo"]');
 });

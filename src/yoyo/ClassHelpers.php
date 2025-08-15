@@ -145,4 +145,54 @@ class ClassHelpers
 
         return $names;
     }
+    
+    public static function methodHasVariadicParameter($class, $method)
+    {
+        $reflector = new ReflectionClass($class);
+        $method = $reflector->getMethod($method);
+        $parameters = $method->getParameters();
+        
+        if (empty($parameters)) {
+            return false;
+        }
+        
+        // Check if the last parameter is variadic
+        $lastParam = end($parameters);
+        return $lastParam->isVariadic();
+    }
+    
+    /**
+     * Get all method parameters with type information
+     * Returns an array with 'typed' and 'regular' parameters
+     */
+    public static function getMethodParametersWithTypes($class, $method)
+    {
+        $typed = [];    // Parameters with class type hints (for DI)
+        $regular = [];  // Parameters without type hints or with builtin types
+        
+        $reflector = new ReflectionClass($class);
+        $method = $reflector->getMethod($method);
+        
+        foreach ($method->getParameters() as $parameter) {
+            $paramInfo = [
+                'name' => $parameter->getName(),
+                'optional' => $parameter->isOptional(),
+                'variadic' => $parameter->isVariadic(),
+            ];
+            
+            if (! $parameter->getType() || ($parameter->getType() && $parameter->getType()->isBuiltin())) {
+                // Regular parameter (no type or builtin type)
+                $regular[] = $paramInfo;
+            } else {
+                // Typed parameter (class type hint for DI)
+                $paramInfo['type'] = $parameter->getType()->getName();
+                $typed[] = $paramInfo;
+            }
+        }
+        
+        return [
+            'typed' => $typed,
+            'regular' => $regular,
+        ];
+    }
 }

@@ -8,4 +8,9 @@ class Comment
     {
         return 'the comment title';
     }
+    
+    public function body()
+    {
+        return 'the comment body';
+    }
 }

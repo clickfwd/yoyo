@@ -1,6 +1,13 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.11.1...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.12.0...develop)
+
+## [0.13.0 (2025-08-15)](https://github.com/clickfwd/yoyo/compare/0.12.0...0.13.0)
+
+- Fix spinners stop working when target is different than current element
+- Add support for variadic parameters in component actions using PHP's `...$params` syntax
+- Improved parameter validation to support methods with only typed (DI) parameters
+- Container integration now properly handles mixed regular, typed, and variadic parameters
 
 ## [0.12.0 (2025-07-18)](https://github.com/clickfwd/yoyo/compare/0.11.1...0.12.0)
 
