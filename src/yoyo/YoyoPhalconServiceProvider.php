@@ -40,7 +40,7 @@ class YoyoPhalconServiceProvider implements ServiceProviderInterface
             $yoyo->configure($yoyoConfig);
             $viewExtention = $this->viewExtention ?? null;
 
-            $yoyo->container()->singleton('yoyo.view.default', function () use ($di, $viewExtention) {
+            $yoyo->container()->set('yoyo.view.default', function () use ($di, $viewExtention) {
                 $view = $di->get('view');
                 $simpleView = new SimpleView();
                 $simpleView->setViewsDir($view->getViewsDir());

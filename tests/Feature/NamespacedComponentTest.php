@@ -1,6 +1,7 @@
 <?php
 
 use Clickfwd\Yoyo\Yoyo;
+use Illuminate\Container\Container;
 use Tests\App\Resolvers\BladeComponentResolver;
 use function Tests\render;
 
@@ -21,6 +22,7 @@ it('can render namespaced dynamic component', function () {
 it('can render namespaced anonymous component with custom resolver', function () {
     $yoyo = Yoyo::getInstance();
     $yoyo->container()->flush();
+    Container::getInstance()->flush();
     $yoyo->registerComponentResolver(new BladeComponentResolver());
     $view = $yoyo->getViewProvider('blade');
     $view->addNamespace('packagename', __DIR__.'/../app-another/views');
@@ -32,6 +34,7 @@ it('can render namespaced anonymous component with custom resolver', function ()
 it('can render namespaced dynamic component with custom resolver', function () {
     $yoyo = Yoyo::getInstance();
     $yoyo->container()->flush();
+    Container::getInstance()->flush();
     $yoyo->registerComponentResolver(new BladeComponentResolver());
     $view = $yoyo->getViewProvider('blade');
     $view->addNamespace('packagename', __DIR__.'/../app-another/views');

@@ -5,7 +5,7 @@ namespace Tests;
 use Clickfwd\Yoyo\Blade\Application;
 use Clickfwd\Yoyo\Blade\YoyoServiceProvider;
 use Clickfwd\Yoyo\ViewProviders\BladeViewProvider;
-use Clickfwd\Yoyo\Yoyo;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Fluent;
@@ -22,8 +22,9 @@ function yoyo_blade()
 
 function blade()
 {
-    $app = Yoyo::getInstance()->container();
-    
+    // Force Illuminate/Container for Blade
+    $app = Container::getInstance();
+
     $app->bind(ApplicationContract::class, Application::class);
     
     $app->alias('view', ViewFactory::class);

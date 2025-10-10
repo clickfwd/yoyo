@@ -3,8 +3,8 @@
 namespace Clickfwd\Yoyo;
 
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
+use Clickfwd\Yoyo\Interfaces\YoyoContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 
 class ComponentResolver
 {
@@ -18,7 +18,7 @@ class ComponentResolver
 
     protected $container;
 
-    public function __invoke(ContainerInterface $container, array $registered = [], array $hints = [])
+    public function __invoke(YoyoContainerInterface $container, array $registered = [], array $hints = [])
     {
         $this->container = $container;
 
