@@ -21,7 +21,6 @@ it('can render namespaced dynamic component', function () {
 
 it('can render namespaced anonymous component with custom resolver', function () {
     $yoyo = Yoyo::getInstance();
-    $yoyo->container()->flush();
     Container::getInstance()->flush();
     $yoyo->registerComponentResolver(new BladeComponentResolver());
     $view = $yoyo->getViewProvider('blade');
@@ -33,7 +32,6 @@ it('can render namespaced anonymous component with custom resolver', function ()
 
 it('can render namespaced dynamic component with custom resolver', function () {
     $yoyo = Yoyo::getInstance();
-    $yoyo->container()->flush();
     Container::getInstance()->flush();
     $yoyo->registerComponentResolver(new BladeComponentResolver());
     $view = $yoyo->getViewProvider('blade');

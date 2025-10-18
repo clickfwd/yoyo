@@ -10,6 +10,8 @@ class IlluminateContainer implements YoyoContainerInterface
 {
     protected static $instance;
 
+    protected Container $container;
+
     public static function getInstance()
     {
         return static::$instance ??= new static(Container::getInstance());
@@ -18,11 +20,6 @@ class IlluminateContainer implements YoyoContainerInterface
     public function __construct(Container $container)
     {
         $this->container = $container;
-    }
-
-    public function getParent()
-    {
-        return $this->container;
     }
 
     public function get(string $id)
@@ -54,10 +51,5 @@ class IlluminateContainer implements YoyoContainerInterface
     public function call(callable $method, array $args = [])
     {
         return $this->container->call($method, $args);
-    }
-
-    public function flush()
-    {
-        $this->container->flush();
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Clickfwd\Yoyo\Containers;
 
-use \Closure;
-use ReflectionClass;
 use Clickfwd\Yoyo\Interfaces\YoyoContainerInterface;
+use Clickfwd\Yoyo\Exceptions\BindingNotFoundException;
+use Clickfwd\Yoyo\Exceptions\ContainerResolutionException;
 
 class YoyoContainer implements YoyoContainerInterface
 {
@@ -21,7 +21,7 @@ class YoyoContainer implements YoyoContainerInterface
     {
         $resolved = $this->bindings[$id] ?? null;
 
-        if($resolved instanceof Closure) {
+        if($resolved instanceof \Closure) {
             $this->bindings[$id] = $resolved($this);
         }
 
@@ -29,7 +29,11 @@ class YoyoContainer implements YoyoContainerInterface
             return $this->make($resolved);
         }
 
-        return $this->bindings[$id];
+        try {
+            return $this->bindings[$id];
+        } catch(\Throwable $e) {
+            throw new BindingNotFoundException("[$id] is not bound to the container", $e);
+        }
     }
 
     public function has(string $id): bool
@@ -46,25 +50,34 @@ class YoyoContainer implements YoyoContainerInterface
 
     public function make(string $class, array $args = [])
     {
-        if(is_object($class)) return $class;
-        if(!class_exists($class)) return null;
-
-        return new $class(...$this->extractArgs($class, '__construct', $args));
+        try {
+            $class = $this->has($class) ? $this->get($class) : $class;
+            return is_object($class) ? $class : new $class(...$this->extractArgs($class, '__construct', $args));
+        } catch(\Throwable $e) {
+            throw new ContainerResolutionException("[$class] could not be resolved", $e);
+        }
     }
 
     public function call(callable $method, array $args = [])
     {
+        if(!is_array($method) || count($method) !== 2) {
+            throw new \InvalidArgumentException("Callable must be in [class, method] format");
+        }
+
         return $method(...$this->extractArgs($method[0], $method[1], $args));
     }
 
     protected function extractArgs($class, $method, $arguments)
     {
-        if(!method_exists($class, $method)) return [];
+        try {
+            $result = [];
+            $reflector = new \ReflectionClass($class);
+            $parameters = $reflector->getMethod($method)->getParameters();
+        } catch(\ReflectionException $e) {
+            return $arguments;
+        }
 
-        $result = [];
-        $reflector = new ReflectionClass($class);
-
-        foreach ($reflector->getMethod($method)->getParameters() as $parameter) {
+        foreach ($parameters as $parameter) {
             // Variadic arguments
             if($parameter->isVariadic()) {
                 return array_merge($result, array_values($arguments));
@@ -75,7 +88,7 @@ class YoyoContainer implements YoyoContainerInterface
                 unset($arguments[$parameter->getName()]);
             }
             // Typed argument
-            elseif($parameter->hasType() && class_exists($parameter->getType()->getName())) {
+            elseif($this->isResolvableType($parameter)) {
                 $result[] = $this->make($parameter->getType()->getName());
             }
             // Argument with default value
@@ -95,8 +108,13 @@ class YoyoContainer implements YoyoContainerInterface
         return $result;
     }
 
-    public function flush()
+    protected function isResolvableType(\ReflectionParameter $parameter): bool
     {
-        $this->bindings = [];
+        if($parameter->getType() instanceof \ReflectionNamedType) {
+            $name = $parameter->getType()->getName();
+            return $name && (class_exists($name) || interface_exists($name));
+        }
+
+        return false;
     }
 }

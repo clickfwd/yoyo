@@ -11,9 +11,14 @@ class ContainerResolver
 {
     protected static ?YoyoContainerInterface $preferred = null;
 
-    public static function setPreferred(YoyoContainerInterface $container)
+    public static function setPreferred(?YoyoContainerInterface $container)
     {
         static::$preferred = $container;
+    }
+
+    public static function getPreferred()
+    {
+        return static::$preferred;
     }
 
     public static function resolve(): YoyoContainerInterface
