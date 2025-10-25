@@ -14,7 +14,7 @@ class YoyoContainer implements YoyoContainerInterface
 
     public static function getInstance()
     {
-        return static::$instance ??= new static;
+        return static::$instance = static::$instance ?? new static;
     }
 
     public function get(string $id)

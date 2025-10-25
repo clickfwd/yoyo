@@ -9,7 +9,7 @@ use Illuminate\Container\Container;
 
 class ContainerResolver
 {
-    protected static ?YoyoContainerInterface $preferred = null;
+    protected static $preferred = null;
 
     public static function setPreferred(?YoyoContainerInterface $container)
     {

@@ -4,7 +4,6 @@ namespace Clickfwd\Yoyo\Interfaces;
 
 use Closure;
 use Psr\Container\ContainerInterface;
-use Psr\Container\ContainerExceptionInterface;
 
 interface YoyoContainerInterface extends ContainerInterface
 {
