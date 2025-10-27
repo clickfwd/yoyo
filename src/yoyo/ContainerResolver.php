@@ -23,11 +23,11 @@ class ContainerResolver
 
     public static function resolve(): YoyoContainerInterface
     {
-        if(static::$preferred) {
+        if (static::$preferred) {
             return static::$preferred;
         }
 
-        if(class_exists(Container::class)) {
+        if (class_exists(Container::class)) {
             return new IlluminateContainer(Container::getInstance());
         }
 

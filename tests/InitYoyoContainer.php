@@ -1,8 +1,8 @@
 <?php
 
-use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\ContainerResolver;
 use Clickfwd\Yoyo\Containers\YoyoContainer;
+use Clickfwd\Yoyo\Yoyo;
 
 ContainerResolver::setPreferred(YoyoContainer::getInstance());
 

@@ -1,10 +1,10 @@
 <?php
 
 use Clickfwd\Yoyo\ContainerResolver;
-use Clickfwd\Yoyo\Containers\YoyoContainer;
 use Clickfwd\Yoyo\Containers\IlluminateContainer;
+use Clickfwd\Yoyo\Containers\YoyoContainer;
 
-it('resolves to illuminate container when available', function() {
+it('resolves to illuminate container when available', function () {
     $oldPreferred  = ContainerResolver::getPreferred();
 
     // Reset preferred
@@ -16,7 +16,7 @@ it('resolves to illuminate container when available', function() {
     ContainerResolver::setPreferred($oldPreferred);
 });
 
-it('uses preferred container when set', function() {
+it('uses preferred container when set', function () {
     $oldPreferred  = ContainerResolver::getPreferred();
 
     // Prefer YoyoContainer

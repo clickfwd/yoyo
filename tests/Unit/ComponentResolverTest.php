@@ -1,7 +1,6 @@
 <?php
 
 use Clickfwd\Yoyo\ContainerResolver;
-use Illuminate\Container\Container;
 
 it('resolves dynamic component', function () {
     $resolver = (new Clickfwd\Yoyo\ComponentResolver())(ContainerResolver::resolve());

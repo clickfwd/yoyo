@@ -3,9 +3,9 @@
 use Clickfwd\Yoyo\Containers\IlluminateContainer;
 use Illuminate\Container\Container;
 
-it('delegates to illuminate container', function() {
+it('delegates to illuminate container', function () {
     $illuminate = Container::getInstance();
-    $illuminate->bind('test', fn() => 'value');
+    $illuminate->bind('test', fn () => 'value');
 
     $container = IlluminateContainer::getInstance();
 

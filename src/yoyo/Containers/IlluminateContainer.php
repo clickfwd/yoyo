@@ -3,8 +3,8 @@
 namespace Clickfwd\Yoyo\Containers;
 
 use \Closure;
-use Illuminate\Container\Container;
 use Clickfwd\Yoyo\Interfaces\YoyoContainerInterface;
+use Illuminate\Container\Container;
 
 class IlluminateContainer implements YoyoContainerInterface
 {
@@ -34,7 +34,7 @@ class IlluminateContainer implements YoyoContainerInterface
 
     public function set(string $id, $value)
     {
-        if(is_object($value) && !($value instanceof Closure)) {
+        if (is_object($value) && ! ($value instanceof Closure)) {
             return $this->container->instance($id, $value);
         }
 
