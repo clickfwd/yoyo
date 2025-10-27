@@ -102,7 +102,7 @@ class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
     {
         return call_user_func_array([$this->view, $method], $params);
     }
-        
+
     public function __toString()
     {
         $this->vars['this'] = $this->yoyoComponent;

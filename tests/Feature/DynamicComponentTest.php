@@ -5,6 +5,7 @@ use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use Clickfwd\Yoyo\Exceptions\HttpException;
 use Clickfwd\Yoyo\Yoyo;
+
 use function Tests\encode_vals;
 use function Tests\htmlformat;
 use function Tests\hxattr;
@@ -101,7 +102,7 @@ it('dynamically resolves class and named arguments in mount method', function ()
     mockYoyoGetRequest('http://example.com/', 'ependency-injection-class-with-named-argument-mapping', '', [
         'id' => 100,
     ]);
-    
+
     expect(render('dependency-injection-class-with-named-argument-mapping'))->toContain('the comment title-100');
 
     resetYoyoRequest();
@@ -145,7 +146,7 @@ it('handles variadic parameters with no arguments', function () {
     mockYoyoPostRequest('/', 'variadic-parameters/onlyVariadic', 'variadic-parameters', [
         'actionArgs' => [],
     ]);
-    
+
     expect(yoyo_update())->toContain('Received: []');
 });
 
@@ -153,7 +154,7 @@ it('handles variadic parameters with multiple arguments', function () {
     mockYoyoPostRequest('/', 'variadic-parameters/onlyVariadic', 'variadic-parameters', [
         'actionArgs' => ['arg1', 'arg2', 'arg3'],
     ]);
-    
+
     expect(yoyo_update())->toContain('Received: ["arg1","arg2","arg3"]');
 });
 
@@ -161,7 +162,7 @@ it('handles mixed regular and variadic parameters', function () {
     mockYoyoPostRequest('/', 'variadic-parameters/mixedVariadic', 'variadic-parameters', [
         'actionArgs' => ['first', 'second', 'third'],
     ]);
-    
+
     expect(yoyo_update())->toContain('First: first, Rest: ["second","third"]');
 });
 
@@ -169,7 +170,7 @@ it('handles optional and variadic parameters', function () {
     mockYoyoPostRequest('/', 'variadic-parameters/optionalAndVariadic', 'variadic-parameters', [
         'actionArgs' => ['required_value', 'optional_value', 'extra1', 'extra2'],
     ]);
-    
+
     expect(yoyo_update())->toContain('Required: required_value, Optional: optional_value, Extra: ["extra1","extra2"]');
 });
 
@@ -178,7 +179,7 @@ it('handles action with only typed parameters', function () {
     mockYoyoPostRequest('/', 'dependency-injection-action/onlyTyped', 'dependency-injection-action', [
         'actionArgs' => [],
     ]);
-    
+
     expect(yoyo_update())->toContain('Post title: the comment title');
 });
 
@@ -186,7 +187,7 @@ it('handles action with multiple typed parameters', function () {
     mockYoyoPostRequest('/', 'dependency-injection-action/multipleTyped', 'dependency-injection-action', [
         'actionArgs' => [],
     ]);
-    
+
     expect(yoyo_update())->toContain('Post: the comment title, Comment: the comment body');
 });
 
@@ -194,7 +195,7 @@ it('handles action with mixed typed and regular parameters', function () {
     mockYoyoPostRequest('/', 'dependency-injection-action/mixedTypedAndRegular', 'dependency-injection-action', [
         'actionArgs' => [123, 'inactive'],
     ]);
-    
+
     expect(yoyo_update())->toContain('Post: the comment title, ID: 123, Status: inactive');
 });
 
@@ -202,7 +203,7 @@ it('handles action with typed and variadic parameters', function () {
     mockYoyoPostRequest('/', 'dependency-injection-action/typedWithVariadic', 'dependency-injection-action', [
         'actionArgs' => ['php', 'laravel', 'yoyo'],
     ]);
-    
+
     expect(yoyo_update())->toContain('Post: the comment title, Tags: ["php","laravel","yoyo"]');
 });
 
@@ -210,7 +211,7 @@ it('handles action with typed and optional regular parameter without value', fun
     mockYoyoPostRequest('/', 'dependency-injection-action/typedWithOptional', 'dependency-injection-action', [
         'actionArgs' => [],
     ]);
-    
+
     expect(yoyo_update())->toContain('Post: the comment title, Status: default');
 });
 
@@ -218,6 +219,6 @@ it('handles action with typed and optional regular parameter with value', functi
     mockYoyoPostRequest('/', 'dependency-injection-action/typedWithOptional', 'dependency-injection-action', [
         'actionArgs' => ['active'],
     ]);
-    
+
     expect(yoyo_update())->toContain('Post: the comment title, Status: active');
 });

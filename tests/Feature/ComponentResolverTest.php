@@ -4,6 +4,7 @@ use Clickfwd\Yoyo\Yoyo;
 use Tests\App\Resolvers\BladeComponentResolver;
 use Tests\App\Resolvers\CustomComponentResolver;
 use Tests\App\Resolvers\TwigComponentResolver;
+
 use function Tests\render;
 
 it('can use multiple view providers using component resolvers', function () {

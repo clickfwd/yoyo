@@ -25,7 +25,7 @@ it('can make classes with dependencies', function () {
 it('handles nullable parameters correctly', function () {
     $container = new YoyoContainer();
 
-    $class = new class(null) {
+    $class = new class (null) {
         public ?string $optional;
 
         public function __construct(?string $optional)
@@ -46,7 +46,7 @@ it('handles nullable parameters correctly', function () {
 it('handles interfaces bound to container', function () {
     $container = new YoyoContainer();
 
-    $class = new class($container) {
+    $class = new class ($container) {
         public YoyoContainerInterface $container;
 
         public function __construct(YoyoContainerInterface $container)

@@ -41,7 +41,7 @@ class ComponentResolver
     public function resolveComponent($id, $name, $variables): ?Component
     {
         $this->resolving($id, $name, $variables);
-        
+
         if ($instance = $this->resolveDynamic($id, $name)) {
             return $instance;
         }
@@ -52,7 +52,7 @@ class ComponentResolver
     public function resolveDynamic($id, $name): ?Component
     {
         $classNames = [];
-        
+
         $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
 
         // Check namespaced components
@@ -80,7 +80,7 @@ class ComponentResolver
                 break;
             }
         }
-        
+
         try {
             return $this->container->make($className, $args);
         } catch (ContainerExceptionInterface $e) {
@@ -91,7 +91,7 @@ class ComponentResolver
     public function resolveAnonymous($id, $name): ?Component
     {
         $args = ['resolver' => $this, 'id' => $id, 'name' => $name];
-        
+
         if ($this->registered[$name] ?? null) {
             $args['name'] = $this->registered[$name] ?? $name;
 

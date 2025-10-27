@@ -2,8 +2,8 @@
 
 namespace Clickfwd\Yoyo\Containers;
 
-use \Closure;
 use Clickfwd\Yoyo\Interfaces\YoyoContainerInterface;
+use Closure;
 use Illuminate\Container\Container;
 
 class IlluminateContainer implements YoyoContainerInterface

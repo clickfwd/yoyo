@@ -81,7 +81,7 @@ abstract class Component
         $this->attributes = $attributes;
 
         $publicProperties = ClassHelpers::getPublicProperties($this, __CLASS__);
-        
+
         foreach ($publicProperties as $property) {
             $this->{$property} = $data[$property] ?? $this->{$property};
         }
@@ -141,7 +141,7 @@ abstract class Component
         if (is_array($action)) {
             return in_array($this->componentAction, $action);
         }
-        
+
         return $this->componentAction == $action;
     }
 
@@ -191,7 +191,7 @@ abstract class Component
 
         return $this;
     }
-    
+
     public function skipRender()
     {
         $this->response->status(204);
@@ -205,7 +205,7 @@ abstract class Component
         if ($modifier) {
             $this->addSwapModifiers($modifier);
         }
-        
+
         $this->response->status(200);
         $this->omitResponse = true;
 
@@ -277,7 +277,7 @@ abstract class Component
     public function __call(string $name, array $arguments)
     {
         $studlyProperty = YoyoHelpers::studly($name);
-        
+
         if (method_exists($this, $computedMethodName = 'get'.$studlyProperty.'Property')) {
             $key = static::makeCacheKey($name, $arguments);
 

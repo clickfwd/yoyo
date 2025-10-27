@@ -42,7 +42,7 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
 
     public function makeFromString($content, $vars = []): string
     {
-        $view = $this->view->make((new \Clickfwd\Yoyo\Blade\CreateBladeViewFromString)($this->view, $content));
+        $view = $this->view->make((new \Clickfwd\Yoyo\Blade\CreateBladeViewFromString())($this->view, $content));
 
         return $view->with($vars)->render();
     }
@@ -89,7 +89,7 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
     {
         return call_user_func_array([$this->view, $method], $params);
     }
-        
+
     public function __toString()
     {
         $output = (string) $this->view->make($this->template, $this->vars);

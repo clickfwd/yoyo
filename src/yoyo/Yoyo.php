@@ -22,7 +22,7 @@ class Yoyo
     private $id;
 
     private $name;
-    
+
     private $variables = [];
 
     private static $container;
@@ -46,7 +46,7 @@ class Yoyo
      */
     public static function getInstance()
     {
-        return new Self(static::$container);
+        return new self(static::$container);
     }
 
     public function bindRequest(RequestInterface $request)
@@ -95,13 +95,13 @@ class Yoyo
         if ($name && static::$container->has("yoyo.resolver.{$name}")) {
             return static::$container->get("yoyo.resolver.{$name}")(static::$container, static::$registeredComponents, static::$componentNamespaces);
         }
-        
+
         $resolver = ! $name ? new ComponentResolver() : static::$resolverInstances[$name];
 
         $name = $name ?? 'default';
-        
+
         static::$container->set("yoyo.resolver.{$name}", $resolver);
-              
+
         return $resolver(static::$container, static::$registeredComponents, static::$componentNamespaces);
     }
 
@@ -147,13 +147,13 @@ class Yoyo
      * @param mixed $class
      * @return void
      */
-    public static function componentNamespace(string $namespace, $class) : void
+    public static function componentNamespace(string $namespace, $class): void
     {
         $class = array_filter((array) $class);
-        
+
         static::$componentNamespaces[$namespace] = array_merge(static::$componentNamespaces[$namespace] ?? [], $class);
     }
-        
+
     public static function registerComponent($name, $class = null): void
     {
         static::$registeredComponents[$name] = $class;
@@ -184,7 +184,7 @@ class Yoyo
         $this->action($action);
 
         $this->id = $this->getComponentId($attributes);
-        
+
         unset($attributes['id']);
 
         $this->name = $name;
@@ -264,7 +264,7 @@ class Yoyo
             } finally {
                 if ($componentManager->getComponentInstance()) {
                     // Get all data needed to pass the rendered HTML through the Yoyo compiler to make it reactive
-                        
+
                     $defaultValues = $componentManager->getDefaultPublicVars();
 
                     $newValues = $componentManager->getPublicVars();
@@ -281,24 +281,24 @@ class Yoyo
                     $componentType = $componentManager->isDynamicComponent() ? 'dynamic' : 'anonymous';
 
                     // For dynamic components, filter variables based on component props
-                        
+
                     $props = $componentManager->getProps();
 
                     $postComponentProcessingActions = function () use ($componentManager, $defaultValues, $newValues) {
                         $queryStringKeys = $componentManager->getQueryString();
                         $queryString = new QueryString($defaultValues, $newValues, $queryStringKeys);
-                
+
                         // Browser URL State
                         $urlStateManager = new UrlStateManagerService();
-                
+
                         if ($componentManager->isDynamicComponent()) {
                             $urlStateManager->pushState($queryString->getPageQueryParams());
                         }
-                
+
                         // Browser Events
                         $eventsService = BrowserEventsService::getInstance();
                         $eventsService->dispatch();
-                
+
                         // Browser Redirect
                         (PageRedirectService::getInstance())->redirect($componentManager->getComponentInstance()->redirectTo);
                     };
@@ -338,7 +338,7 @@ class Yoyo
             }
         )
         );
-        
+
         $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props, $cacheHistory);
 
         if ($spinning) {

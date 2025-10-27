@@ -11,7 +11,7 @@ beforeAll(function () {
 
 it('emits browser event', function () {
     mockYoyoGetRequest('http://example.com/', 'counter/increment');
-    
+
     yoyo_update();
 
     $headers = headers();

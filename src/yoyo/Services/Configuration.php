@@ -40,7 +40,7 @@ class Configuration
         'globalViewTransitions',
         'methodsThatUseUrlParams',
     ];
-        
+
     public function __construct($options)
     {
         self::$options = array_merge([

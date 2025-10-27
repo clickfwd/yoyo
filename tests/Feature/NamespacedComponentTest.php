@@ -3,6 +3,7 @@
 use Clickfwd\Yoyo\Yoyo;
 use Illuminate\Container\Container;
 use Tests\App\Resolvers\BladeComponentResolver;
+
 use function Tests\render;
 
 it('can render namespaced anonymous component', function () {

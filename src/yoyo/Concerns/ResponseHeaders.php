@@ -52,7 +52,7 @@ trait ResponseHeaders
 
         return $this;
     }
-    
+
     public function retarget($selector)
     {
         $this->header('HX-Retarget', $selector);
