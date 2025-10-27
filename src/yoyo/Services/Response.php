@@ -37,7 +37,7 @@ class Response
             if (is_array($value)) {
                 $value = json_encode($value);
             }
-            
+
             header("$key: $value");
         }
 

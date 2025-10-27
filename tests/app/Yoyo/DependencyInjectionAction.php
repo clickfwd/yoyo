@@ -9,7 +9,7 @@ use Tests\App\Post;
 class DependencyInjectionAction extends Component
 {
     public $result = '';
-    
+
     /**
      * Test action with only typed parameters (dependency injection)
      */
@@ -17,7 +17,7 @@ class DependencyInjectionAction extends Component
     {
         $this->result = 'Post title: ' . $post->title();
     }
-    
+
     /**
      * Test action with multiple typed parameters
      */
@@ -25,7 +25,7 @@ class DependencyInjectionAction extends Component
     {
         $this->result = 'Post: ' . $post->title() . ', Comment: ' . $comment->body();
     }
-    
+
     /**
      * Test action with mixed typed and regular parameters
      */
@@ -33,7 +33,7 @@ class DependencyInjectionAction extends Component
     {
         $this->result = "Post: {$post->title()}, ID: {$id}, Status: {$status}";
     }
-    
+
     /**
      * Test action with typed and variadic parameters
      */
@@ -41,7 +41,7 @@ class DependencyInjectionAction extends Component
     {
         $this->result = "Post: {$post->title()}, Tags: " . json_encode($tags);
     }
-    
+
     /**
      * Test action with typed and optional regular parameter
      */
@@ -50,7 +50,7 @@ class DependencyInjectionAction extends Component
         $statusText = $status ?? 'default';
         $this->result = "Post: {$post->title()}, Status: {$statusText}";
     }
-    
+
     public function render()
     {
         return $this->view('dependency-injection-action', ['result' => $this->result]);

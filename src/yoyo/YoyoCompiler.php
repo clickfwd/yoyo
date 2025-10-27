@@ -249,7 +249,7 @@ class YoyoCompiler
         }
 
         // Process variables
-        
+
         if ($vars = $element->getAttribute(self::yoprefix('vals'))) {
             $element->removeAttribute(self::yoprefix('vals'));
 
@@ -273,13 +273,13 @@ class YoyoCompiler
             self::yoprefix('resolver'),
             self::yoprefix('source'),
         ]);
-        
+
         $variables = array_filter($this->variables, function ($key) use ($props) {
             return in_array($key, $props);
         }, ARRAY_FILTER_USE_KEY);
-                
+
         $attributes['vals'] = array_merge($attributes['vals'], $variables);
-        
+
         // Add all attributes
 
         $attributes['vals'] = YoyoHelpers::encode_vals($attributes['vals']);
@@ -337,9 +337,9 @@ class YoyoCompiler
             if (count($parts) == 1 || $parts[0] !== self::yoprefix('val')) {
                 continue;
             }
-            
+
             $attributes[YoyoHelpers::camel($parts[1], '-')] = YoyoHelpers::decode_val($attr->value);
-            
+
             $element->removeAttribute($attr->name);
         }
 
@@ -417,7 +417,7 @@ class YoyoCompiler
     protected function addRequestMethodAttribute($element, $isRootNode = false)
     {
         // Skip if element already has an hx-[request] attribute (no yoyo:[request] which is processed below)
-        
+
         foreach (self::HTMX_REQUEST_METHOD_ATTRIBUTES as $attr) {
             $hxattr = self::hxprefix($attr);
             if ($element->hasAttribute($hxattr)) {
@@ -426,10 +426,10 @@ class YoyoCompiler
         }
 
         // Look for existing method attribute, otherwise set 'get' as default
-        
+
         foreach (self::HTMX_REQUEST_METHOD_ATTRIBUTES as $attr) {
             $yoattr = self::yoprefix($attr);
-            
+
             if ($value = $element->getAttribute($yoattr)) {
                 $element->removeAttribute($yoattr);
 

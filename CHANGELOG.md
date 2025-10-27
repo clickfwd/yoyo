@@ -1,6 +1,28 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.13.1...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.14.0...develop)
+
+## [0.14.0 (2025-10-27)](https://github.com/clickfwd/yoyo/compare/0.13.1...0.14.0)
+
+### Breaking Changes
+
+- Minimum PHP version is now 8.0+
+- `illuminate/container` is now an optional dependency
+
+### Added
+
+- Built-in dependency injection container for standalone usage
+
+### Changed
+
+- Yoyo now automatically detects and uses `illuminate/container` if available, otherwise uses built-in container
+
+### Migration Notes
+
+If you're using Yoyo standalone and need advanced container features, install illuminate/container:
+```bash
+composer require illuminate/container
+```
 
 ## [0.13.1 (2025-08-15)](https://github.com/clickfwd/yoyo/compare/0.13.0...0.13.1)
 

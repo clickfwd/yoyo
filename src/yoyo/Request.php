@@ -9,7 +9,7 @@ class Request implements RequestInterface
     private $request;
 
     private $server;
-    
+
     private $dropped = [];
 
     public function __construct()
@@ -104,14 +104,14 @@ class Request implements RequestInterface
 
         return $this;
     }
-        
+
     public function merge($data)
     {
         $this->request = array_merge($this->request, $data);
 
         return $this;
     }
-        
+
     public function drop($key)
     {
         $this->dropped[] = $key;

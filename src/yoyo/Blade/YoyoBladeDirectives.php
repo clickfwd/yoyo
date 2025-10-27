@@ -21,7 +21,7 @@ class YoyoBladeDirectives
         $blade->directive('emitToWithSelector', [$this, 'emitToWithSelector']);
 
         $blade->directive('emitSelf', [$this, 'emitToWithSelector']);
-    
+
         $blade->directive('emitUp', [$this, 'emitToWithSelector']);
     }
 

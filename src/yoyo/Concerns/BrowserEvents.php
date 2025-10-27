@@ -20,7 +20,7 @@ trait BrowserEvents
     {
         (BrowserEventsService::getInstance())->emitToWithSelector($target, $event, $params);
     }
-    
+
     public function emitSelf($event, ...$params)
     {
         (BrowserEventsService::getInstance())->emitSelf($event, $params);

@@ -104,7 +104,7 @@ class ComponentManager
         $isEventListenerAction = false;
 
         $eventParams = $this->request->get('eventParams', []);
-        
+
         $this->component->spinning($this->spinning)->boot($variables, $attributes);
 
         $hookStack = [
@@ -135,12 +135,12 @@ class ComponentManager
             // If action is an event listener, re-route it to the listener method
 
             $action = ! empty($listeners[$action]) ? $listeners[$action] : $action;
-            
+
             $isEventListenerAction = true;
         } elseif (! method_exists($this->component, $action)) {
             throw new ComponentMethodNotFound($class, $action);
         }
-        
+
         $excludedActions = ClassHelpers::getPublicMethods(Component::class, ['render']);
 
         if (in_array($action, $excludedActions) ||
@@ -156,33 +156,33 @@ class ComponentManager
 
         if (! in_array($action, ['render', 'refresh'])) {
             $parameters = $isEventListenerAction ? $eventParams : $this->parseActionArguments();
-            
+
             // Get parameter information with types
             $paramInfo = ClassHelpers::getMethodParametersWithTypes($this->component, $action);
             $regularParams = $paramInfo['regular'];
             $typedParams = $paramInfo['typed'];
-            
+
             // Extract just the names of regular parameters for backwards compatibility
             $parameterNames = array_column($regularParams, 'name');
-            
+
             // Check if the last regular parameter is variadic
             $hasVariadic = ! empty($regularParams) && end($regularParams)['variadic'];
-            
+
             // Handle variadic parameters
             if ($hasVariadic && count($parameterNames) > 0) {
                 $regularParamCount = count($parameterNames) - 1; // Exclude the variadic parameter
-                
+
                 if (count($parameters) >= $regularParamCount) {
                     // Split parameters into regular and variadic
                     $regularParamValues = array_slice($parameters, 0, $regularParamCount);
                     $variadicParamValues = array_slice($parameters, $regularParamCount);
-                    
+
                     // Create args array with named regular parameters and indexed variadic parameters
                     $args = [];
                     for ($i = 0; $i < $regularParamCount; $i++) {
                         $args[$parameterNames[$i]] = $regularParamValues[$i] ?? null;
                     }
-                    
+
                     // Add variadic parameters as indexed values (not named)
                     foreach ($variadicParamValues as $value) {
                         $args[] = $value;
@@ -198,7 +198,7 @@ class ComponentManager
                         $requiredCount++;
                     }
                 }
-                
+
                 // Only validate regular parameters (not typed/DI parameters)
                 if (count($parameters) >= $requiredCount && count($parameters) <= count($parameterNames)) {
                     // Parameters count is valid (between required and total)
@@ -213,7 +213,7 @@ class ComponentManager
                     throw new \InvalidArgumentException("Incorrect number of parameters passed to [{$this->name}::{$action}]");
                 }
             }
-            
+
             // The container will handle dependency injection for typed parameters
             $actionResponse = Yoyo::container()->call([$this->component, $action], $args);
 
@@ -231,7 +231,7 @@ class ComponentManager
         }
 
         $view = $this->component->render();
- 
+
         if (is_null($view)) {
             return '';
         }

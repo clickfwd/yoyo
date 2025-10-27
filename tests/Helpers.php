@@ -43,7 +43,7 @@ function compile_html_with_vars($name, $html, $vars, $spinning = false)
 function render($name, $variables = [], $attributes = [])
 {
     $yoyo = yoyo_instance();
-    
+
     return $yoyo->mount($name, $variables, $attributes)->render();
 }
 

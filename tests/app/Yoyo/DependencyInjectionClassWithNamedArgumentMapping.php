@@ -17,7 +17,7 @@ class DependencyInjectionClassWithNamedArgumentMapping extends Component
     public function mount(Post $post, $id)
     {
         $this->id = $id;
-        
+
         $this->post = $post;
     }
 

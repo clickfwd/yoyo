@@ -4,6 +4,7 @@ namespace Tests\App\Resolvers;
 
 use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\ViewProviders\BladeViewProvider;
+
 use function Tests\blade;
 
 class BladeComponentResolver extends ComponentResolver

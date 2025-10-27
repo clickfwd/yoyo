@@ -3,3 +3,4 @@
 /.php-cs-fixer.cache
 /tests/compiled/**/*.php
 /tests/compiled/*.php
+.claude

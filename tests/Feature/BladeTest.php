@@ -1,6 +1,7 @@
 <?php
 
 use Clickfwd\Yoyo\Yoyo;
+
 use function Tests\htmlformat;
 use function Tests\render;
 use function Tests\response;

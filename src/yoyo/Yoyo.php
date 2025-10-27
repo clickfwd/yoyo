@@ -6,13 +6,12 @@ use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\HttpException;
 use Clickfwd\Yoyo\Exceptions\NotFoundHttpException;
 use Clickfwd\Yoyo\Interfaces\RequestInterface;
+use Clickfwd\Yoyo\Interfaces\YoyoContainerInterface;
 use Clickfwd\Yoyo\Services\BrowserEventsService;
 use Clickfwd\Yoyo\Services\Configuration;
 use Clickfwd\Yoyo\Services\PageRedirectService;
 use Clickfwd\Yoyo\Services\Response;
 use Clickfwd\Yoyo\Services\UrlStateManagerService;
-use Illuminate\Container\Container;
-use Psr\Container\ContainerInterface;
 
 class Yoyo
 {
@@ -23,7 +22,7 @@ class Yoyo
     private $id;
 
     private $name;
-    
+
     private $variables = [];
 
     private static $container;
@@ -36,9 +35,9 @@ class Yoyo
 
     private static $resolverInstances = [];
 
-    public function __construct(?ContainerInterface $container = null)
+    public function __construct(?YoyoContainerInterface $container = null)
     {
-        static::$container = $container ?? Container::getInstance();
+        static::$container = $container ?? ContainerResolver::resolve();
     }
 
     /**
@@ -47,7 +46,7 @@ class Yoyo
      */
     public static function getInstance()
     {
-        return new Self(static::$container);
+        return new self(static::$container);
     }
 
     public function bindRequest(RequestInterface $request)
@@ -93,16 +92,16 @@ class Yoyo
         $name = $this->variables[YoyoCompiler::yoprefix('resolver')]
                             ?? static::request()->get(YoyoCompiler::yoprefix('resolver'));
 
-        if ($name && static::$container->bound("yoyo.resolver.{$name}")) {
+        if ($name && static::$container->has("yoyo.resolver.{$name}")) {
             return static::$container->get("yoyo.resolver.{$name}")(static::$container, static::$registeredComponents, static::$componentNamespaces);
         }
-        
+
         $resolver = ! $name ? new ComponentResolver() : static::$resolverInstances[$name];
 
         $name = $name ?? 'default';
-        
-        static::$container->instance("yoyo.resolver.{$name}", $resolver);
-              
+
+        static::$container->set("yoyo.resolver.{$name}", $resolver);
+
         return $resolver(static::$container, static::$registeredComponents, static::$componentNamespaces);
     }
 
@@ -113,7 +112,7 @@ class Yoyo
             $name = 'default';
         }
 
-        static::$container->singleton("yoyo.view.{$name}", $provider);
+        static::$container->set("yoyo.view.{$name}", $provider);
     }
 
     public function registerViewProviders($providers)
@@ -148,13 +147,13 @@ class Yoyo
      * @param mixed $class
      * @return void
      */
-    public static function componentNamespace(string $namespace, $class) : void
+    public static function componentNamespace(string $namespace, $class): void
     {
         $class = array_filter((array) $class);
-        
+
         static::$componentNamespaces[$namespace] = array_merge(static::$componentNamespaces[$namespace] ?? [], $class);
     }
-        
+
     public static function registerComponent($name, $class = null): void
     {
         static::$registeredComponents[$name] = $class;
@@ -185,7 +184,7 @@ class Yoyo
         $this->action($action);
 
         $this->id = $this->getComponentId($attributes);
-        
+
         unset($attributes['id']);
 
         $this->name = $name;
@@ -265,7 +264,7 @@ class Yoyo
             } finally {
                 if ($componentManager->getComponentInstance()) {
                     // Get all data needed to pass the rendered HTML through the Yoyo compiler to make it reactive
-                        
+
                     $defaultValues = $componentManager->getDefaultPublicVars();
 
                     $newValues = $componentManager->getPublicVars();
@@ -282,24 +281,24 @@ class Yoyo
                     $componentType = $componentManager->isDynamicComponent() ? 'dynamic' : 'anonymous';
 
                     // For dynamic components, filter variables based on component props
-                        
+
                     $props = $componentManager->getProps();
 
                     $postComponentProcessingActions = function () use ($componentManager, $defaultValues, $newValues) {
                         $queryStringKeys = $componentManager->getQueryString();
                         $queryString = new QueryString($defaultValues, $newValues, $queryStringKeys);
-                
+
                         // Browser URL State
                         $urlStateManager = new UrlStateManagerService();
-                
+
                         if ($componentManager->isDynamicComponent()) {
                             $urlStateManager->pushState($queryString->getPageQueryParams());
                         }
-                
+
                         // Browser Events
                         $eventsService = BrowserEventsService::getInstance();
                         $eventsService->dispatch();
-                
+
                         // Browser Redirect
                         (PageRedirectService::getInstance())->redirect($componentManager->getComponentInstance()->redirectTo);
                     };
@@ -339,7 +338,7 @@ class Yoyo
             }
         )
         );
-        
+
         $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props, $cacheHistory);
 
         if ($spinning) {

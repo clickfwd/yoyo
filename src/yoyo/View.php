@@ -43,7 +43,7 @@ class View
         $path = $this->exists($name);
 
         ob_start();
-        
+
         \Closure::bind(function () use ($path, $vars) {
             extract($vars, EXTR_SKIP);
             include $path;

@@ -1,6 +1,7 @@
 <?php
 
 use Clickfwd\Yoyo\YoyoCompiler;
+
 use function Tests\compile_html;
 use function Tests\compile_html_with_vars;
 use function Tests\encode_vals;

@@ -7,6 +7,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\Markup;
 use Twig\TwigFunction;
+
 use function Yoyo\yoyo_render;
 use function Yoyo\yoyo_scripts;
 
