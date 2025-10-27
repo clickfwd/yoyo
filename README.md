@@ -169,6 +169,36 @@ You are required to load the component classes at run time, either using a `requ
 
 Anonymous components don't need to be registered, but the template name needs to match the component name.
 
+### Dependency Injection Container
+
+Yoyo includes a built-in container and automatically detects Laravel's `illuminate/container` if installed.
+
+**Simple dependency injection:**
+
+```php
+class UserProfile extends Component
+{
+    public function mount(UserRepository $users, $userId)
+    {
+        $this->user = $users->find($userId);
+    }
+}
+```
+
+**For advanced container features**, install `illuminate/container` (automatically detected):
+
+```bash
+composer require illuminate/container
+```
+
+**Using a custom PSR-11 container:**
+
+```php
+use Clickfwd\Yoyo\ContainerResolver;
+
+ContainerResolver::setPreferred($myContainer);
+```
+
 ### Load Assets
 
 Find `yoyo.js` in the following vendor path and copy it to your project's public assets directory.
