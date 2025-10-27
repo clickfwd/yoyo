@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.13.1...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.14.0...develop)
+
+## [0.14.0 (2025-10-27)](https://github.com/clickfwd/yoyo/compare/0.13.1...0.14.0)
 
 ### Breaking Changes
 
