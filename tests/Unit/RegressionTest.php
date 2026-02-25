@@ -3,8 +3,8 @@
 use Clickfwd\Yoyo\ClassHelpers;
 use Clickfwd\Yoyo\Component;
 use Clickfwd\Yoyo\ComponentResolver;
-use Clickfwd\Yoyo\Request;
 use Clickfwd\Yoyo\QueryString;
+use Clickfwd\Yoyo\Request;
 use Clickfwd\Yoyo\Yoyo;
 use Clickfwd\Yoyo\YoyoHelpers;
 use Tests\App\Yoyo\Counter;

@@ -1,7 +1,6 @@
 <?php
 
 use function Tests\compile_html;
-use function Tests\render;
 use function Tests\yoyo_view;
 
 beforeAll(function () {
@@ -98,15 +97,21 @@ function buildListingList(int $rows): string
 
         // 3 nested Yoyo child components (already compiled, as the parent sees them)
         $html .= '<div class="listing-actions">';
-        $html .= childComponent('favorite', $i,
+        $html .= childComponent(
+            'favorite',
+            $i,
             '<button hx-post="toggle" id="favorite-'.$i.'-1" class="btn-fav">♡</button>',
             ['listingId' => $i, 'isFavorite' => 0]
         );
-        $html .= childComponent('mylist', $i,
+        $html .= childComponent(
+            'mylist',
+            $i,
             '<button hx-post="toggle" id="mylist-'.$i.'-1" class="btn-list">+ My List</button><span class="count">3 lists</span>',
             ['listingId' => $i, 'inList' => 0]
         );
-        $html .= childComponent('compare', $i,
+        $html .= childComponent(
+            'compare',
+            $i,
             '<button hx-post="toggle" id="compare-'.$i.'-1" class="btn-compare">Compare</button>',
             ['listingId' => $i, 'inCompare' => 0]
         );
@@ -166,7 +171,9 @@ for ($f = 1; $f <= 8; $f++) {
 $listingFormHtml .= '</div>';
 // Media upload section with nested Yoyo component
 $listingFormHtml .= '<div class="form-section"><h3>Media</h3>';
-$listingFormHtml .= childComponent('media-upload', 1,
+$listingFormHtml .= childComponent(
+    'media-upload',
+    1,
     '<div class="dropzone" hx-post="upload" id="media-upload-1-1"><input type="file" name="photos[]" multiple /><p>Drop files here</p></div>'
     .'<div class="preview"><div class="thumb"><img src="photo1.jpg"/><button hx-post="removePhoto" id="media-upload-1-2">×</button></div></div>',
     ['listingId' => 1, 'maxFiles' => 10]

@@ -3,7 +3,6 @@
 use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\ContainerResolver;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
-use Clickfwd\Yoyo\Yoyo;
 
 uses()->group('component');
 

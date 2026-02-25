@@ -118,7 +118,9 @@ function profilePhases(string $html, int $iters): array
     // Phase 4: Per-element attribute scanning (3 passes currently)
     $phase4 = bench('Children: attr scanning (3-pass)', $iters, function () use ($children) {
         foreach ($children as $key => $el) {
-            if ($key == 0) continue;
+            if ($key == 0) {
+                continue;
+            }
             // Pass 1: addRequestMethodAttribute - check hx-* (8 checks)
             foreach (['boost', 'delete', 'get', 'patch', 'post', 'put', 'sse', 'ws'] as $m) {
                 $el->hasAttribute('hx-' . $m);
@@ -141,7 +143,9 @@ function profilePhases(string $html, int $iters): array
     // Phase 5: DOM mutations (setAttribute/removeAttribute per element)
     $phase5 = bench('Children: DOM mutations (set/remove)', $iters, function () use ($children) {
         foreach ($children as $key => $el) {
-            if ($key == 0) continue;
+            if ($key == 0) {
+                continue;
+            }
             // Typical: remove yoyo:post, set hx-post, remove yoyo:val.id, set hx-vals
             $el->setAttribute('hx-post', 'edit');
             $el->removeAttribute('hx-post');
@@ -165,7 +169,9 @@ function profilePhases(string $html, int $iters): array
         $matched = $xpath2->query("//*[starts-with(name(@*),'hx-')]");
         foreach ($matched as $n) {
             foreach (['get', 'post', 'put', 'delete', 'patch', 'ws', 'sse'] as $v) {
-                if ($n->hasAttribute('hx-' . $v)) break;
+                if ($n->hasAttribute('hx-' . $v)) {
+                    break;
+                }
             }
         }
     });
@@ -249,7 +255,11 @@ function phaseBar(array $profile, array $colors): string
         $sum += $phase['per_op_ms'];
         $segments[] = sprintf(
             '<div class="seg" style="width:%.1f%%;background:%s" title="%s: %.4fms (%.1f%%)"></div>',
-            $pct, $colors[$i], htmlspecialchars($phase['label']), $phase['per_op_ms'], $pct
+            $pct,
+            $colors[$i],
+            htmlspecialchars($phase['label']),
+            $phase['per_op_ms'],
+            $pct
         );
     }
 
@@ -257,7 +267,9 @@ function phaseBar(array $profile, array $colors): string
     $uPct = ($unaccounted / $full) * 100;
     $segments[] = sprintf(
         '<div class="seg" style="width:%.1f%%;background:#bdc3c7" title="Other overhead: %.4fms (%.1f%%)"></div>',
-        $uPct, $unaccounted, $uPct
+        $uPct,
+        $unaccounted,
+        $uPct
     );
 
     return implode('', $segments);
@@ -276,8 +288,12 @@ function phaseTable(array $profile): string
         $bar = str_repeat('█', max(1, (int) round($pct / 2)));
         $rows .= sprintf(
             '<tr><td><span class="dot" style="background:%s"></span>%s</td><td class="num">%.4f</td><td class="num">%.1f%%</td><td class="bar-cell"><div class="mini-bar" style="width:%.1f%%;background:%s"></div></td></tr>',
-            $phaseColors[$i], htmlspecialchars($phase['label']),
-            $phase['per_op_ms'], $pct, $pct, $phaseColors[$i]
+            $phaseColors[$i],
+            htmlspecialchars($phase['label']),
+            $phase['per_op_ms'],
+            $pct,
+            $pct,
+            $phaseColors[$i]
         );
     }
 
@@ -285,7 +301,9 @@ function phaseTable(array $profile): string
     $uPct = ($unaccounted / $full) * 100;
     $rows .= sprintf(
         '<tr><td><span class="dot" style="background:#bdc3c7"></span>Other (root attrs, form, overhead)</td><td class="num">%.4f</td><td class="num">%.1f%%</td><td class="bar-cell"><div class="mini-bar" style="width:%.1f%%;background:#bdc3c7"></div></td></tr>',
-        $unaccounted, $uPct, $uPct
+        $unaccounted,
+        $uPct,
+        $uPct
     );
 
     $rows .= sprintf(
@@ -309,7 +327,10 @@ function scalingChart(array $scaling): string
         $label = $r['rows'] === 0 ? 'minimal' : $r['rows'] . ' rows';
         $bars .= sprintf(
             '<div class="scale-row"><span class="scale-label">%s<br><small>%d elems</small></span><div class="scale-bar-wrap"><div class="scale-bar" style="width:%.1f%%"></div><span class="scale-val">%.3fms</span></div></div>',
-            $label, $r['reactive_elements'], $pct, $r['per_op_ms']
+            $label,
+            $r['reactive_elements'],
+            $pct,
+            $r['per_op_ms']
         );
     }
     return $bars;

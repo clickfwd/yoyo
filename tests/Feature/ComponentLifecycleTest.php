@@ -1,6 +1,5 @@
 <?php
 
-use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\NonPublicComponentMethodCall;
 use Clickfwd\Yoyo\Services\BrowserEventsService;
 use Clickfwd\Yoyo\Services\PageRedirectService;
@@ -8,7 +7,6 @@ use Clickfwd\Yoyo\Services\Response;
 
 use function Tests\headers;
 use function Tests\mockYoyoGetRequest;
-use function Tests\mockYoyoPostRequest;
 use function Tests\render;
 use function Tests\resetYoyoRequest;
 use function Tests\update;
