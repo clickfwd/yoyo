@@ -18,19 +18,24 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Cache dependencies
-      uses: actions/cache@v4
-      with:
-          path: ~/.composer/cache/files
-          key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
-
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php }}
 
+    - name: Get Composer cache dir
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+        restore-keys: php-${{ matrix.php }}-composer-
+
     - name: Install dependencies
-      run: composer update --prefer-stable --prefer-dist --no-interaction
+      run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
 
     - name: Run unit & feature tests
       run: vendor/bin/pest --testsuite="Unit Suite,Feature Suite"
@@ -53,14 +58,30 @@ jobs:
       with:
         node-version: 20
 
+    - name: Get Composer cache dir
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
     - name: Cache Composer dependencies
       uses: actions/cache@v4
       with:
-          path: ~/.composer/cache/files
-          key: dependencies-php-8.3-composer-${{ hashFiles('composer.json') }}
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: php-8.3-composer-${{ hashFiles('composer.json') }}
+        restore-keys: php-8.3-composer-
 
     - name: Install PHP dependencies
-      run: composer update --prefer-stable --prefer-dist --no-interaction
+      run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+
+    - name: Get Playwright version
+      id: playwright-version
+      run: echo "version=$(npm show playwright version)" >> $GITHUB_OUTPUT
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ steps.playwright-version.outputs.version }}-chromium
 
     - name: Install Playwright
       run: npm install playwright && npx playwright install --with-deps chromium
