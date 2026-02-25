@@ -30,33 +30,50 @@ function compile_html($name, $html, $spinning = false)
 {
     $yoyo = yoyo_instance();
 
-    return $yoyo->mount($name)->compile('anonymous', $html, $spinning);
+    return normalizeDomOutput($yoyo->mount($name)->compile('anonymous', $html, $spinning));
 }
 
 function compile_html_with_vars($name, $html, $vars, $spinning = false)
 {
     $yoyo = yoyo_instance();
 
-    return $yoyo->mount($name, $vars)->compile('anonymous', $html, $spinning);
+    return normalizeDomOutput($yoyo->mount($name, $vars)->compile('anonymous', $html, $spinning));
 }
 
 function render($name, $variables = [], $attributes = [])
 {
     $yoyo = yoyo_instance();
 
-    return $yoyo->mount($name, $variables, $attributes)->render();
+    return normalizeDomOutput($yoyo->mount($name, $variables, $attributes)->render());
 }
 
 function update($name, $action = 'render', $variables = [], $attributes = [])
 {
     $yoyo = yoyo_instance();
 
-    return $yoyo->mount($name, $variables, $attributes, $action)->refresh();
+    return normalizeDomOutput($yoyo->mount($name, $variables, $attributes, $action)->refresh());
 }
 
 function yoyo_update()
 {
-    return (yoyo_instance())->update();
+    return normalizeDomOutput((yoyo_instance())->update());
+}
+
+/**
+ * Normalize DOMDocument attribute encoding for cross-PHP-version compatibility.
+ * PHP 8.3+ outputs: hx-vals="{&quot;key&quot;:&quot;val&quot;}"
+ * PHP 8.0-8.2 outputs: hx-vals='{"key":"val"}'
+ * This normalizes to the single-quoted format.
+ */
+function normalizeDomOutput($html)
+{
+    return preg_replace_callback(
+        '/hx-vals="([^"]*)"/',
+        function ($m) {
+            return "hx-vals='" . str_replace('&quot;', '"', $m[1]) . "'";
+        },
+        $html
+    );
 }
 
 function mockYoyoGetRequest($url, $component, $target = '', $parameters = [])

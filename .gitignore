@@ -1,6 +1,10 @@
 /vendor
+/node_modules
+/package-lock.json
 /.phpunit.result.cache
 /.php-cs-fixer.cache
 /tests/compiled/**/*.php
 /tests/compiled/*.php
+/tests/Browser/Screenshots
+/tests/Benchmark/profile-report.html
 .claude

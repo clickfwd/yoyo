@@ -102,8 +102,10 @@ HTML;
         $configuration = array_intersect_key(static::$options, array_flip(static::$allowedConfigOptions));
         $yoyoConfig = json_encode($configuration);
 
+        $yoyoRouteJs = json_encode($yoyoRoute);
+
         $script = <<<HTML
-        Yoyo.url = '{$yoyoRoute}';
+        Yoyo.url = {$yoyoRouteJs};
         Yoyo.config($yoyoConfig);
 HTML;
 

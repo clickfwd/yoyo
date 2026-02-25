@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  style:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Code Style
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.3
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Run PHP CS Fixer
+      run: vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes
+
+    - name: Commit changes
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Fix styling
+
+  unit:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [ 8.4, 8.3 ]
+
+    name: Unit & Feature — PHP ${{ matrix.php }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+
+    - name: Get Composer cache dir
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+        restore-keys: php-${{ matrix.php }}-composer-
+
+    - name: Install dependencies
+      run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+
+    - name: Run unit & feature tests
+      run: vendor/bin/pest --testsuite="Unit Suite,Feature Suite"
+
+  browser:
+    runs-on: ubuntu-latest
+    name: Browser E2E
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Get Composer cache dir
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: php-8.3-composer-${{ hashFiles('composer.json') }}
+        restore-keys: php-8.3-composer-
+
+    - name: Install PHP dependencies
+      run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+
+    - name: Get Playwright version
+      id: playwright-version
+      run: echo "version=$(npm show playwright version)" >> $GITHUB_OUTPUT
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ steps.playwright-version.outputs.version }}-chromium
+
+    - name: Install Playwright
+      run: npm install playwright && npx playwright install --with-deps chromium
+
+    - name: Run browser tests
+      run: vendor/bin/pest --group=browser
