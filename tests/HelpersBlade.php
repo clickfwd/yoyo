@@ -22,9 +22,8 @@ function yoyo_blade()
 
 function blade()
 {
-    // Use Application (which has terminating()) instead of base Container
-    $app = new Application();
-    Container::setInstance($app);
+    // Force Illuminate/Container for Blade
+    $app = Container::getInstance();
 
     $app->bind(ApplicationContract::class, Application::class);
 

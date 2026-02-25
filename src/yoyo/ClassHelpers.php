@@ -7,30 +7,15 @@ use ReflectionMethod;
 
 class ClassHelpers
 {
-    private static array $propertyCache = [];
-
-    private static array $defaultVarCache = [];
-
-    private static array $methodCache = [];
-
-    private static array $traitCache = [];
-
     public static function getDefaultPublicVars($instance, $baseClass = null)
     {
-        $className = get_class($instance);
-        $cacheKey = $className . ':' . ($baseClass ?? '');
-
-        if (isset(static::$defaultVarCache[$cacheKey])) {
-            return static::$defaultVarCache[$cacheKey];
-        }
-
-        $class = new ReflectionClass($className);
+        $class = new ReflectionClass(get_class($instance));
 
         $names = self::getPublicProperties($instance, $baseClass);
 
         $values = $class->getDefaultProperties();
 
-        return static::$defaultVarCache[$cacheKey] = array_intersect_key($values, array_flip($names));
+        return array_intersect_key($values, array_flip($names));
     }
 
     public static function getPublicVars($instance, $baseClass = null)
@@ -52,14 +37,9 @@ class ClassHelpers
 
     public static function getPublicProperties($instance, $baseClass = null)
     {
-        $className = get_class($instance);
-        $cacheKey = $className . ':' . ($baseClass ?? '');
+        $class = new ReflectionClass(get_class($instance));
 
-        if (isset(static::$propertyCache[$cacheKey])) {
-            return static::$propertyCache[$cacheKey];
-        }
-
-        $class = new ReflectionClass($className);
+        $className = $class->getName();
 
         $properties = $class->getProperties(ReflectionMethod::IS_PUBLIC);
 
@@ -68,24 +48,19 @@ class ClassHelpers
         foreach ($properties as $prop) {
             // Only include the property if it's different from the base class when passed as 2d parameter
             // This allows extending component classes with public properties
-            if (($baseClass && $prop->class !== $baseClass) || $prop->class == $className) {
+            if ($baseClass && $prop->class !== $baseClass || $prop->class == $className) {
                 $publicProperties[] = $prop->name;
             }
         }
 
-        return static::$propertyCache[$cacheKey] = $publicProperties;
+        return $publicProperties;
     }
 
     public static function getPublicMethods($instance, $exceptions = [])
     {
-        $className = is_string($instance) ? $instance : get_class($instance);
-        $cacheKey = $className . ':' . implode(',', $exceptions);
+        $class = new ReflectionClass(is_string($instance) ? $instance : get_class($instance));
 
-        if (isset(static::$methodCache[$cacheKey])) {
-            return static::$methodCache[$cacheKey];
-        }
-
-        $class = new ReflectionClass($className);
+        $className = $class->getName();
 
         $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
 
@@ -95,7 +70,7 @@ class ClassHelpers
             }
         }
 
-        return static::$methodCache[$cacheKey] = $publicMethods ?? [];
+        return $publicMethods ?? [];
     }
 
     public static function methodIsPrivate($instance, $method)
@@ -121,19 +96,13 @@ class ClassHelpers
             $class = get_class($class);
         }
 
-        $className = $class;
-
-        if (isset(static::$traitCache[$className])) {
-            return static::$traitCache[$className];
-        }
-
         $results = [];
 
         foreach (array_reverse(class_parents($class)) + [$class => $class] as $class) {
             $results += static::traitUsesRecursive($class);
         }
 
-        return static::$traitCache[$className] = array_unique($results);
+        return array_unique($results);
     }
 
     /**
@@ -225,13 +194,5 @@ class ClassHelpers
             'typed' => $typed,
             'regular' => $regular,
         ];
-    }
-
-    public static function flushCache(): void
-    {
-        static::$propertyCache = [];
-        static::$defaultVarCache = [];
-        static::$methodCache = [];
-        static::$traitCache = [];
     }
 }

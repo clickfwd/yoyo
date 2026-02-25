@@ -67,7 +67,7 @@ class QueryString
                 $queryParams[$key] = $val->toArray();
             }
 
-            if ((isset($this->defaults[$key]) && $val === $this->defaults[$key]) || $val === '') {
+            if (isset($this->defaults[$key]) && $val === $this->defaults[$key] || $val === '') {
                 unset($queryParams[$key]);
             }
         }

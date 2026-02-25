@@ -87,11 +87,13 @@ it('resolves closures as singletons', function () {
 it('throws exception for failed resolution', function () {
     $container = new YoyoContainer();
 
+    $this->expectException(ContainerResolutionException::class);
     $container->make(Foo::class);
-})->throws(ContainerResolutionException::class);
+});
 
 it('throws exception for invalid bindings', function () {
     $container = new YoyoContainer();
 
+    $this->expectException(BindingNotFoundException::class);
     $container->get(Foo::class);
-})->throws(BindingNotFoundException::class);
+});

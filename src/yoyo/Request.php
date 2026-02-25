@@ -12,8 +12,6 @@ class Request implements RequestInterface
 
     private $dropped = [];
 
-    private $decodedRequest = null;
-
     public function __construct()
     {
         $this->request = $_REQUEST;
@@ -27,8 +25,6 @@ class Request implements RequestInterface
 
         $this->server = $server;
 
-        $this->decodedRequest = null;
-
         return $this;
     }
 
@@ -37,17 +33,11 @@ class Request implements RequestInterface
         $this->request = [];
 
         $this->server = [];
-
-        $this->decodedRequest = null;
     }
 
     public function all()
     {
-        if ($this->decodedRequest !== null) {
-            return $this->decodedRequest;
-        }
-
-        return $this->decodedRequest = array_map(function ($value) {
+        return array_map(function ($value) {
             if ($decoded = YoyoHelpers::test_json($value)) {
                 return $decoded;
             }
@@ -112,16 +102,12 @@ class Request implements RequestInterface
     {
         $this->request[$key] = $value;
 
-        $this->decodedRequest = null;
-
         return $this;
     }
 
     public function merge($data)
     {
         $this->request = array_merge($this->request, $data);
-
-        $this->decodedRequest = null;
 
         return $this;
     }
@@ -148,13 +134,13 @@ class Request implements RequestInterface
 
         $protocol = 'http';
 
-        if (isset($this->server['HTTPS']) && $this->server['HTTPS'] === 'on') {
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
             $protocol = 'https';
         }
 
-        $host = $this->server['HTTP_HOST'];
+        $host = $_SERVER['HTTP_HOST'];
 
-        $path = rtrim($this->server['REQUEST_URI'] ?? '', '?');
+        $path = rtrim($_SERVER['REQUEST_URI'], '?');
 
         return "{$protocol}://{$host}{$path}";
     }

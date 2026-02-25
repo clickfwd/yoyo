@@ -19,10 +19,6 @@ class Response
 
     public function header($name, $value)
     {
-        // Sanitize header name and value to prevent header injection
-        $name = str_replace(["\r", "\n", "\0"], '', (string) $name);
-        $value = is_array($value) ? $value : str_replace(["\r", "\n", "\0"], '', (string) $value);
-
         $this->headers[$name] = $value;
 
         return $this;

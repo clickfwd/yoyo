@@ -19,11 +19,7 @@ class YoyoContainer implements YoyoContainerInterface
 
     public function get(string $id)
     {
-        if (! $this->has($id)) {
-            throw new BindingNotFoundException("[$id] is not bound to the container");
-        }
-
-        $resolved = $this->bindings[$id];
+        $resolved = $this->bindings[$id] ?? null;
 
         if ($resolved instanceof \Closure) {
             $this->bindings[$id] = $resolved($this);
@@ -33,7 +29,11 @@ class YoyoContainer implements YoyoContainerInterface
             return $this->make($resolved);
         }
 
-        return $this->bindings[$id];
+        try {
+            return $this->bindings[$id];
+        } catch (\Throwable $e) {
+            throw new BindingNotFoundException("[$id] is not bound to the container", $e);
+        }
     }
 
     public function has(string $id): bool

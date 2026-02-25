@@ -1,4 +1,4 @@
-; (function (global, factory) {
+;(function (global, factory) {
 	if (typeof define === 'function' && define.amd) {
 		define([], factory)
 	} else {
@@ -72,7 +72,7 @@
 
 				if (!component) {
 					return;
-				}
+				}			
 
 				initializeComponentSpinners(component)
 			},
@@ -155,13 +155,6 @@
 				}
 
 				componentCopyYoyoDataFromTo(evt.detail.target, component)
-
-				// For 204 No Content responses or empty responses, explicitly stop spinners
-				// since no DOM swap occurs that would naturally clean up spinner states
-				const xhr = evt.detail.xhr
-				if (xhr.status === 204 || !xhr.responseText) {
-					spinningStop(component)
-				}
 
 				// This isn't needed at this time because the CSS classes/attributes are
 				// automatically removed when a component is updated from the server
@@ -281,7 +274,7 @@
 				return token.slice(1, -1);
 			}
 			// boolean literals?
-			if (token === 'true') return true;
+			if (token === 'true')  return true;
 			if (token === 'false') return false;
 			// try number
 			const num = Number(token);
@@ -479,7 +472,7 @@
 
 			spinningElts = spinningElts.concat(
 				yoyoSpinners[componentId]?.actions[component.__yoyo.action] ||
-				[]
+					[]
 			)
 
 			delete yoyoSpinners[component.id]
