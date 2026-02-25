@@ -3,7 +3,6 @@
 use Clickfwd\Yoyo\YoyoCompiler;
 
 use function Tests\compile_html;
-use function Tests\yoyo_instance;
 
 beforeAll(function () {
     Tests\yoyo_view();
