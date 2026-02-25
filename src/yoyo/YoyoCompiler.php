@@ -80,6 +80,16 @@ class YoyoCompiler
 
     public const HTMX_PREFIX = 'hx';
 
+    // Pre-built lookup tables for O(1) checks instead of in_array()
+    private static $yoyoAttributeMap;
+
+    private static $htmxMethodMap;
+
+    // Cached prefix strings to avoid repeated concatenation
+    private static $yoprefixCache = [];
+
+    private static $hxprefixCache = [];
+
     public function __construct($componentType, $componentId, $name, $variables, $attributes, $spinning)
     {
         $this->componentType = $componentType;
@@ -93,6 +103,12 @@ class YoyoCompiler
         $this->attributes = $attributes;
 
         $this->spinning = $spinning;
+
+        // Build lookup maps once
+        if (self::$yoyoAttributeMap === null) {
+            self::$yoyoAttributeMap = array_flip(self::YOYO_ATTRIBUTES);
+            self::$htmxMethodMap = array_flip(self::HTMX_REQUEST_METHOD_ATTRIBUTES);
+        }
     }
 
     public function addComponentListeners($listeners = [])
@@ -122,20 +138,28 @@ class YoyoCompiler
             return $html;
         }
 
-        // For each yoyo: attribute found, add new yoyo-wind attribute that can be
-        // used by XPath to find the elements which cannot be found when using
-        // colons in attribute names
-
+        // Add yoyo-finder marker attributes for XPath discovery
+        // (XPath cannot query attributes with colons)
+        // Combined regex handles both double and single quoted attributes
         $prefix = self::YOYO_PREFIX;
-
         $prefix_finder = self::YOYO_PREFIX_FINDER;
 
-        // U modifier needed to match children tags when there are no line breaks in the HTML code
-        $html = preg_replace('/ '.$prefix.':(.*)="(.*)"/U', " $prefix_finder $prefix:\$1=\"\$2\"", $html);
-        $html = preg_replace('/ ' . $prefix . ':(.*)=\'(.*)\'/U', " {$prefix_finder} {$prefix}:\$1='\$2'", $html);
+        $html = preg_replace(
+            [
+                '/ '.$prefix.':(.*)="(.*)"/U',
+                '/ '.$prefix.':(.*)=\'(.*)\'/U',
+            ],
+            [
+                " $prefix_finder $prefix:\$1=\"\$2\"",
+                " $prefix_finder $prefix:\$1='\$2'",
+            ],
+            $html
+        );
 
-        // Converts non-ascii characters to numeric html entities
-        $html = mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, ~0], 'UTF-8');
+        // Convert non-ASCII characters to numeric HTML entities only when needed
+        if (preg_match('/[\x80-\xff]/', $html)) {
+            $html = mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, ~0], 'UTF-8');
+        }
 
         $dom = new DOMDocument();
 
@@ -145,21 +169,22 @@ class YoyoCompiler
 
         libxml_use_internal_errors($internalErrors);
 
-        if (! ($node = $this->getComponentRootNode($dom))) {
-            $html = $this->getOuterHTML($dom);
+        // Reuse a single XPath instance throughout
+        $xpath = new DOMXPath($dom);
+
+        if (! ($node = $this->getComponentRootNode($xpath))) {
+            $html = $this->getOuterHTML($dom, $xpath);
 
             unset($dom);
 
             return $this->compile('<div>'.$html.'</div>');
         }
 
-        $xpath = new DOMXPath($dom);
-
         $elements = $xpath->query('//form');
 
-        foreach ($elements as $key => $element) {
+        foreach ($elements as $element) {
             if (! $element->hasAttribute(self::yoprefix('ignore'))) {
-                $this->addFormBehavior($element);
+                $this->addFormBehavior($element, $xpath);
             }
         }
 
@@ -169,7 +194,7 @@ class YoyoCompiler
 
         $this->addComponentRootAttributes($node);
 
-        $this->addComponentChildrenAttributes($dom);
+        $this->addComponentChildrenAttributes($xpath);
 
         // Cleanup
         $node->removeAttribute(self::YOYO_PREFIX_FINDER);
@@ -177,9 +202,9 @@ class YoyoCompiler
         $doOuterHtmlSwap = ! $this->elementHasAttributeWithValue($node, self::hxprefix('swap'), 'innerHTML');
 
         if ($this->spinning && ! $doOuterHtmlSwap) {
-            $output = $this->getInnerHTML($dom);
+            $output = $this->getInnerHTML($dom, $xpath);
         } else {
-            $output = $this->getOuterHTML($dom);
+            $output = $this->getOuterHTML($dom, $xpath);
         }
 
         return trim($output);
@@ -295,11 +320,10 @@ class YoyoCompiler
         }
     }
 
-    protected function addComponentChildrenAttributes($dom)
+    protected function addComponentChildrenAttributes($xpath)
     {
-        $xpath = new DOMXPath($dom);
-
         $elements = $xpath->query('//*[@'.self::YOYO_PREFIX.']|//*[@'.self::YOYO_PREFIX_FINDER.']');
+        $valPrefixLen = strlen(self::yoprefix('val').'.'); // "yoyo:val." = 9
 
         foreach ($elements as $key => $element) {
             // Skip the component root because it's processed separately
@@ -307,22 +331,84 @@ class YoyoCompiler
                 continue;
             }
 
-            $this->addRequestMethodAttribute($element);
+            // Single pass over element attributes: categorize everything at once
+            // instead of 3 separate passes (addRequestMethodAttribute + yoyo scan + val scan)
+            $yoyoAttrs = [];
+            $valAttrs = [];
+            $valToRemove = [];
+            $hasHxMethod = false;
+            $yoyoMethod = null;
+            $yoyoMethodValue = null;
+            $hasYoyoMarker = false;
 
-            foreach (self::YOYO_ATTRIBUTES as $attr) {
-                if ($value = $element->getAttribute(self::yoprefix($attr))) {
-                    $this->remapAndReplaceAttribute($element, $attr, $value);
+            foreach ($element->attributes as $attr) {
+                $name = $attr->name;
+
+                if ($name === self::YOYO_PREFIX) {
+                    $hasYoyoMarker = true;
+                    continue;
+                }
+
+                // Check for existing hx-{method} — skip method assignment if found
+                if (str_starts_with($name, 'hx-') && isset(self::$htmxMethodMap[substr($name, 3)])) {
+                    $hasHxMethod = true;
+                    continue;
+                }
+
+                if (! str_starts_with($name, 'yoyo:')) {
+                    continue;
+                }
+
+                $yoyoAttr = substr($name, 5);
+
+                // yoyo:val.{key} — collect for val processing
+                if (str_starts_with($yoyoAttr, 'val.')) {
+                    $valKey = substr($name, $valPrefixLen);
+                    $valAttrs[YoyoHelpers::camel($valKey, '-')] = YoyoHelpers::decode_val($attr->value);
+                    $valToRemove[] = $name;
+                    continue;
+                }
+
+                // yoyo:{method} — request method to remap
+                if (isset(self::$htmxMethodMap[$yoyoAttr])) {
+                    $yoyoMethod = $yoyoAttr;
+                    $yoyoMethodValue = $attr->value;
+                    continue;
+                }
+
+                // yoyo:{attr} — collect for hx- remapping
+                if (isset(self::$yoyoAttributeMap[$yoyoAttr])) {
+                    $yoyoAttrs[$yoyoAttr] = $attr->value;
                 }
             }
 
-            if ($vals = $this->parseIndividualValAttributes($element)) {
-                $element->setAttribute(self::hxprefix('vals'), YoyoHelpers::encode_vals($vals));
+            // Handle request method
+            if (! $hasHxMethod) {
+                if ($yoyoMethod !== null) {
+                    $element->removeAttribute(self::yoprefix($yoyoMethod));
+                    $element->setAttribute(self::hxprefix($yoyoMethod), $yoyoMethodValue);
+                    $this->checkForIdAttribute($element);
+                } elseif ($hasYoyoMarker) {
+                    $element->setAttribute(self::hxprefix('get'), self::COMPONENT_DEFAULT_ACTION);
+                    $this->checkForIdAttribute($element);
+                }
+            }
+
+            // Remap yoyo: attributes to hx-
+            foreach ($yoyoAttrs as $yoyoAttr => $value) {
+                $this->remapAndReplaceAttribute($element, $yoyoAttr, $value);
+            }
+
+            // Process val attributes
+            if ($valAttrs) {
+                foreach ($valToRemove as $name) {
+                    $element->removeAttribute($name);
+                }
+                $element->setAttribute(self::hxprefix('vals'), YoyoHelpers::encode_vals($valAttrs));
             }
 
             // Cleanup
-
             $element->removeAttribute(self::YOYO_PREFIX);
-
             $element->removeAttribute(self::YOYO_PREFIX_FINDER);
         }
     }
@@ -330,17 +416,26 @@ class YoyoCompiler
     protected function parseIndividualValAttributes($element)
     {
         $attributes = [];
+        $valPrefix = self::yoprefix('val').'.';
+        $valPrefixLen = strlen($valPrefix);
 
+        // Collect matching attributes first to avoid modifying
+        // the live DOMNamedNodeMap while iterating
+        $toRemove = [];
         foreach ($element->attributes as $attr) {
-            $parts = explode('.', $attr->name);
+            $name = $attr->name;
 
-            if (count($parts) == 1 || $parts[0] !== self::yoprefix('val')) {
+            if (! str_starts_with($name, $valPrefix)) {
                 continue;
             }
 
-            $attributes[YoyoHelpers::camel($parts[1], '-')] = YoyoHelpers::decode_val($attr->value);
+            $key = substr($name, $valPrefixLen);
+            $attributes[YoyoHelpers::camel($key, '-')] = YoyoHelpers::decode_val($attr->value);
+            $toRemove[] = $name;
+        }
 
-            $element->removeAttribute($attr->name);
+        foreach ($toRemove as $name) {
+            $element->removeAttribute($name);
         }
 
         return $attributes;
@@ -361,7 +456,7 @@ class YoyoCompiler
         }
     }
 
-    protected function addFormBehavior($element)
+    protected function addFormBehavior($element, $xpath = null)
     {
         if ($element->tagName == 'form' && ! $element->hasAttribute(self::yoprefix('on'))) {
             $element->setAttribute(self::YOYO_PREFIX, '');
@@ -370,9 +465,11 @@ class YoyoCompiler
 
             // If the form has an upload input, set the encoding to multipart/form-data
 
-            $xpath = new DOMXPath($element->ownerDocument);
+            if ($xpath === null) {
+                $xpath = new DOMXPath($element->ownerDocument);
+            }
 
-            $inputs = $xpath->query('//*[@type="file"]', $element);
+            $inputs = $xpath->query('.//*[@type="file"]', $element);
 
             if ($inputs->item(0)) {
                 $element->setAttribute(self::yoprefix('encoding'), 'multipart/form-data');
@@ -382,7 +479,7 @@ class YoyoCompiler
 
             foreach ($element->attributes as $attr) {
                 if (($parts = explode(':', $attr->name))[0] == self::YOYO_PREFIX && ! empty($parts[1])) {
-                    if (in_array($parts[1], self::HTMX_REQUEST_METHOD_ATTRIBUTES)) {
+                    if (isset(self::$htmxMethodMap[$parts[1]])) {
                         return;
                     }
                 }
@@ -401,7 +498,7 @@ class YoyoCompiler
 
     protected function remapAndReplaceAttribute($element, $attr, $value)
     {
-        if (str_starts_with($attr, self::YOYO_PREFIX) || in_array($attr, self::YOYO_ATTRIBUTES)) {
+        if (str_starts_with($attr, self::YOYO_PREFIX) || isset(self::$yoyoAttributeMap[$attr])) {
             $element->removeAttribute(self::yoprefix($attr));
             $remappedAttr = self::YOYO_TO_HX_ATTRIBUTE_REMAP[$attr] ?? $attr;
             $element->setAttribute(self::hxprefix($remappedAttr), $value);
@@ -482,7 +579,7 @@ class YoyoCompiler
 
     public static function yoprefix($attr): string
     {
-        return self::YOYO_PREFIX.':'.$attr;
+        return self::$yoprefixCache[$attr] ??= self::YOYO_PREFIX.':'.$attr;
     }
 
     public static function yoprefix_value($string): string
@@ -492,13 +589,11 @@ class YoyoCompiler
 
     public static function hxprefix($attr): string
     {
-        return self::HTMX_PREFIX.'-'.$attr;
+        return self::$hxprefixCache[$attr] ??= self::HTMX_PREFIX.'-'.$attr;
     }
 
-    protected function getComponentRootNode($dom)
+    protected function getComponentRootNode($xpath)
     {
-        $xpath = new DOMXPath($dom);
-
         $count = 0;
 
         foreach ($xpath->query('/html/body/*') as $node) {
@@ -521,11 +616,13 @@ class YoyoCompiler
         return strpos($string, $value) !== false;
     }
 
-    protected function getOuterHTML($dom): string
+    protected function getOuterHTML($dom, $xpath = null): string
     {
         $output = '';
 
-        $xpath = new DOMXPath($dom);
+        if ($xpath === null) {
+            $xpath = new DOMXPath($dom);
+        }
 
         $elements = $xpath->query("//*[starts-with(name(@*),'hx-')]");
 
@@ -552,16 +649,18 @@ class YoyoCompiler
         return $output;
     }
 
-    protected function getInnerHTML($dom): string
+    protected function getInnerHTML($dom, $xpath = null): string
     {
         $output = '';
 
-        $xpath = new DOMXPath($dom);
+        if ($xpath === null) {
+            $xpath = new DOMXPath($dom);
+        }
 
         $elements = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' ".self::COMPONENT_WRAPPER_CLASS." ')]");
 
         if (! $elements->length) {
-            return $this->getOuterHTML($dom);
+            return $this->getOuterHTML($dom, $xpath);
         }
 
         foreach ($elements->item(0)->childNodes as $node) {

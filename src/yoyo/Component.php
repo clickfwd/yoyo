@@ -276,16 +276,16 @@ abstract class Component
 
     public function __call(string $name, array $arguments)
     {
+        $key = static::makeCacheKey($name, $arguments);
+
+        if (isset($this->computedPropertyCache[$key])) {
+            return $this->computedPropertyCache[$key];
+        }
+
         $studlyProperty = YoyoHelpers::studly($name);
 
         if (method_exists($this, $computedMethodName = 'get'.$studlyProperty.'Property')) {
-            $key = static::makeCacheKey($name, $arguments);
-
-            if (isset($this->computedPropertyCache[$key])) {
-                return $this->computedPropertyCache[$key];
-            }
-
-            return $this->computedPropertyCache[$key] = call_user_func_array([$this,$computedMethodName], $arguments);
+            return $this->computedPropertyCache[$key] = call_user_func_array([$this, $computedMethodName], $arguments);
         }
 
         throw new ComponentMethodNotFound($this->getName(), $name);
@@ -293,13 +293,13 @@ abstract class Component
 
     public function __get($property)
     {
+        if (isset($this->computedPropertyCache[$property])) {
+            return $this->computedPropertyCache[$property];
+        }
+
         $studlyProperty = YoyoHelpers::studly($property);
 
         if (method_exists($this, $computedMethodName = 'get'.$studlyProperty.'Property')) {
-            if (isset($this->computedPropertyCache[$property])) {
-                return $this->computedPropertyCache[$property];
-            }
-
             return $this->computedPropertyCache[$property] = $this->$computedMethodName();
         }
 
