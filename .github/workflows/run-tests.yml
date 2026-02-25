@@ -33,7 +33,7 @@ jobs:
       run: composer update --prefer-stable --prefer-dist --no-interaction
 
     - name: Run unit & feature tests
-      run: vendor/bin/pest --exclude-group=browser,benchmark
+      run: vendor/bin/pest --testsuite="Unit Suite,Feature Suite"
 
   browser:
     runs-on: ubuntu-latest
@@ -63,7 +63,7 @@ jobs:
       run: composer update --prefer-stable --prefer-dist --no-interaction
 
     - name: Install Playwright
-      run: npx playwright install --with-deps chromium
+      run: npm install playwright && npx playwright install --with-deps chromium
 
     - name: Run browser tests
       run: vendor/bin/pest --group=browser
