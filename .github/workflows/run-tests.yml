@@ -5,33 +5,65 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  unit:
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: true
       matrix:
-        php: [ 8.4, 8.3, 8.2, 8.1, 8.0 ]
-        dependency-version: [ prefer-stable ]
+        php: [ 8.4, 8.3 ]
 
-    name: P${{ matrix.php }} - ${{ matrix.dependency-version }}
+    name: Unit & Feature — PHP ${{ matrix.php }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Cache dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
           path: ~/.composer/cache/files
           key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
-    
+
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php }}
 
     - name: Install dependencies
-      run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
-    
-    - name: Run tests
-      run: vendor/bin/pest --verbose
+      run: composer update --prefer-stable --prefer-dist --no-interaction
+
+    - name: Run unit & feature tests
+      run: vendor/bin/pest --testsuite="Unit Suite,Feature Suite"
+
+  browser:
+    runs-on: ubuntu-latest
+    name: Browser E2E
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+          path: ~/.composer/cache/files
+          key: dependencies-php-8.3-composer-${{ hashFiles('composer.json') }}
+
+    - name: Install PHP dependencies
+      run: composer update --prefer-stable --prefer-dist --no-interaction
+
+    - name: Install Playwright
+      run: npm install playwright && npx playwright install --with-deps chromium
+
+    - name: Run browser tests
+      run: vendor/bin/pest --group=browser
