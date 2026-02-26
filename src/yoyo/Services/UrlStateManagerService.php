@@ -25,6 +25,12 @@ class UrlStateManagerService
             return;
         }
 
+        // Don't override if the component already set an explicit URL
+        $headers = $response->getHeaders();
+        if (isset($headers['HX-Replace-Url']) || isset($headers['HX-Push-Url'])) {
+            return;
+        }
+
         $parsedUrl = parse_url($this->currentUrl);
 
         $port = isset($parsedUrl['port']) ? (':'.$parsedUrl['port']) : '';

@@ -82,6 +82,38 @@ it('preserves port in push URL', function () {
     expect($headers['Yoyo-Push'])->toContain('localhost:8080');
 });
 
+it('does not set push header when HX-Replace-Url is already set', function () {
+    Yoyo::request()->mock([], [
+        'REQUEST_METHOD' => 'GET',
+        'HTTP_HX_CURRENT_URL' => 'http://example.com/page',
+    ]);
+
+    Response::getInstance()->replaceUrl('/custom-url');
+
+    $service = new UrlStateManagerService();
+    $service->pushState(['count' => 1]);
+
+    $headers = Response::getInstance()->getHeaders();
+    expect($headers)->toHaveKey('HX-Replace-Url');
+    expect($headers)->not->toHaveKey('Yoyo-Push');
+});
+
+it('does not set push header when HX-Push-Url is already set', function () {
+    Yoyo::request()->mock([], [
+        'REQUEST_METHOD' => 'GET',
+        'HTTP_HX_CURRENT_URL' => 'http://example.com/page',
+    ]);
+
+    Response::getInstance()->pushUrl('/custom-url');
+
+    $service = new UrlStateManagerService();
+    $service->pushState(['count' => 1]);
+
+    $headers = Response::getInstance()->getHeaders();
+    expect($headers)->toHaveKey('HX-Push-Url');
+    expect($headers)->not->toHaveKey('Yoyo-Push');
+});
+
 it('builds URL without query string when no params', function () {
     Yoyo::request()->mock([], [
         'REQUEST_METHOD' => 'GET',
