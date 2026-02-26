@@ -254,7 +254,7 @@ class ComponentManager
     {
         $args = $this->request->get('actionArgs', []);
 
-        return $args;
+        return is_array($args) ? $args : [$args];
     }
 
     private function processAnonymousComponent($variables = [], $attributes = [])
