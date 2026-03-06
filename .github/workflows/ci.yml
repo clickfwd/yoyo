@@ -13,8 +13,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        ref: ${{ github.head_ref }}
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -22,7 +20,7 @@ jobs:
         php-version: 8.3
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: composer install --prefer-dist --no-interaction --no-progress
 
     - name: Run PHP CS Fixer
       run: vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes
