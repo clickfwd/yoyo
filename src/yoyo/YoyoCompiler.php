@@ -299,8 +299,15 @@ class YoyoCompiler
             self::yoprefix('source'),
         ]);
 
-        $variables = array_filter($this->variables, function ($key) use ($props) {
-            return in_array($key, $props);
+        $propsLookup = [];
+        foreach ($props as $prop) {
+            if (is_string($prop) && $prop !== '') {
+                $propsLookup[$prop] = true;
+            }
+        }
+
+        $variables = array_filter($this->variables, function ($key) use ($propsLookup) {
+            return isset($propsLookup[$key]);
         }, ARRAY_FILTER_USE_KEY);
 
         $attributes['vals'] = array_merge($attributes['vals'], $variables);
