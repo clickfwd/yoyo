@@ -2,6 +2,19 @@
 
 ## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.14.0...develop)
 
+### Performance
+
+- Optimize props filtering in `YoyoCompiler` by replacing repeated `in_array` checks with a lookup map.
+- Skip re-processing already compiled nested Yoyo child components (`yoyo:name` + `hx-vals`) during compile.
+
+Benchmark update (5-run averages from `tests/Benchmark/RealWorldBenchmarkTest.php`):
+
+- Listing List (10x3 children): `0.5064 -> 0.4488 ms/op` (`-11.4%`)
+- Listing List (25x3 children): `1.1379 -> 1.0104 ms/op` (`-11.2%`)
+- Listing List (50x3 children): `2.1507 -> 1.9204 ms/op` (`-10.7%`)
+
+Other scenarios remained in the same range with normal benchmark variance.
+
 ## [0.14.0 (2025-10-27)](https://github.com/clickfwd/yoyo/compare/0.13.1...0.14.0)
 
 ### Breaking Changes
