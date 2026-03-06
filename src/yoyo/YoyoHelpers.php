@@ -45,6 +45,17 @@ class YoyoHelpers
 
         $decoded = json_decode($string, true);
 
+        if ($decoded !== null) {
+            return $decoded;
+        }
+
+        // Retry after stripping slashes (handles WordPress magic quotes)
+        $unslashed = stripslashes($string);
+
+        if ($unslashed !== $string) {
+            $decoded = json_decode($unslashed, true);
+        }
+
         return $decoded ?? null;
     }
 

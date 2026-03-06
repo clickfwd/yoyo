@@ -83,7 +83,17 @@ it('constructs http URL when HTTPS is not set', function () {
     expect($request->fullUrl())->toBe('http://example.com/path?query');
 });
 
-// --- stripslashes removal: test_json no longer corrupts backslashes ---
+// --- test_json: preserves legitimate backslashes, handles WordPress magic quotes ---
+
+it('decodes WordPress magic-quoted JSON via stripslashes fallback', function () {
+    // WordPress wp_magic_quotes() adds backslashes to $_REQUEST values.
+    // HTMX sends: ["jreviews-cp::pages.browse-listings"]
+    // After magic quotes: [\"jreviews-cp::pages.browse-listings\"]
+    $magicQuoted = addslashes('["jreviews-cp::pages.browse-listings"]');
+    $decoded = YoyoHelpers::test_json($magicQuoted);
+
+    expect($decoded)->toBe(['jreviews-cp::pages.browse-listings']);
+});
 
 it('does not strip legitimate backslashes from JSON values', function () {
     // A JSON string containing a backslash in a value (e.g., a Windows path)
