@@ -58,11 +58,11 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
-        key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+        key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
         restore-keys: php-${{ matrix.php }}-composer-
 
     - name: Install dependencies
-      run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+      run: composer install --prefer-dist --no-interaction --no-progress
 
     - name: Run unit & feature tests
       run: vendor/bin/pest --testsuite="Unit Suite,Feature Suite"
@@ -84,6 +84,8 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
+        cache: npm
+        cache-dependency-path: package-lock.json
 
     - name: Get Composer cache dir
       id: composer-cache
@@ -93,25 +95,22 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
-        key: php-8.3-composer-${{ hashFiles('composer.json') }}
+        key: php-8.3-composer-${{ hashFiles('composer.lock') }}
         restore-keys: php-8.3-composer-
 
     - name: Install PHP dependencies
-      run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
-
-    - name: Get Playwright version
-      id: playwright-version
-      run: echo "version=$(npm show playwright version)" >> $GITHUB_OUTPUT
+      run: composer install --prefer-dist --no-interaction --no-progress
 
     - name: Cache Playwright browsers
       uses: actions/cache@v4
       id: playwright-cache
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-${{ steps.playwright-version.outputs.version }}-chromium
+        key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-chromium
+        restore-keys: ${{ runner.os }}-playwright-
 
     - name: Install Playwright
-      run: npm install playwright && npx playwright install --with-deps chromium
+      run: npm ci && npx playwright install --with-deps chromium
 
     - name: Run browser tests
       run: vendor/bin/pest --group=browser
