@@ -338,6 +338,14 @@ class YoyoCompiler
                 continue;
             }
 
+            // Skip already-compiled nested components.
+            // Keep cleanup behavior consistent with the existing loop.
+            if ($element->hasAttribute(self::yoprefix('name')) && $element->hasAttribute(self::hxprefix('vals'))) {
+                $element->removeAttribute(self::YOYO_PREFIX);
+                $element->removeAttribute(self::YOYO_PREFIX_FINDER);
+                continue;
+            }
+
             // Single pass over element attributes: categorize everything at once
             // instead of 3 separate passes (addRequestMethodAttribute + yoyo scan + val scan)
             $yoyoAttrs = [];
