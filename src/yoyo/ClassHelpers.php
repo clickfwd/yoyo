@@ -15,6 +15,8 @@ class ClassHelpers
 
     private static array $traitCache = [];
 
+    private static array $paramTypeCache = [];
+
     public static function getDefaultPublicVars($instance, $baseClass = null)
     {
         $className = get_class($instance);
@@ -198,6 +200,13 @@ class ClassHelpers
      */
     public static function getMethodParametersWithTypes($class, $method)
     {
+        $className = is_object($class) ? get_class($class) : $class;
+        $cacheKey = $className . ':' . $method;
+
+        if (isset(static::$paramTypeCache[$cacheKey])) {
+            return static::$paramTypeCache[$cacheKey];
+        }
+
         $typed = [];    // Parameters with class type hints (for DI)
         $regular = [];  // Parameters without type hints or with builtin types
 
@@ -221,7 +230,7 @@ class ClassHelpers
             }
         }
 
-        return [
+        return static::$paramTypeCache[$cacheKey] = [
             'typed' => $typed,
             'regular' => $regular,
         ];
@@ -233,5 +242,6 @@ class ClassHelpers
         static::$defaultVarCache = [];
         static::$methodCache = [];
         static::$traitCache = [];
+        static::$paramTypeCache = [];
     }
 }

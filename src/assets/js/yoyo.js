@@ -29,6 +29,17 @@
 					callback(event.detail)
 				})
 			},
+			dispatch(eventName, params = null) {
+				this.processEmitEvents(document.body, [
+					{ event: eventName, params: params }
+				])
+			},
+			dispatchTo(componentName, eventName, params = null) {
+				if (!/^[a-zA-Z0-9._-]+$/.test(componentName)) return
+				this.processEmitEvents(document.body, [
+					{ event: eventName, params: params, component: componentName }
+				])
+			},
 			createNonExistentIdTarget(targetId) {
 				// Dynamically create non-existent target IDs by appending them to document body
 				if (
@@ -422,6 +433,8 @@
 			const componentName = event.component || null
 			const propagation = event.propagation || null
 			let elements
+
+			if (!component && (propagation === 'self' || selector)) return
 
 			// emit
 			if (!selector && !componentName) {
