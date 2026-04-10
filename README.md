@@ -911,6 +911,34 @@ Yoyo.on('productAddedToCart', id => {
 
 With this feature you can control toasters, alerts, modals, etc. directly from a component action on the server by emitting the event and listening for it on the browser.
 
+### Dispatching Events From JavaScript
+
+You can also trigger component events directly from your custom JavaScript using the `Yoyo.dispatch()` method. This is useful when you need to interact with other JavaScript libraries or custom browser APIs.
+
+```js
+// Dispatch an event to all Yoyo components listening for it
+Yoyo.dispatch('post-created');
+
+// You can also pass named parameters to the event listener
+Yoyo.dispatch('post-created', { postId: 2 });
+
+// Dispatch an event to a specific component by name
+Yoyo.dispatchTo('dashboard', 'post-created', { postId: 2 });
+```
+
+Parameters are passed as named arguments that match the listener method's parameter names:
+
+```php
+protected $listeners = [
+    'post-created' => 'handlePostCreated',
+];
+
+public function handlePostCreated($postId)
+{
+    // $postId will be 2
+}
+```
+
 ### Dispatching Browser Events
 
 In addition to allowing components to communicate with each other, you can also send browser window events directly from a component method or template:
