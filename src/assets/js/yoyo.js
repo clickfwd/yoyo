@@ -1,4 +1,4 @@
-;(function (global, factory) {
+; (function (global, factory) {
 	if (typeof define === 'function' && define.amd) {
 		define([], factory)
 	} else {
@@ -28,6 +28,17 @@
 					delete event.detail.elt
 					callback(event.detail)
 				})
+			},
+			dispatch(eventName, params = null) {
+				this.processEmitEvents(document.body, [
+					{ event: eventName, params: params }
+				])
+			},
+			dispatchTo(componentName, eventName, params = null) {
+				if (!/^[a-zA-Z0-9._-]+$/.test(componentName)) return
+				this.processEmitEvents(document.body, [
+					{ event: eventName, params: params, component: componentName }
+				])
 			},
 			createNonExistentIdTarget(targetId) {
 				// Dynamically create non-existent target IDs by appending them to document body
@@ -72,7 +83,7 @@
 
 				if (!component) {
 					return;
-				}			
+				}
 
 				initializeComponentSpinners(component)
 			},
@@ -155,6 +166,13 @@
 				}
 
 				componentCopyYoyoDataFromTo(evt.detail.target, component)
+
+				// For 204 No Content responses or empty responses, explicitly stop spinners
+				// since no DOM swap occurs that would naturally clean up spinner states
+				const xhr = evt.detail.xhr
+				if (xhr.status === 204 || !xhr.responseText) {
+					spinningStop(component)
+				}
 
 				// This isn't needed at this time because the CSS classes/attributes are
 				// automatically removed when a component is updated from the server
@@ -274,7 +292,7 @@
 				return token.slice(1, -1);
 			}
 			// boolean literals?
-			if (token === 'true')  return true;
+			if (token === 'true') return true;
 			if (token === 'false') return false;
 			// try number
 			const num = Number(token);
@@ -416,6 +434,8 @@
 			const propagation = event.propagation || null
 			let elements
 
+			if (!component && (propagation === 'self' || selector)) return
+
 			// emit
 			if (!selector && !componentName) {
 				elements = getAllcomponents()
@@ -472,7 +492,7 @@
 
 			spinningElts = spinningElts.concat(
 				yoyoSpinners[componentId]?.actions[component.__yoyo.action] ||
-					[]
+				[]
 			)
 
 			delete yoyoSpinners[component.id]

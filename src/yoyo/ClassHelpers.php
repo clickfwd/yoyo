@@ -7,15 +7,32 @@ use ReflectionMethod;
 
 class ClassHelpers
 {
+    private static array $propertyCache = [];
+
+    private static array $defaultVarCache = [];
+
+    private static array $methodCache = [];
+
+    private static array $traitCache = [];
+
+    private static array $paramTypeCache = [];
+
     public static function getDefaultPublicVars($instance, $baseClass = null)
     {
-        $class = new ReflectionClass(get_class($instance));
+        $className = get_class($instance);
+        $cacheKey = $className . ':' . ($baseClass ?? '');
+
+        if (isset(static::$defaultVarCache[$cacheKey])) {
+            return static::$defaultVarCache[$cacheKey];
+        }
+
+        $class = new ReflectionClass($className);
 
         $names = self::getPublicProperties($instance, $baseClass);
 
         $values = $class->getDefaultProperties();
 
-        return array_intersect_key($values, array_flip($names));
+        return static::$defaultVarCache[$cacheKey] = array_intersect_key($values, array_flip($names));
     }
 
     public static function getPublicVars($instance, $baseClass = null)
@@ -37,9 +54,14 @@ class ClassHelpers
 
     public static function getPublicProperties($instance, $baseClass = null)
     {
-        $class = new ReflectionClass(get_class($instance));
+        $className = get_class($instance);
+        $cacheKey = $className . ':' . ($baseClass ?? '');
 
-        $className = $class->getName();
+        if (isset(static::$propertyCache[$cacheKey])) {
+            return static::$propertyCache[$cacheKey];
+        }
+
+        $class = new ReflectionClass($className);
 
         $properties = $class->getProperties(ReflectionMethod::IS_PUBLIC);
 
@@ -48,19 +70,24 @@ class ClassHelpers
         foreach ($properties as $prop) {
             // Only include the property if it's different from the base class when passed as 2d parameter
             // This allows extending component classes with public properties
-            if ($baseClass && $prop->class !== $baseClass || $prop->class == $className) {
+            if (($baseClass && $prop->class !== $baseClass) || $prop->class == $className) {
                 $publicProperties[] = $prop->name;
             }
         }
 
-        return $publicProperties;
+        return static::$propertyCache[$cacheKey] = $publicProperties;
     }
 
     public static function getPublicMethods($instance, $exceptions = [])
     {
-        $class = new ReflectionClass(is_string($instance) ? $instance : get_class($instance));
+        $className = is_string($instance) ? $instance : get_class($instance);
+        $cacheKey = $className . ':' . implode(',', $exceptions);
 
-        $className = $class->getName();
+        if (isset(static::$methodCache[$cacheKey])) {
+            return static::$methodCache[$cacheKey];
+        }
+
+        $class = new ReflectionClass($className);
 
         $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
 
@@ -70,7 +97,7 @@ class ClassHelpers
             }
         }
 
-        return $publicMethods ?? [];
+        return static::$methodCache[$cacheKey] = $publicMethods ?? [];
     }
 
     public static function methodIsPrivate($instance, $method)
@@ -96,13 +123,19 @@ class ClassHelpers
             $class = get_class($class);
         }
 
+        $className = $class;
+
+        if (isset(static::$traitCache[$className])) {
+            return static::$traitCache[$className];
+        }
+
         $results = [];
 
         foreach (array_reverse(class_parents($class)) + [$class => $class] as $class) {
             $results += static::traitUsesRecursive($class);
         }
 
-        return array_unique($results);
+        return static::$traitCache[$className] = array_unique($results);
     }
 
     /**
@@ -167,6 +200,13 @@ class ClassHelpers
      */
     public static function getMethodParametersWithTypes($class, $method)
     {
+        $className = is_object($class) ? get_class($class) : $class;
+        $cacheKey = $className . ':' . $method;
+
+        if (isset(static::$paramTypeCache[$cacheKey])) {
+            return static::$paramTypeCache[$cacheKey];
+        }
+
         $typed = [];    // Parameters with class type hints (for DI)
         $regular = [];  // Parameters without type hints or with builtin types
 
@@ -190,9 +230,18 @@ class ClassHelpers
             }
         }
 
-        return [
+        return static::$paramTypeCache[$cacheKey] = [
             'typed' => $typed,
             'regular' => $regular,
         ];
+    }
+
+    public static function flushCache(): void
+    {
+        static::$propertyCache = [];
+        static::$defaultVarCache = [];
+        static::$methodCache = [];
+        static::$traitCache = [];
+        static::$paramTypeCache = [];
     }
 }

@@ -43,7 +43,18 @@ class YoyoHelpers
             return null;
         }
 
-        $decoded = json_decode(stripslashes($string), true);
+        $decoded = json_decode($string, true);
+
+        if ($decoded !== null) {
+            return $decoded;
+        }
+
+        // Retry after stripping slashes (handles WordPress magic quotes)
+        $unslashed = stripslashes($string);
+
+        if ($unslashed !== $string) {
+            $decoded = json_decode($unslashed, true);
+        }
 
         return $decoded ?? null;
     }
@@ -76,7 +87,7 @@ class YoyoHelpers
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
         }
 
         return $randomString;

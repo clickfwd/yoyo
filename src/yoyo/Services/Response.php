@@ -19,6 +19,10 @@ class Response
 
     public function header($name, $value)
     {
+        // Sanitize header name and value to prevent header injection
+        $name = str_replace(["\r", "\n", "\0"], '', (string) $name);
+        $value = is_array($value) ? $value : str_replace(["\r", "\n", "\0"], '', (string) $value);
+
         $this->headers[$name] = $value;
 
         return $this;
@@ -33,16 +37,15 @@ class Response
 
     public function send(string $content = ''): string
     {
-        foreach ($this->headers as $key => $value) {
-            if (is_array($value)) {
-                $value = json_encode($value);
+        if (! headers_sent()) {
+            foreach ($this->headers as $key => $value) {
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
+
+                header("$key: $value");
             }
 
-            header("$key: $value");
-        }
-
-        // Prevent headers already sent error
-        if (! headers_sent()) {
             http_response_code($this->statusCode ?? 200);
         }
 

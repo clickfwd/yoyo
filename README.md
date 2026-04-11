@@ -911,6 +911,34 @@ Yoyo.on('productAddedToCart', id => {
 
 With this feature you can control toasters, alerts, modals, etc. directly from a component action on the server by emitting the event and listening for it on the browser.
 
+### Dispatching Events From JavaScript
+
+You can also trigger component events directly from your custom JavaScript using the `Yoyo.dispatch()` method. This is useful when you need to interact with other JavaScript libraries or custom browser APIs.
+
+```js
+// Dispatch an event to all Yoyo components listening for it
+Yoyo.dispatch('post-created');
+
+// You can also pass named parameters to the event listener
+Yoyo.dispatch('post-created', { postId: 2 });
+
+// Dispatch an event to a specific component by name
+Yoyo.dispatchTo('dashboard', 'post-created', { postId: 2 });
+```
+
+Parameters are passed as named arguments that match the listener method's parameter names:
+
+```php
+protected $listeners = [
+    'post-created' => 'handlePostCreated',
+];
+
+public function handlePostCreated($postId)
+{
+    // $postId will be 2
+}
+```
+
 ### Dispatching Browser Events
 
 In addition to allowing components to communicate with each other, you can also send browser window events directly from a component method or template:
@@ -949,6 +977,121 @@ class Registration extends Component
 
 	$this->redirect('/welcome');
     }
+}
+```
+
+## Response Headers
+
+Yoyo components have access to `$this->response` which provides methods for controlling how HTMX handles the response. These map directly to [HTMX response headers](https://htmx.org/reference/#response_headers).
+
+### Retargeting
+
+Override which element receives the swap:
+
+```php
+public function save()
+{
+    // Swap the response into a different element instead of the component itself
+    $this->response->retarget('#notification-area');
+}
+```
+
+### Changing Swap Strategy
+
+Override the swap strategy for the response:
+
+```php
+public function update()
+{
+    // Use innerHTML instead of the default outerHTML swap
+    $this->response->reswap('innerHTML');
+}
+```
+
+### Selecting Response Content
+
+Select a subset of the response HTML to swap:
+
+```php
+public function load()
+{
+    // Only swap the #content portion of the response
+    $this->response->reselect('#content');
+}
+```
+
+### URL Management
+
+Push or replace the browser URL without a full page reload:
+
+```php
+public function navigate()
+{
+    // Push a new URL to browser history
+    $this->response->pushUrl('/new-page');
+}
+
+public function filter()
+{
+    // Replace the current URL without adding a history entry
+    $this->response->replaceUrl('/results?q=search');
+}
+```
+
+### Client-Side Navigation
+
+Perform a client-side redirect (AJAX-style, no full reload) or a full redirect:
+
+```php
+public function softRedirect()
+{
+    // AJAX navigation — loads content without a full page reload
+    $this->response->location('/dashboard');
+}
+
+public function fullRedirect()
+{
+    // Full page redirect via HX-Redirect header
+    $this->response->redirect('/login');
+}
+```
+
+> **Note:** `$this->response->redirect()` sets the `HX-Redirect` header (HTMX native redirect). This is different from `$this->redirect()` which uses Yoyo's own `Yoyo-Redirect` header. Both achieve a full page redirect but through different mechanisms.
+
+### Triggering Client-Side Events
+
+Trigger browser events from the server that JavaScript can listen for:
+
+```php
+public function save()
+{
+    // Trigger immediately after the response is received
+    $this->response->trigger('item-saved');
+
+    // Trigger after the swap is complete
+    $this->response->triggerAfterSwap('swap-complete');
+
+    // Trigger after the settle phase (CSS transitions finished)
+    $this->response->triggerAfterSettle('settle-complete');
+}
+```
+
+Listen for these events in JavaScript:
+
+```js
+document.body.addEventListener('item-saved', function() {
+    // Show a toast notification, update a counter, etc.
+});
+```
+
+### Full Page Refresh
+
+Force a full page refresh from a component action:
+
+```php
+public function reset()
+{
+    $this->response->refresh();
 }
 ```
 

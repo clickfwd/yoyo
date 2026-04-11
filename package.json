@@ -1,0 +1,11 @@
+{
+  "name": "yoyo-tests",
+  "private": true,
+  "scripts": {
+    "test:browser": "./vendor/bin/pest --testsuite Browser",
+    "test:browser:headed": "./vendor/bin/pest --testsuite Browser --headed"
+  },
+  "devDependencies": {
+    "playwright": "^1.54.1"
+  }
+}

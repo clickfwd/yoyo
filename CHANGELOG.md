@@ -1,6 +1,34 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.14.0...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.0...develop)
+
+## [0.15.0 (2026-04-10)](https://github.com/clickfwd/yoyo/compare/0.14.0...0.15.0)
+
+### Added
+
+- `Yoyo.dispatch()` and `Yoyo.dispatchTo()` JS API for triggering component events from JavaScript, matching Livewire 3's dispatch API. Thanks to @mucan54 for the original proposal in #35.
+- Named parameter support for JS dispatch — object params like `{ postId: 2 }` map to listener method arguments by name.
+- Required parameter validation for named dispatch params — throws `InvalidArgumentException` if a required parameter is missing.
+- Documentation for all HTMX response header methods available via `$this->response` (`retarget`, `reswap`, `reselect`, `pushUrl`, `replaceUrl`, `location`, `redirect`, `refresh`, `trigger`, `triggerAfterSwap`, `triggerAfterSettle`).
+
+### Fixed
+
+- Fix `test_json` empty-params decode bug when `eventParams` is an empty JSON object (`'{}'`).
+- Add defensive null-guard in `triggerServerEmittedEvent` to prevent TypeError when source element is not inside a component.
+
+### Performance
+
+- Add static cache to `getMethodParametersWithTypes()` for consistency with other `ClassHelpers` caches.
+- Optimize props filtering in `YoyoCompiler` by replacing repeated `in_array` checks with a lookup map.
+- Skip re-processing already compiled nested Yoyo child components (`yoyo:name` + `hx-vals`) during compile.
+
+Benchmark update (5-run averages from `tests/Benchmark/RealWorldBenchmarkTest.php`):
+
+- Listing List (10x3 children): `0.5064 -> 0.4488 ms/op` (`-11.4%`)
+- Listing List (25x3 children): `1.1379 -> 1.0104 ms/op` (`-11.2%`)
+- Listing List (50x3 children): `2.1507 -> 1.9204 ms/op` (`-10.7%`)
+
+Other scenarios remained in the same range with normal benchmark variance.
 
 ## [0.14.0 (2025-10-27)](https://github.com/clickfwd/yoyo/compare/0.13.1...0.14.0)
 
