@@ -48,7 +48,10 @@ class Request implements RequestInterface
         }
 
         return $this->decodedRequest = array_map(function ($value) {
-            if ($decoded = YoyoHelpers::test_json($value)) {
+            $validJson = false;
+            $decoded = YoyoHelpers::test_json($value, $validJson);
+
+            if ($validJson) {
                 return $decoded;
             }
 
@@ -88,7 +91,10 @@ class Request implements RequestInterface
 
         $value = $this->request[$key] ?? $default;
 
-        if ($decoded = YoyoHelpers::test_json($value)) {
+        $validJson = false;
+        $decoded = YoyoHelpers::test_json($value, $validJson);
+
+        if ($validJson) {
             return $decoded;
         }
 
