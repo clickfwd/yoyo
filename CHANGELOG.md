@@ -2,6 +2,23 @@
 
 ## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.0...develop)
 
+### Fixed
+
+- Request data no longer reaches a slot declared to hold an object. Lifecycle arguments
+  are matched by name before the container consults the type, and public properties are
+  populated from the same data, so a query string carrying a slot's name displaced the
+  object the component asked for. This surfaced as a 500 on an ordinary page load from
+  nothing but a URL. Values arrive JSON-decoded, so the displacing value could be an int,
+  float, bool, array or null — and against a nullable slot, `null` satisfied the signature
+  and displaced the object with no error at all. Caller-supplied variables still fill
+  those slots, which is how a parent hands a model to a nested component, and slots that
+  take a scalar are unchanged.
+- `getMethodParametersWithTypes()` and `getMethodParameterNames()` no longer raise a fatal
+  `Error` for a union or intersection parameter. Both called `isBuiltin()` on whatever
+  `getType()` returned, and neither `ReflectionUnionType` nor `ReflectionIntersectionType`
+  has that method. Composite types are now classified the way the container itself treats
+  them: not container-resolved.
+
 ## [0.15.0 (2026-04-10)](https://github.com/clickfwd/yoyo/compare/0.14.0...0.15.0)
 
 ### Added
