@@ -5,6 +5,7 @@ use Clickfwd\Yoyo\Component;
 use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\Yoyo;
 use Tests\App\Yoyo\ComponentWithTrait;
+use Tests\App\Yoyo\CompositeTypeParams;
 use Tests\App\Yoyo\ComputedProperty;
 use Tests\App\Yoyo\Counter;
 
@@ -136,4 +137,38 @@ it('caches getPublicMethods result', function () {
     $second = ClassHelpers::getPublicMethods(Counter::class, ['render']);
 
     expect($first)->toBe($second);
+});
+
+// --- Composite (union / intersection) parameter types ---
+//
+// The classifier must mirror Laravel's own rule: only a ReflectionNamedType that is
+// not builtin counts as a container-resolved slot. Union and intersection types have
+// no isBuiltin() method, so touching them unguarded is a fatal Error, not an exception.
+
+it('classifies a union of class and builtin without fatalling', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'unionOfClassAndBuiltin');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toContain('post');
+});
+
+it('classifies a union of builtins without fatalling', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'unionOfBuiltins');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toContain('value');
+});
+
+it('classifies an intersection type without fatalling', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'intersection');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toContain('both');
+});
+
+it('still treats a nullable class as a container-resolved slot', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'nullableClass');
+
+    expect(array_column($params['typed'], 'name'))->toContain('post')
+        ->and($params['regular'])->toBeEmpty();
 });

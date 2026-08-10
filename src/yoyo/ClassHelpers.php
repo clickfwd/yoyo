@@ -4,6 +4,8 @@ namespace Clickfwd\Yoyo;
 
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionParameter;
 
 class ClassHelpers
 {
@@ -171,12 +173,28 @@ class ClassHelpers
         $method = $reflector->getMethod($method);
 
         foreach ($method->getParameters() as $parameter) {
-            if (! $parameter->getType() || ($parameter->getType() && $parameter->getType()->isBuiltin())) {
+            if (! static::isContainerResolvedParameter($parameter)) {
                 $names[] = $parameter->getName();
             }
         }
 
         return $names;
+    }
+
+    /**
+     * Whether a parameter is one the container should resolve, rather than one a
+     * caller supplies a value for.
+     *
+     * Mirrors the container's own rule: only a single named class or interface type
+     * qualifies. Union and intersection types report as ReflectionUnionType and
+     * ReflectionIntersectionType, neither of which has isBuiltin(), so they must be
+     * matched by instance rather than interrogated.
+     */
+    private static function isContainerResolvedParameter(ReflectionParameter $parameter): bool
+    {
+        $type = $parameter->getType();
+
+        return $type instanceof ReflectionNamedType && ! $type->isBuiltin();
     }
 
     public static function methodHasVariadicParameter($class, $method)
@@ -220,8 +238,8 @@ class ClassHelpers
                 'variadic' => $parameter->isVariadic(),
             ];
 
-            if (! $parameter->getType() || ($parameter->getType() && $parameter->getType()->isBuiltin())) {
-                // Regular parameter (no type or builtin type)
+            if (! static::isContainerResolvedParameter($parameter)) {
+                // Regular parameter (no type, builtin type, or composite type)
                 $regular[] = $paramInfo;
             } else {
                 // Typed parameter (class type hint for DI)
