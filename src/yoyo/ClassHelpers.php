@@ -19,6 +19,8 @@ class ClassHelpers
 
     private static array $paramTypeCache = [];
 
+    private static array $objectPropertyCache = [];
+
     public static function getDefaultPublicVars($instance, $baseClass = null)
     {
         $className = get_class($instance);
@@ -52,6 +54,37 @@ class ClassHelpers
         }
 
         return $publicVars;
+    }
+
+    /**
+     * Public properties declared to hold an object.
+     *
+     * These name a collaborator rather than a value, so a request variable sharing the
+     * name cannot be what the property is for -- assigning one is a fatal at best, and
+     * a silently wrong collaborator at worst.
+     */
+    public static function getObjectTypedProperties($instance, $baseClass = null)
+    {
+        $className = get_class($instance);
+        $cacheKey = $className.':'.($baseClass ?? '');
+
+        if (isset(static::$objectPropertyCache[$cacheKey])) {
+            return static::$objectPropertyCache[$cacheKey];
+        }
+
+        $class = new ReflectionClass($className);
+
+        $objectProperties = [];
+
+        foreach (static::getPublicProperties($instance, $baseClass) as $name) {
+            $type = $class->getProperty($name)->getType();
+
+            if ($type instanceof ReflectionNamedType && ! $type->isBuiltin()) {
+                $objectProperties[] = $name;
+            }
+        }
+
+        return static::$objectPropertyCache[$cacheKey] = $objectProperties;
     }
 
     public static function getPublicProperties($instance, $baseClass = null)
@@ -261,5 +294,6 @@ class ClassHelpers
         static::$methodCache = [];
         static::$traitCache = [];
         static::$paramTypeCache = [];
+        static::$objectPropertyCache = [];
     }
 }
