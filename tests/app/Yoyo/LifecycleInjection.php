@@ -24,12 +24,12 @@ class LifecycleInjection extends Component
 
     public function initialize(Comment $comment)
     {
-        $this->commentTitle = $comment->title();
+        $this->commentTitle = $comment->label();
     }
 
     public function mount(Post $post, $id = 0)
     {
-        $this->postTitle = $post->title();
+        $this->postTitle = $post->label();
 
         $this->id = $id;
     }

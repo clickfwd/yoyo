@@ -16,7 +16,7 @@ class LifecycleInjectionNullable extends Component
 
     public function mount(?Post $post)
     {
-        $this->postTitle = $post === null ? 'NULL-INJECTED' : $post->title();
+        $this->postTitle = $post === null ? 'NULL-INJECTED' : $post->label();
     }
 
     public function render()

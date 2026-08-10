@@ -37,6 +37,16 @@ class CompositeTypeParams extends Component
         $this->result = 'intersection';
     }
 
+    public function builtinsAndUntyped(int $i, string $s, bool $b, array $a, $untyped)
+    {
+        $this->result = 'builtins';
+    }
+
+    public function classSlot(Post $post)
+    {
+        $this->result = 'class';
+    }
+
     public function render()
     {
         return $this->view('composite-type-params', ['result' => $this->result]);

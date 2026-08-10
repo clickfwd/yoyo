@@ -5,6 +5,7 @@ use Clickfwd\Yoyo\Component;
 use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\Yoyo;
 use Tests\App\Yoyo\ComponentWithTrait;
+use Tests\App\Post;
 use Tests\App\Yoyo\CompositeTypeParams;
 use Tests\App\Yoyo\ComputedProperty;
 use Tests\App\Yoyo\Counter;
@@ -170,5 +171,29 @@ it('still treats a nullable class as a container-resolved slot', function () {
     $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'nullableClass');
 
     expect(array_column($params['typed'], 'name'))->toContain('post')
+        ->and($params['regular'])->toBeEmpty();
+});
+
+// --- Builtin and untyped parameters are caller-supplied, never container-resolved ---
+
+it('classifies builtin and untyped parameters as caller-supplied', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'builtinsAndUntyped');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toBe(['i', 's', 'b', 'a', 'untyped']);
+});
+
+it('returns builtin and untyped parameter names, and omits container slots', function () {
+    expect(ClassHelpers::getMethodParameterNames(CompositeTypeParams::class, 'builtinsAndUntyped'))
+        ->toBe(['i', 's', 'b', 'a', 'untyped'])
+        ->and(ClassHelpers::getMethodParameterNames(CompositeTypeParams::class, 'classSlot'))
+        ->toBe([]);
+});
+
+it('names a container slot with its resolved type', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'classSlot');
+
+    expect(array_column($params['typed'], 'name'))->toBe(['post'])
+        ->and($params['typed'][0]['type'])->toBe(Post::class)
         ->and($params['regular'])->toBeEmpty();
 });

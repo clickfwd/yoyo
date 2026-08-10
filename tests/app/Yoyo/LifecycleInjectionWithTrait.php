@@ -25,6 +25,6 @@ trait WithLifecycleHook
 {
     public function mountWithLifecycleHook(Comment $comment)
     {
-        $this->traitComment = $comment->title();
+        $this->traitComment = $comment->label();
     }
 }
