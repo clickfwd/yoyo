@@ -13,4 +13,9 @@ class Comment
     {
         return 'the comment body';
     }
+
+    public function label(): string
+    {
+        return 'COMMENT-OBJECT';
+    }
 }

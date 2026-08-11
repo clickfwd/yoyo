@@ -82,8 +82,15 @@ abstract class Component
 
         $publicProperties = ClassHelpers::getPublicProperties($this, __CLASS__);
 
+        // A property declared to hold an object names a collaborator, not a value, so a
+        // request variable sharing its name cannot be what the property is for. Those
+        // take caller-supplied variables only; every other property is unchanged.
+        $objectProperties = array_flip(ClassHelpers::getObjectTypedProperties($this, __CLASS__));
+
         foreach ($publicProperties as $property) {
-            $this->{$property} = $data[$property] ?? $this->{$property};
+            $source = isset($objectProperties[$property]) ? $variables : $data;
+
+            $this->{$property} = $source[$property] ?? $this->{$property};
         }
 
         // Set an initial value for dynamic properties

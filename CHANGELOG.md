@@ -1,6 +1,31 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.0...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.1...develop)
+
+## [0.15.1 (2026-08-10)](https://github.com/clickfwd/yoyo/compare/0.15.0...0.15.1)
+
+### Fixed
+
+- Request data no longer reaches a slot declared to hold an object. Lifecycle arguments
+  are matched by name before the container consults the type, and public properties are
+  populated from the same data, so a query string carrying a slot's name displaced the
+  object the component asked for. This surfaced as a 500 on an ordinary page load from
+  nothing but a URL. Values arrive JSON-decoded, so the displacing value could be an int,
+  float, bool, array or null — and against a nullable slot, `null` satisfied the signature
+  and displaced the object with no error at all. Caller-supplied variables still fill
+  those slots, which is how a parent hands a model to a nested component, and slots that
+  take a scalar are unchanged.
+- `getMethodParametersWithTypes()` and `getMethodParameterNames()` no longer raise a fatal
+  `Error` for a union or intersection parameter. Both called `isBuiltin()` on whatever
+  `getType()` returned, and neither `ReflectionUnionType` nor `ReflectionIntersectionType`
+  has that method. Composite types are now classified the way the container itself treats
+  them: not container-resolved.
+- `Request::all()` and `Request::get()` no longer corrupt a public property holding JSON
+  scalar `null` or `false`. Both tested the RESULT of `test_json()` for truthiness, and a
+  successful decode of those two values is falsy, so the raw strings `"null"` and `"false"`
+  were kept instead of the decoded values and re-hydrated the component with them on every
+  re-render. Decode success is now reported separately from the decoded value, via a by-ref
+  flag reading `json_last_error()`. Single-argument callers of `test_json()` are unaffected.
 
 ## [0.15.0 (2026-04-10)](https://github.com/clickfwd/yoyo/compare/0.14.0...0.15.0)
 

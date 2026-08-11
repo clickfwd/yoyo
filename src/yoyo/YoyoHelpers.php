@@ -26,16 +26,23 @@ class YoyoHelpers
 
     public static function decode_val(string $string)
     {
-        if ($json = self::test_json($string)) {
+        $validJson = false;
+        $json = self::test_json($string, $validJson);
+
+        if ($validJson) {
             return $json;
         }
 
         return $string === '0' ? 0 : $string;
     }
 
-    public static function test_json($string)
+    public static function test_json($string, ?bool &$validJson = null)
     {
+        $validJson = false;
+
         if (is_array($string)) {
+            $validJson = true;
+
             return $string;
         }
 
@@ -45,7 +52,9 @@ class YoyoHelpers
 
         $decoded = json_decode($string, true);
 
-        if ($decoded !== null) {
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $validJson = true;
+
             return $decoded;
         }
 
@@ -54,9 +63,15 @@ class YoyoHelpers
 
         if ($unslashed !== $string) {
             $decoded = json_decode($unslashed, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $validJson = true;
+
+                return $decoded;
+            }
         }
 
-        return $decoded ?? null;
+        return null;
     }
 
     public static function studly($str, $delimiter = ['-', '_'])

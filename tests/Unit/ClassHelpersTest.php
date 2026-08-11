@@ -4,7 +4,9 @@ use Clickfwd\Yoyo\ClassHelpers;
 use Clickfwd\Yoyo\Component;
 use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\Yoyo;
+use Tests\App\Post;
 use Tests\App\Yoyo\ComponentWithTrait;
+use Tests\App\Yoyo\CompositeTypeParams;
 use Tests\App\Yoyo\ComputedProperty;
 use Tests\App\Yoyo\Counter;
 
@@ -136,4 +138,62 @@ it('caches getPublicMethods result', function () {
     $second = ClassHelpers::getPublicMethods(Counter::class, ['render']);
 
     expect($first)->toBe($second);
+});
+
+// --- Composite (union / intersection) parameter types ---
+//
+// The classifier must mirror Laravel's own rule: only a ReflectionNamedType that is
+// not builtin counts as a container-resolved slot. Union and intersection types have
+// no isBuiltin() method, so touching them unguarded is a fatal Error, not an exception.
+
+it('classifies a union of class and builtin without fatalling', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'unionOfClassAndBuiltin');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toContain('post');
+});
+
+it('classifies a union of builtins without fatalling', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'unionOfBuiltins');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toContain('value');
+});
+
+it('classifies an intersection type without fatalling', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'intersection');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toContain('both');
+});
+
+it('still treats a nullable class as a container-resolved slot', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'nullableClass');
+
+    expect(array_column($params['typed'], 'name'))->toContain('post')
+        ->and($params['regular'])->toBeEmpty();
+});
+
+// --- Builtin and untyped parameters are caller-supplied, never container-resolved ---
+
+it('classifies builtin and untyped parameters as caller-supplied', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'builtinsAndUntyped');
+
+    expect($params['typed'])->toBeEmpty()
+        ->and(array_column($params['regular'], 'name'))->toBe(['i', 's', 'b', 'a', 'untyped']);
+});
+
+it('returns builtin and untyped parameter names, and omits container slots', function () {
+    expect(ClassHelpers::getMethodParameterNames(CompositeTypeParams::class, 'builtinsAndUntyped'))
+        ->toBe(['i', 's', 'b', 'a', 'untyped'])
+        ->and(ClassHelpers::getMethodParameterNames(CompositeTypeParams::class, 'classSlot'))
+        ->toBe([]);
+});
+
+it('names a container slot with its resolved type', function () {
+    $params = ClassHelpers::getMethodParametersWithTypes(CompositeTypeParams::class, 'classSlot');
+
+    expect(array_column($params['typed'], 'name'))->toBe(['post'])
+        ->and($params['typed'][0]['type'])->toBe(Post::class)
+        ->and($params['regular'])->toBeEmpty();
 });

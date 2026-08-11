@@ -145,3 +145,44 @@ it('returns cached all() result (strict identity)', function () {
 
     expect($first)->toBe($second);
 });
+
+// --- JSON scalar null/false decoding (regression) ---
+
+it('decodes JSON scalar null in all()', function () {
+    $_REQUEST = ['iconSlot' => 'null'];
+    $request = new Request();
+    $all = $request->all();
+
+    expect($all)->toHaveKey('iconSlot');
+    expect($all['iconSlot'])->toBeNull();
+});
+
+it('decodes JSON scalar null in get()', function () {
+    $_REQUEST = ['iconSlot' => 'null'];
+    $request = new Request();
+
+    expect($request->get('iconSlot', 'fallback'))->toBeNull();
+});
+
+it('decodes JSON scalar false in all()', function () {
+    $_REQUEST = ['enabled' => 'false'];
+    $request = new Request();
+    $all = $request->all();
+
+    expect($all['enabled'])->toBeFalse();
+});
+
+it('decodes JSON scalar false in get()', function () {
+    $_REQUEST = ['enabled' => 'false'];
+    $request = new Request();
+
+    expect($request->get('enabled'))->toBeFalse();
+});
+
+it('keeps non-JSON strings unchanged in all()', function () {
+    $_REQUEST = ['greeting' => 'hello'];
+    $request = new Request();
+    $all = $request->all();
+
+    expect($all['greeting'])->toBe('hello');
+});

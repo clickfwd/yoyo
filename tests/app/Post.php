@@ -15,4 +15,9 @@ class Post
     {
         return $this->comment->title();
     }
+
+    public function label(): string
+    {
+        return 'POST-OBJECT';
+    }
 }

@@ -62,6 +62,68 @@ it('returns non-JSON string as-is from decode_val', function () {
     expect(YoyoHelpers::decode_val('hello'))->toBe('hello');
 });
 
+it('decodes JSON scalar null to PHP null in decode_val', function () {
+    expect(YoyoHelpers::decode_val('null'))->toBeNull();
+});
+
+it('decodes JSON scalar false to PHP false in decode_val', function () {
+    expect(YoyoHelpers::decode_val('false'))->toBeFalse();
+});
+
+it('decodes JSON scalar true to PHP true in decode_val', function () {
+    expect(YoyoHelpers::decode_val('true'))->toBeTrue();
+});
+
+// --- test_json ---
+
+it('flags JSON scalar null as valid in test_json', function () {
+    $valid = false;
+    $decoded = YoyoHelpers::test_json('null', $valid);
+
+    expect($valid)->toBeTrue();
+    expect($decoded)->toBeNull();
+});
+
+it('flags JSON scalar false as valid in test_json', function () {
+    $valid = false;
+    $decoded = YoyoHelpers::test_json('false', $valid);
+
+    expect($valid)->toBeTrue();
+    expect($decoded)->toBeFalse();
+});
+
+it('flags JSON object as valid in test_json', function () {
+    $valid = false;
+    $decoded = YoyoHelpers::test_json('{"a":1}', $valid);
+
+    expect($valid)->toBeTrue();
+    expect($decoded)->toBe(['a' => 1]);
+});
+
+it('marks invalid JSON string as not valid in test_json', function () {
+    $valid = false;
+    $decoded = YoyoHelpers::test_json('hello', $valid);
+
+    expect($valid)->toBeFalse();
+    expect($decoded)->toBeNull();
+});
+
+it('treats array input as already-decoded valid JSON in test_json', function () {
+    $valid = false;
+    $decoded = YoyoHelpers::test_json(['a' => 1], $valid);
+
+    expect($valid)->toBeTrue();
+    expect($decoded)->toBe(['a' => 1]);
+});
+
+it('marks non-string non-array input as not valid in test_json', function () {
+    $valid = false;
+    $decoded = YoyoHelpers::test_json(123, $valid);
+
+    expect($valid)->toBeFalse();
+    expect($decoded)->toBeNull();
+});
+
 // --- studly ---
 
 it('converts kebab-case to StudlyCase', function () {

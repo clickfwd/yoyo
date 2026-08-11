@@ -95,6 +95,29 @@ class ComponentManager
         return ! $this->isAnonymousComponent();
     }
 
+    /**
+     * Arguments for one lifecycle hook.
+     *
+     * The container matches by parameter name before it consults the type, so a request
+     * variable sharing a container slot's name would be handed to the component in place
+     * of the object it asked for. Request data is therefore withheld from container
+     * slots; caller-supplied variables still reach them, which is how a parent passes a
+     * model down to a nested component.
+     *
+     * Resolved per method: a component and each of its trait hooks have their own
+     * signatures.
+     */
+    private function lifecycleParameters($method, array $variables, array $requestParameters)
+    {
+        $typed = ClassHelpers::getMethodParametersWithTypes($this->component, $method)['typed'];
+
+        foreach ($typed as $parameter) {
+            unset($requestParameters[$parameter['name']]);
+        }
+
+        return array_merge($variables, $requestParameters);
+    }
+
     private function processDynamicComponent($action, $variables = [], $attributes = [])
     {
         $class = get_class($this->component);
@@ -121,7 +144,9 @@ class ComponentManager
             'rendered' => ['rendered'],
         ];
 
-        $parameters = array_merge($variables, $this->request->all());
+        $requestParameters = $this->request->all();
+
+        $parameters = array_merge($variables, $requestParameters);
 
         // Build stack of trait lifecycle hooks to run after the component hook of the same name
         foreach (ClassHelpers::classUsesRecursive($this->component) as $trait) {
@@ -132,7 +157,7 @@ class ComponentManager
 
         foreach ($hookStack['initialize'] as $method) {
             if (method_exists($this->component, $method)) {
-                Yoyo::container()->call([$this->component, $method], $parameters);
+                Yoyo::container()->call([$this->component, $method], $this->lifecycleParameters($method, $variables, $requestParameters));
             }
         }
 
@@ -157,7 +182,7 @@ class ComponentManager
 
         foreach ($hookStack['mount'] as $method) {
             if (method_exists($this->component, $method)) {
-                Yoyo::container()->call([$this->component, $method], $parameters);
+                Yoyo::container()->call([$this->component, $method], $this->lifecycleParameters($method, $variables, $requestParameters));
             }
         }
 
