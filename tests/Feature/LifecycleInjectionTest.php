@@ -92,8 +92,7 @@ it('still applies the default when the request omits a caller-supplied slot', fu
 it('still lets a caller-supplied variable fill a container slot', function () {
     mockYoyoGetRequest('http://example.com/', 'lifecycle-injection', '', []);
 
-    $sentinel = new class extends Comment
-    {
+    $sentinel = new class () extends Comment {
         public function label(): string
         {
             return 'CALLER-SUPPLIED';

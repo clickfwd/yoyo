@@ -11,9 +11,8 @@ use Tests\App\Comment;
  */
 class LifecycleInjectionWithTrait extends Component
 {
-    protected $traitComment = 'none';
-
     use WithLifecycleHook;
+    protected $traitComment = 'none';
 
     public function render()
     {

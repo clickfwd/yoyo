@@ -34,8 +34,7 @@ it('leaves a class-typed property alone when the request carries its name', func
 it('does not let the request null out a caller-supplied collaborator', function () {
     mockYoyoGetRequest('http://example.com/', 'property-injection', '', ['collaborator' => 'null']);
 
-    $sentinel = new class extends Comment
-    {
+    $sentinel = new class () extends Comment {
         public function label(): string
         {
             return 'CALLER-COLLABORATOR';
@@ -50,8 +49,7 @@ it('does not let the request null out a caller-supplied collaborator', function 
 it('still lets a caller variable supply a class-typed property', function () {
     mockYoyoGetRequest('http://example.com/', 'property-injection', '', []);
 
-    $sentinel = new class extends Comment
-    {
+    $sentinel = new class () extends Comment {
         public function label(): string
         {
             return 'CALLER-COLLABORATOR';
