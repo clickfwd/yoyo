@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.0...develop)
+## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.1...develop)
+
+## [0.15.1 (2026-08-10)](https://github.com/clickfwd/yoyo/compare/0.15.0...0.15.1)
 
 ### Fixed
 
@@ -18,6 +20,12 @@
   `getType()` returned, and neither `ReflectionUnionType` nor `ReflectionIntersectionType`
   has that method. Composite types are now classified the way the container itself treats
   them: not container-resolved.
+- `Request::all()` and `Request::get()` no longer corrupt a public property holding JSON
+  scalar `null` or `false`. Both tested the RESULT of `test_json()` for truthiness, and a
+  successful decode of those two values is falsy, so the raw strings `"null"` and `"false"`
+  were kept instead of the decoded values and re-hydrated the component with them on every
+  re-render. Decode success is now reported separately from the decoded value, via a by-ref
+  flag reading `json_last_error()`. Single-argument callers of `test_json()` are unaffected.
 
 ## [0.15.0 (2026-04-10)](https://github.com/clickfwd/yoyo/compare/0.14.0...0.15.0)
 
