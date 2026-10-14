@@ -2,6 +2,13 @@
 
 ## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.1...develop)
 
+### Fixed
+
+- Links with both an `id` and an `href` no longer add two browser history entries
+  when the component sets an explicit URL. Yoyo now leaves history updates to htmx
+  when the response carries `HX-Push-Url` or `HX-Replace-Url`, so one Back press
+  returns to the previous URL after a paginator click.
+
 ## [0.15.1 (2026-08-10)](https://github.com/clickfwd/yoyo/compare/0.15.0...0.15.1)
 
 ### Fixed
