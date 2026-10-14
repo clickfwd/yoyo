@@ -112,3 +112,79 @@ it('lets lifecycle hooks initialize typed public properties', function ($contain
 
     expect(render('lifecycle-presence'))->toContain('from-initialize from-mount');
 })->with('presence containers');
+
+it('preserves non-nullable property values when an input is null', function ($container, $source, $property, $expected) {
+    new Yoyo($container === 'native' ? new YoyoContainer() : new IlluminateContainer(new Container()));
+    yoyo_view();
+    $variables = $source === 'caller' ? [$property => null] : [];
+    $request = $source === 'request' ? [$property => 'null'] : [];
+    mockYoyoGetRequest('http://example.com/', 'typed-input-presence', '', $request);
+
+    expect(render('typed-input-presence', $variables))->toContain($expected . '</span>');
+})->with('presence containers')->with(['caller', 'request'])->with([
+    'bool' => ['open', 'open=true'],
+    'int' => ['limit', 'limit=15'],
+    'string' => ['title', 'title="default-title"'],
+    'constructor value' => ['current', 'current="constructor-current"'],
+    'union' => ['selection', 'selection=25'],
+    'collaborator' => ['collaborator', 'collaborator=COMMENT-OBJECT'],
+]);
+
+it('still clears properties whose types allow null', function ($container, $source, $property) {
+    new Yoyo($container === 'native' ? new YoyoContainer() : new IlluminateContainer(new Container()));
+    yoyo_view();
+    $variables = $source === 'caller' ? [$property => null] : [];
+    $request = $source === 'request' ? [$property => 'null'] : [];
+    mockYoyoGetRequest('http://example.com/', 'typed-input-presence', '', $request);
+
+    expect(render('typed-input-presence', $variables))->toContain($property . '=null</span>');
+})->with('presence containers')->with(['caller', 'request'])->with([
+    'nullable union' => ['nullableSelection'],
+    'mixed' => ['mixedValue'],
+    'untyped' => ['untypedValue'],
+]);
+
+it('still applies falsy non-null property inputs', function ($container, $source, $property, $value, $expected) {
+    new Yoyo($container === 'native' ? new YoyoContainer() : new IlluminateContainer(new Container()));
+    yoyo_view();
+    $variables = $source === 'caller' ? [$property => $value] : [];
+    $request = $source === 'request' ? [$property => json_encode($value)] : [];
+    mockYoyoGetRequest('http://example.com/', 'typed-input-presence', '', $request);
+
+    expect(render('typed-input-presence', $variables))->toContain($expected . '</span>');
+})->with('presence containers')->with(['caller', 'request'])->with([
+    'false' => ['open', false, 'open=false'],
+    'zero' => ['limit', 0, 'limit=0'],
+    'empty string' => ['title', '', 'title=""'],
+]);
+
+it('keeps the property value when request null overrides a caller input', function ($container) {
+    new Yoyo($container === 'native' ? new YoyoContainer() : new IlluminateContainer(new Container()));
+    yoyo_view();
+    mockYoyoGetRequest('http://example.com/', 'typed-input-presence', '', ['limit' => 'null']);
+
+    expect(render('typed-input-presence', ['limit' => 42]))->toContain('limit=15</span>');
+})->with('presence containers');
+
+it('still rejects other invalid values for typed public properties', function ($container) {
+    new Yoyo($container === 'native' ? new YoyoContainer() : new IlluminateContainer(new Container()));
+    yoyo_view();
+    mockYoyoGetRequest('http://example.com/', 'typed-input-presence', '', ['limit' => '{}']);
+
+    expect(fn () => yoyo_update())->toThrow(TypeError::class);
+})->with('presence containers');
+
+it('preserves typed defaults when an update sends wire nulls', function ($container) {
+    new Yoyo($container === 'native' ? new YoyoContainer() : new IlluminateContainer(new Container()));
+    yoyo_view();
+    mockYoyoGetRequest('http://example.com/', 'typed-input-presence', '', [
+        'open' => 'null',
+        'limit' => 'null',
+        'title' => 'null',
+    ]);
+
+    expect(yoyo_update())
+        ->toContain('open=true</span>')
+        ->toContain('limit=15</span>')
+        ->toContain('title="default-title"</span>');
+})->with('presence containers');
