@@ -3,7 +3,8 @@
 require __DIR__.'/bootstrap.php';
 
 beforeEach(function () {
-    $this->page = $this->visit(BASE_URL.'/browser-events');
+    $this->page = $this->visit(BASE_URL.'/browser-events')
+        ->assertSeeIn('#browser-event-message', 'initial');
 
     $this->page->script(<<<'JS'
         window.browserEvents = [];
