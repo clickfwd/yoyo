@@ -90,7 +90,9 @@ abstract class Component
         foreach ($publicProperties as $property) {
             $source = isset($objectProperties[$property]) ? $variables : $data;
 
-            $this->{$property} = $source[$property] ?? $this->{$property};
+            if (array_key_exists($property, $source)) {
+                $this->{$property} = $source[$property];
+            }
         }
 
         // Set an initial value for dynamic properties
@@ -259,7 +261,9 @@ abstract class Component
 
         $properties = ClassHelpers::getPublicVars($this, __CLASS__);
 
-        $properties = array_merge($properties, array_fill_keys($this->getDynamicProperties(), null));
+        foreach ($this->getDynamicProperties() as $property) {
+            $properties[$property] = $this->{$property} ?? null;
+        }
 
         return array_merge($this->viewData, $vars, $properties);
     }
