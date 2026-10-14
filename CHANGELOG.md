@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Loading indicators apply once per request and continue to work after 204 and
+  no-swap responses. Nested components keep independent indicators. Indicators
+  stop when their request finishes or is aborted, including responses that delay
+  the DOM swap.
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
   when the response carries `HX-Push-Url` or `HX-Replace-Url`, so one Back press
