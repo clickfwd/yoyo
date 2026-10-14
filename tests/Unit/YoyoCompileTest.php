@@ -107,6 +107,11 @@ it('converts kebab-case val key to camel-case', function () {
         ->toContain(hxattr('vals', encode_vals([yoprefix_value('id') => 'foo', 'filterFoo' => 'bar'])));
 });
 
+it('lowercases camel-case val keys as HTML attribute names', function () {
+    expect(compile_html('foo', '<div id="foo" yoyo:val.orderId="42"></div>'))
+        ->toContain(hxattr('vals', encode_vals([yoprefix_value('id') => 'foo', 'orderid' => 42])));
+});
+
 it('parses and merges single yoyo:val attribute in child node', function () {
     expect(compile_html('foo', '<div><button yoyo:val.count="1"></button></div>'))
         ->toContain(hxattr('vals', encode_vals(['count' => 1])));
