@@ -230,7 +230,6 @@ abstract class Component
         $view->startYoyoRendering($this);
 
         try {
-            // Make public properties and methods available to views
             $vars = array_merge($this->viewVars(), $vars);
 
             return $view->render($template, $vars);

@@ -61,8 +61,19 @@ class View
                 include $path;
             }, $this->yoyoComponent ? $this->yoyoComponent : $this)();
         } catch (\Throwable $e) {
-            while (ob_get_level() > $obLevel) {
-                ob_end_clean();
+            while (($bufferLevel = ob_get_level()) > $obLevel) {
+                if (! (ob_get_status()['flags'] & PHP_OUTPUT_HANDLER_REMOVABLE)) {
+                    break;
+                }
+
+                try {
+                    ob_end_clean();
+                } catch (\Throwable) {
+                }
+
+                if (ob_get_level() >= $bufferLevel) {
+                    break;
+                }
             }
 
             throw $e;

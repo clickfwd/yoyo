@@ -9,7 +9,10 @@
   template, variables, and component, including repeated casts and fluent hook
   changes. Twig string templates now receive the component as `this`.
 - Rendering failures restore the previous component context. Native templates also
-  discard their output buffers without closing buffers opened by the caller.
+  discard removable output buffers without closing buffers opened by the caller.
+  Cleanup preserves the original template error even when an output handler throws.
+  A nonremovable buffer prevents further cleanup, so it and any buffers below it
+  remain open, but the original template error is rethrown without retrying cleanup.
   Built-in subclasses that prohibit cloning retain their shared render behavior
   and do not gain independent pending views.
 - Links with both an `id` and an `href` no longer add two browser history entries
