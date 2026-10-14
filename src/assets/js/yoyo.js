@@ -229,7 +229,6 @@
 		let yoyoEventCache = new Set()
 
 		const yoyoSpinners = new WeakMap()
-		const yoyoSpinnerOwners = new WeakMap()
 		const yoyoSpinnerRequests = new WeakMap()
 
 		function getActionAndParseArguments(detail) {
@@ -499,9 +498,7 @@
 
 			walk(subtree, (elt) => {
 				if (elt !== component && isComponent(elt)) return false
-				if (elt !== subtree && yoyoSpinnerOwners.get(elt) === component) return false
 
-				yoyoSpinnerOwners.set(elt, component)
 				const directive = extractModifiersAndValue(elt, 'spinning')
 				if (directive) {
 					directive.actions = (elt.getAttribute('yoyo:spin-on') || '')
