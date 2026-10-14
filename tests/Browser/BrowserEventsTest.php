@@ -68,19 +68,27 @@ it('replays the browser event once when restoring a cached history state', funct
 
     $page->click('#event-page-two')
         ->assertScript('window.finishedSwaps', 1)
-        ->assertSeeIn('#browser-event-message', 'Page 2');
-
-    $page->click('#event-page-three')
-        ->assertScript('window.finishedSwaps', 2)
-        ->assertSeeIn('#browser-event-message', 'Page 3');
+        ->assertSeeIn('#browser-event-message', 'Page 2')
+        ->assertScript('window.location.href', BASE_URL.'/browser-events?page=2')
+        ->assertScript('window.history.state.yoyo[0].initialState === undefined')
+        ->assertScript('JSON.parse(window.history.state.yoyo[0].effects.browserEvents)[0].params.page', 2);
 
     $page->back()
         ->assertScript('window.finishedHistory', true)
+        ->assertScript('window.finishedResponses', 2)
+        ->assertScript('window.finishedSwaps', 2)
+        ->assertScript('window.location.href', BASE_URL.'/browser-events')
+        ->assertSeeIn('#browser-event-message', 'initial');
+
+    $page->script('window.finishedHistory = false');
+
+    $page->forward()
+        ->assertScript('window.finishedHistory', true)
+        ->assertScript('window.location.href', BASE_URL.'/browser-events?page=2')
         ->assertSeeIn('#browser-event-message', 'Page 2');
 
     expect($page->script('window.browserEvents'))->toBe([
         ['detail' => ['page' => 2], 'message' => 'Page 2'],
-        ['detail' => ['page' => 3], 'message' => 'Page 3'],
         ['detail' => ['page' => 2], 'message' => 'Page 2'],
     ]);
 });
