@@ -173,9 +173,11 @@ class ComponentManager
             throw new ComponentMethodNotFound($class, $action);
         }
 
-        $excludedActions = ClassHelpers::getPublicMethods(Component::class, ['render']);
+        $actionName = strtolower($action);
 
-        if (in_array($action, $excludedActions) ||
+        $excludedActions = array_map('strtolower', ClassHelpers::getPublicMethods(Component::class, ['render']));
+
+        if (in_array($actionName, $excludedActions) ||
             (! $isEventListenerAction && ClassHelpers::methodIsPrivate($this->component, $action))) {
             throw new NonPublicComponentMethodCall($class, $action);
         }
@@ -186,7 +188,7 @@ class ComponentManager
             }
         }
 
-        if (! in_array($action, ['render', 'refresh'])) {
+        if ($actionName !== 'render' && $action !== 'refresh') {
             $parameters = $isEventListenerAction ? $eventParams : $this->parseActionArguments();
 
             // Empty params must fall through to existing no-params handling in the else branch
