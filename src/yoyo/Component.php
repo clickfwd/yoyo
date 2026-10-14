@@ -229,13 +229,16 @@ abstract class Component
 
         $view->startYoyoRendering($this);
 
-        // Make public properties and methods available to views
+        try {
+            // Make public properties and methods available to views
+            $vars = array_merge($this->viewVars(), $vars);
 
-        $vars = array_merge($this->viewVars(), $vars);
+            return $view->render($template, $vars);
+        } catch (\Throwable $e) {
+            $view->stopYoyoRendering();
 
-        $view->render($template, $vars);
-
-        return $view;
+            throw $e;
+        }
     }
 
     public function createViewFromString($content): string
@@ -244,11 +247,11 @@ abstract class Component
 
         $view->startYoyoRendering($this);
 
-        $html = $view->makeFromString($content, $this->viewVars());
-
-        $view->stopYoyoRendering();
-
-        return $html;
+        try {
+            return $view->makeFromString($content, $this->viewVars());
+        } finally {
+            $view->stopYoyoRendering();
+        }
     }
 
     protected function viewVars(): array

@@ -12,39 +12,27 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
 
     protected $vars;
 
-    protected $engine;
-
     public function __construct($view)
     {
         $this->view = $view;
     }
 
-    public function startYoyoRendering($component): void
-    {
-        $this->engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
-
-        $this->engine->startYoyoRendering($component);
-    }
-
-    public function stopYoyoRendering(): void
-    {
-        $this->engine->stopYoyoRendering();
-    }
-
     public function render($template, $vars = []): ViewProviderInterface
     {
-        $this->template = $template;
+        $pending = $this->pendingRender();
+        $pending->template = $template;
+        $pending->vars = $vars;
 
-        $this->vars = $vars;
-
-        return $this;
+        return $pending;
     }
 
     public function makeFromString($content, $vars = []): string
     {
-        $view = $this->view->make((new \Clickfwd\Yoyo\Blade\CreateBladeViewFromString())($this->view, $content));
+        return $this->withComponentContext(function () use ($content, $vars) {
+            $view = $this->view->make((new \Clickfwd\Yoyo\Blade\CreateBladeViewFromString())($this->view, $content));
 
-        return $view->with($vars)->render();
+            return $view->with($vars)->render();
+        });
     }
 
     public function exists($template): bool
@@ -90,12 +78,26 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
         return call_user_func_array([$this->view, $method], $params);
     }
 
+    protected function withComponentContext(callable $render): string
+    {
+        $component = $this->yoyoComponent;
+
+        if (! $this->hasYoyoComponent) {
+            return $render();
+        }
+
+        $engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
+        $engine->startYoyoRendering($component);
+
+        try {
+            return $render();
+        } finally {
+            $engine->stopYoyoRendering();
+        }
+    }
+
     public function __toString()
     {
-        $output = (string) $this->view->make($this->template, $this->vars);
-
-        $this->stopYoyoRendering();
-
-        return $output;
+        return $this->withComponentContext(fn () => (string) $this->view->make($this->template, $this->vars));
     }
 }

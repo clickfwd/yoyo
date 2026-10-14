@@ -1,1 +1,6 @@
-<?php echo "PARTIAL"; ob_start(); echo "INNER"; $this->fail(); ?>
+<?php
+
+echo "PARTIAL";
+ob_start();
+echo "INNER";
+$this->fail();

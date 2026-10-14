@@ -13,6 +13,8 @@ class View
 
     protected $yoyoComponent;
 
+    protected $renderingComponents = [];
+
     protected static $hints;
 
     public function __construct($paths)
@@ -33,7 +35,15 @@ class View
 
     public function startYoyoRendering($component)
     {
+        $this->renderingComponents[] = $this->yoyoComponent;
         $this->yoyoComponent = $component;
+
+        return $this;
+    }
+
+    public function stopYoyoRendering()
+    {
+        $this->yoyoComponent = array_pop($this->renderingComponents);
 
         return $this;
     }
@@ -42,12 +52,21 @@ class View
     {
         $path = $this->exists($name);
 
+        $obLevel = ob_get_level();
         ob_start();
 
-        \Closure::bind(function () use ($path, $vars) {
-            extract($vars, EXTR_SKIP);
-            include $path;
-        }, $this->yoyoComponent ? $this->yoyoComponent : $this)();
+        try {
+            \Closure::bind(function () use ($path, $vars) {
+                extract($vars, EXTR_SKIP);
+                include $path;
+            }, $this->yoyoComponent ? $this->yoyoComponent : $this)();
+        } catch (\Throwable $e) {
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
+            }
+
+            throw $e;
+        }
 
         return ltrim(ob_get_clean());
     }

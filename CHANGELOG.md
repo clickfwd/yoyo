@@ -4,6 +4,14 @@
 
 ### Fixed
 
+- Nested rendering no longer replaces a parent's pending view or leaves native and
+  Blade partials bound to the child. Built-in providers keep each pending view's
+  template, variables, and component, including repeated casts and fluent hook
+  changes. Twig string templates now receive the component as `this`.
+- Rendering failures restore the previous component context. Native templates also
+  discard their output buffers without closing buffers opened by the caller.
+  Built-in subclasses that prohibit cloning retain their shared render behavior
+  and do not gain independent pending views.
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
   when the response carries `HX-Push-Url` or `HX-Replace-Url`, so one Back press

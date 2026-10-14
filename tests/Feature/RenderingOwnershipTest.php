@@ -1,6 +1,7 @@
 <?php
 
 use Clickfwd\Yoyo\Component;
+use Clickfwd\Yoyo\ComponentResolver;
 use Clickfwd\Yoyo\Interfaces\ViewProviderInterface;
 use Clickfwd\Yoyo\View;
 use Clickfwd\Yoyo\ViewProviders\BladeViewProvider;
@@ -25,6 +26,8 @@ class RenderingOwnershipComponent extends Component
     public $template = 'owner';
     public $hook = '';
     public $prepareChild = false;
+    public $prepareFailure = false;
+    public $error = false;
     public $content;
 
     public function render()
@@ -51,6 +54,9 @@ class RenderingOwnershipComponent extends Component
     protected function viewVars(): array
     {
         RenderingOwnershipState::$events[] = 'vars';
+        if ($this->prepareFailure) {
+            throw new RuntimeException('preparation failed');
+        }
         if ($this->prepareChild) {
             Yoyo::getInstance()->mount('render-owner', ['owner' => 'prepared-child'])->render();
         }
@@ -69,7 +75,7 @@ class RenderingOwnershipComponent extends Component
 
     public function fail(): void
     {
-        throw new RuntimeException('render failed');
+        throw $this->error ? new Error('render failed') : new RuntimeException('render failed');
     }
 }
 
@@ -163,20 +169,20 @@ it('binds string templates and restores context after nested rendering and failu
     expect(renderingOwnershipText($html))->toBe('parent:beforechild:childparent:partialparent:after');
 
     $content = $engine === 'blade' ? '{{ $this->fail() }}' : '{{ this.fail() }}';
-    expect(fn () => Yoyo::getInstance()->mount('render-owner', ['content' => $content])->render())->toThrow(Throwable::class, 'render failed');
+    expect(fn () => Yoyo::getInstance()->mount('render-owner', ['content' => $content])->render())->toThrow(Exception::class, 'render failed');
     $raw = $provider->getProviderInstance();
     $plain = $engine === 'blade' ? $raw->render('render-ownership/plain') : $raw->render('render-ownership/plain.twig');
     expect(trim($plain))->toBe('plain')
         ->and(renderingOwnershipText(Yoyo::getInstance()->mount('render-owner', ['owner' => 'next'])->render()))->toBe('next:value');
 })->with(['blade', 'twig']);
 
-it('keeps caller buffers and discards native partial output when a template throws', function () {
+it('keeps caller buffers and discards native partial output when a template throws', function ($error) {
     $provider = renderingOwnershipProvider('native');
     $depth = ob_get_level();
     ob_start();
     echo 'caller';
     try {
-        expect(fn () => Yoyo::getInstance()->mount('render-owner', ['template' => 'failure'])->render())->toThrow(RuntimeException::class, 'render failed');
+        expect(fn () => Yoyo::getInstance()->mount('render-owner', ['template' => 'failure', 'error' => $error])->render())->toThrow($error ? Error::class : RuntimeException::class, 'render failed');
         expect(ob_get_level())->toBe($depth + 1)
             ->and(ob_get_contents())->toBe('caller');
         expect(trim($provider->getProviderInstance()->render('render-ownership/plain')))->toBe('plain')
@@ -186,7 +192,7 @@ it('keeps caller buffers and discards native partial output when a template thro
             ob_end_clean();
         }
     }
-});
+})->with([false, true]);
 
 it('keeps native unsupported string failures from leaking component context', function () {
     $provider = renderingOwnershipProvider('native');
@@ -280,4 +286,106 @@ it('honors a distinct custom render result', function () {
     renderingOwnershipProvider('native');
     Yoyo::getInstance()->registerViewProvider(fn () => $provider);
     expect(renderingOwnershipText(Yoyo::getInstance()->mount('render-owner')->render()))->toBe('distinct');
+});
+
+
+it('restores an existing raw engine scope and lets unbound partials inherit it', function ($engine) {
+    $provider = renderingOwnershipProvider($engine);
+    $raw = $provider->getProviderInstance();
+    $context = $engine === 'native' ? $raw : $raw->getContainer()->get('view.engine.resolver')->resolve('blade');
+    $context->startYoyoRendering((object) ['owner' => 'outer']);
+    try {
+        expect(renderingOwnershipText(Yoyo::getInstance()->mount('render-owner')->render()))->toBe('parent:value');
+        expect(renderingOwnershipText((string) $provider->render('render-ownership/owner', ['value' => 'inherited'])))->toBe('outer:inherited');
+        expect(fn () => Yoyo::getInstance()->mount('render-owner', ['template' => 'failure'])->render())->toThrow(Exception::class, 'render failed');
+        expect(renderingOwnershipText($raw->render('render-ownership/owner', ['value' => 'restored'])))->toBe('outer:restored');
+    } finally {
+        $context->stopYoyoRendering();
+    }
+    expect(trim($raw->render('render-ownership/plain')))->toBe('plain');
+})->with(['native', 'blade']);
+
+it('restores preparation after a nested variable-preparation failure', function ($engine) {
+    $provider = renderingOwnershipProvider($engine);
+    $provider->startYoyoRendering((object) ['owner' => 'outer']);
+    expect(fn () => Yoyo::getInstance()->mount('render-owner', ['prepareFailure' => true])->render())->toThrow(RuntimeException::class, 'preparation failed');
+    $pending = $provider->render('render-ownership/owner', ['value' => 'restored']);
+    expect(renderingOwnershipText((string) $pending))->toBe('outer:restored');
+})->with(['native', 'blade', 'twig']);
+
+it('restores preparation after a failed nested string render', function ($engine) {
+    $provider = renderingOwnershipProvider($engine);
+    $provider->startYoyoRendering((object) ['owner' => 'outer']);
+    $content = $engine === 'blade' ? '{{ $this->fail() }}' : '{{ this.fail() }}';
+    expect(fn () => Yoyo::getInstance()->mount('render-owner', ['content' => $content])->render())->toThrow(Exception::class, 'render failed');
+    expect(renderingOwnershipText((string) $provider->render('render-ownership/owner', ['value' => 'restored'])))->toBe('outer:restored');
+})->with(['blade', 'twig']);
+
+it('stops an independent custom provider after string failure', function () {
+    $provider = new IndependentRenderingProvider(null);
+    renderingOwnershipProvider('native');
+    Yoyo::getInstance()->registerViewProvider(fn () => $provider);
+    expect(fn () => Yoyo::getInstance()->mount('render-owner', ['content' => 'string'])->render())->toThrow(RuntimeException::class, 'custom string failed')
+        ->and(RenderingOwnershipState::$events)->toBe(['start', 'vars', 'stop']);
+});
+
+
+it('releases a discarded pending view without retaining its component on the registry', function ($engine) {
+    $provider = renderingOwnershipProvider($engine);
+    $component = (object) ['owner' => 'discarded'];
+    $reference = WeakReference::create($component);
+    $provider->startYoyoRendering($component);
+    $pending = $provider->render('render-ownership/owner', ['value' => 'discarded']);
+    unset($component);
+    expect($reference->get())->not->toBeNull();
+    unset($pending);
+    expect($reference->get())->toBeNull();
+})->with(['native', 'blade', 'twig']);
+
+class TypedRenderingOwnershipComponent extends Component
+{
+    public $owner = 'typed';
+    public $value = 'typed';
+
+    public function render()
+    {
+        return $this->view('render-ownership/owner');
+    }
+
+    public function rendered(YoyoViewProvider|BladeViewProvider|TwigViewProvider $view): ViewProviderInterface
+    {
+        Yoyo::getInstance()->mount('render-owner', ['owner' => 'child'])->render();
+        return $view->render('render-ownership/alternate', ['value' => 'retargeted']);
+    }
+}
+
+it('preserves concrete provider types in typed fluent rendered hooks', function ($engine) {
+    renderingOwnershipProvider($engine);
+    Yoyo::registerComponent('typed-render-owner', TypedRenderingOwnershipComponent::class);
+    expect(renderingOwnershipText(Yoyo::getInstance()->mount('typed-render-owner')->render()))->toBe('alternate:typed:retargeted');
+})->with(['native', 'blade', 'twig']);
+
+
+it('distinguishes an explicitly null binding from an unbound inherited engine scope', function ($engine) {
+    $provider = renderingOwnershipProvider($engine);
+    $raw = $provider->getProviderInstance();
+    $context = $engine === 'native' ? $raw : $raw->getContainer()->get('view.engine.resolver')->resolve('blade');
+    $outer = new RenderingOwnershipComponent(new ComponentResolver(), 'outer', 'outer');
+    $context->startYoyoRendering($outer);
+    try {
+        $provider->startYoyoRendering(null);
+        $pending = $provider->render('render-ownership/plain');
+        expect(trim((string) $pending))->toBe('plain')
+            ->and(trim((string) $pending))->toBe('plain')
+            ->and(trim((string) $provider->render('render-ownership/plain')))->toBe('leaked');
+    } finally {
+        $context->stopYoyoRendering();
+    }
+})->with(['native', 'blade']);
+
+it('keeps an explicitly null Twig binding separate from caller supplied this data', function () {
+    $provider = renderingOwnershipProvider('twig');
+    $provider->startYoyoRendering(null);
+    expect(renderingOwnershipText((string) $provider->render('render-ownership/owner', ['value' => 'bound', 'this' => (object) ['owner' => 'caller']])))->toBe(':bound')
+        ->and(renderingOwnershipText((string) $provider->render('render-ownership/owner', ['value' => 'unbound', 'this' => (object) ['owner' => 'caller']])))->toBe('caller:unbound');
 });
