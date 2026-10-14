@@ -212,9 +212,16 @@
 				const url =
 					pushedUrl !== null ? pushedUrl : window.location.href
 
+				// A URL the server named for htmx is recorded by htmx. Pushing it
+				// here as well gives one change two history entries.
+				const htmxOwnsUrl =
+					xhr.getResponseHeader('HX-Push-Url') !== null ||
+					xhr.getResponseHeader('HX-Replace-Url') !== null
+
 				if (
 					!history ||
 					!pushedUrl ||
+					htmxOwnsUrl ||
 					component?.__yoyo?.replayingHistory
 				) {
 					component.__yoyo.replayingHistory = false
