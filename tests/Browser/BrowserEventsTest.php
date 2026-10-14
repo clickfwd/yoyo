@@ -2,11 +2,12 @@
 
 require __DIR__.'/bootstrap.php';
 
-beforeEach(function () {
-    $this->page = $this->visit(BASE_URL.'/browser-events')
+function visitBrowserEventsPage($test)
+{
+    $page = $test->visit(BASE_URL.'/browser-events')
         ->assertSeeIn('#browser-event-message', 'initial');
 
-    $this->page->script(<<<'JS'
+    $page->script(<<<'JS'
         window.browserEvents = [];
         window.finishedResponses = 0;
         window.finishedSwaps = 0;
@@ -29,14 +30,18 @@ beforeEach(function () {
             setTimeout(() => { window.finishedHistory = true; }, 0);
         });
     JS);
-});
+
+    return $page;
+}
 
 it('delivers one browser event per completed response', function ($button, $message, $status) {
-    $this->page->click($button)
+    $page = visitBrowserEventsPage($this);
+
+    $page->click($button)
         ->assertScript('window.finishedResponses', 1)
         ->assertScript('window.responseStatus', $status);
 
-    expect($this->page->script('window.browserEvents'))->toBe([
+    expect($page->script('window.browserEvents'))->toBe([
         ['detail' => ['message' => 'saved', 'id' => 42], 'message' => $message],
     ]);
 })->with([
@@ -46,30 +51,34 @@ it('delivers one browser event per completed response', function ($button, $mess
 ]);
 
 it('delivers one browser event when the response delays its swap', function () {
-    $this->page->click('#save-event-delayed')
+    $page = visitBrowserEventsPage($this);
+
+    $page->click('#save-event-delayed')
         ->assertScript('window.finishedResponses', 1)
         ->assertScript('window.finishedSwaps', 1)
         ->assertSeeIn('#browser-event-message', 'saved');
 
-    expect($this->page->script('window.browserEvents'))->toBe([
+    expect($page->script('window.browserEvents'))->toBe([
         ['detail' => ['message' => 'saved', 'id' => 42], 'message' => 'initial'],
     ]);
 });
 
 it('replays the browser event once when restoring a cached history state', function () {
-    $this->page->click('#event-page-two')
+    $page = visitBrowserEventsPage($this);
+
+    $page->click('#event-page-two')
         ->assertScript('window.finishedSwaps', 1)
         ->assertSeeIn('#browser-event-message', 'Page 2');
 
-    $this->page->click('#event-page-three')
+    $page->click('#event-page-three')
         ->assertScript('window.finishedSwaps', 2)
         ->assertSeeIn('#browser-event-message', 'Page 3');
 
-    $this->page->back()
+    $page->back()
         ->assertScript('window.finishedHistory', true)
         ->assertSeeIn('#browser-event-message', 'Page 2');
 
-    expect($this->page->script('window.browserEvents'))->toBe([
+    expect($page->script('window.browserEvents'))->toBe([
         ['detail' => ['page' => 2], 'message' => 'Page 2'],
         ['detail' => ['page' => 3], 'message' => 'Page 3'],
         ['detail' => ['page' => 2], 'message' => 'Page 2'],
