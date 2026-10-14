@@ -8,6 +8,7 @@
     <button id="<?php echo $scope; ?>-skip" yoyo:get="skip">Skip</button>
     <button id="<?php echo $scope; ?>-fast" yoyo:get="fast">Fast</button>
     <button id="<?php echo $scope; ?>-replace" yoyo:get="update">Replace</button>
+    <button id="<?php echo $scope; ?>-delayed-swap" yoyo:get="update" yoyo:swap="outerHTML swap:0.3s">Delayed swap</button>
     <button id="<?php echo $scope; ?>-none" yoyo:get="update" yoyo:swap="none">No swap</button>
     <button id="<?php echo $scope; ?>-partial" yoyo:get="update"
         yoyo:target="#<?php echo $scope; ?>-result" yoyo:select="#<?php echo $scope; ?>-result">Partial</button>
