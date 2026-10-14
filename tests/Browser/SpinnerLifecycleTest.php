@@ -9,6 +9,10 @@ function spinnerLifecyclePage($test)
         ->assertVisible('#child-skip');
 
     $page->script(<<<'JS'
+        const parent = document.getElementById('parent');
+        parent.appendChild(document.getElementById('child'));
+        parent.setAttribute('data-nested', 'true');
+        htmx.process(parent);
         window.spinnerStarts = [];
         window.spinnerFinishes = [];
         window.spinnerWrites = [];
@@ -116,10 +120,10 @@ it('cleans up targeted responses and discovers replacement roots with the same i
         ->assertSeeIn('#parent-result', '1')
         ->assertScript('window.spinnerFinishes[0].parent.busy', false);
 
-    $page->click('#parent-replace')
+    $page->click('#child-replace')
         ->assertScript('window.spinnerFinishes.length', 2)
         ->assertScript('window.spinnerSettles', 2)
-        ->assertSeeIn('#parent-result', '1');
+        ->assertSeeIn('#child-result', '1');
 
     $page->click('#child-skip')
         ->assertScript('window.spinnerFinishes.length', 3)

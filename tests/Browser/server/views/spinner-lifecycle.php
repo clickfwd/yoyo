@@ -11,7 +11,4 @@
     <button id="<?php echo $scope; ?>-none" yoyo:get="update" yoyo:swap="none">No swap</button>
     <button id="<?php echo $scope; ?>-partial" yoyo:get="update"
         yoyo:target="#<?php echo $scope; ?>-result" yoyo:select="#<?php echo $scope; ?>-result">Partial</button>
-    <?php if ($scope === 'parent') { ?>
-        <?php echo Yoyo\yoyo_render('spinner-lifecycle', ['scope' => 'child'], ['id' => 'child']); ?>
-    <?php } ?>
 </div>
