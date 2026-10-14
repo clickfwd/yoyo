@@ -96,23 +96,25 @@ it('applies each spinner once after repeated processing and keeps nested ownersh
 it('discovers plain spinners inserted below a processed wrapper when its component is reprocessed', function () {
     $page = spinnerLifecyclePage($this);
     $page->script(<<<'JS'
-        const parent = document.getElementById('parent');
-        const wrapper = document.createElement('div');
-        parent.appendChild(wrapper);
-        htmx.process(wrapper);
-        wrapper.innerHTML = '<span id="extra-spinner" yoyo:spinning.attr="data-loading">Extra</span>';
-        for (let i = 0; i < 2; i++) {
-            parent.setAttribute('data-pass', i);
-            htmx.process(parent);
-        }
-        window.extraSpinnerClears = [];
-        const removeAttribute = Element.prototype.removeAttribute;
-        Element.prototype.removeAttribute = function(name) {
-            if (this.id === 'extra-spinner' && name === 'data-loading') {
-                window.extraSpinnerClears.push(this.id);
+        () => {
+            const parent = document.getElementById('parent');
+            const wrapper = document.createElement('div');
+            parent.appendChild(wrapper);
+            htmx.process(wrapper);
+            wrapper.innerHTML = '<span id="extra-spinner" yoyo:spinning.attr="data-loading">Extra</span>';
+            for (let i = 0; i < 2; i++) {
+                parent.setAttribute('data-pass', i);
+                htmx.process(parent);
             }
-            return removeAttribute.call(this, name);
-        };
+            window.extraSpinnerClears = [];
+            const removeAttribute = Element.prototype.removeAttribute;
+            Element.prototype.removeAttribute = function(name) {
+                if (this.id === 'extra-spinner' && name === 'data-loading') {
+                    window.extraSpinnerClears.push(this.id);
+                }
+                return removeAttribute.call(this, name);
+            };
+        }
     JS);
 
     $page->click('#parent-skip')->assertScript('window.spinnerFinishes.length', 1);
