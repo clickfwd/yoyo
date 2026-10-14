@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Framework helper methods are blocked as component actions regardless of letter case,
+  including listener mappings and overridden helpers. Public actions remain
+  case-insensitive, and case-equivalent `render` actions render the component once.
+
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
   when the response carries `HX-Push-Url` or `HX-Replace-Url`, so one Back press
