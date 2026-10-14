@@ -14,6 +14,7 @@ $yoyo = new Yoyo();
 $yoyo->configure([
     'url' => '/yoyo',
     'namespace' => 'Tests\\Browser\\Components\\',
+    'historyEnabled' => parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/history',
 ]);
 
 $yoyo->registerViewProvider(function () {
