@@ -23,11 +23,11 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
 
     public function startYoyoRendering($component): void
     {
-        parent::startYoyoRendering($component);
-
         if ($this->usesLegacyLifecycle()) {
             $this->engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
             $this->engine->startYoyoRendering($component);
+        } else {
+            parent::startYoyoRendering($component);
         }
     }
 
@@ -35,17 +35,17 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
     {
         $this->legacyRenderPending = false;
 
-        if ($this->usesLegacyLifecycle() && $this->hasYoyoComponent) {
+        if ($this->usesLegacyLifecycle()) {
             $this->engine->stopYoyoRendering();
+        } else {
+            parent::stopYoyoRendering();
         }
-
-        parent::stopYoyoRendering();
     }
 
     protected function pendingRender(): static
     {
         if ($this->usesLegacyLifecycle()) {
-            $this->legacyRenderPending = $this->hasYoyoComponent;
+            $this->legacyRenderPending = true;
 
             return $this;
         }
