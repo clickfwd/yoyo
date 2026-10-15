@@ -4,6 +4,7 @@ use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\HttpException;
 use Clickfwd\Yoyo\Services\Response;
 
+use function Tests\headers;
 use function Tests\mockYoyoGetRequest;
 use function Tests\render;
 use function Tests\resetYoyoRequest;
@@ -64,6 +65,16 @@ it('sets the 204 status on an update request that skips rendering', function () 
     expect(fn () => yoyo_update())->toThrow(BypassRenderMethod::class);
 
     expect(http_response_code())->toBe(204);
+});
+
+it('sets the 200 status and the swap header on an update request that skips rendering and removes itself', function () {
+    mockYoyoGetRequest('http://example.com/', 'empty-response-and-remove', 'empty-response-and-remove');
+
+    expect(yoyo_update())->toBe('');
+
+    expect(http_response_code())->toBe(200);
+
+    expect(headers())->toHaveKey('Yoyo-Swap-Modifier', 'swap:1s');
 });
 
 it('sets the status on an update request that aborts', function () {
