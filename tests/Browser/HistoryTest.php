@@ -2,10 +2,13 @@
 
 require __DIR__.'/bootstrap.php';
 
-it('adds one history entry when a link action pushes an explicit URL', function () {
+it('adds one history entry when a link action pushes an explicit URL', function (bool $historyEnabled) {
     $page = $this->visit(BASE_URL.'/history')
         ->assertSeeIn('#history-page', 'Page 1')
         ->assertScript('htmx.config.historyEnabled', true);
+
+    $page->script('htmx.config.historyEnabled = '.json_encode($historyEnabled));
+    $page->assertScript('htmx.config.historyEnabled', $historyEnabled);
 
     $originalUrl = $page->url();
     $historyLength = $page->script('window.history.length');
@@ -28,4 +31,7 @@ it('adds one history entry when a link action pushes an explicit URL', function 
     expect($page->script('window.history.length'))->toBe($historyLength + 1);
 
     $page->back()->assertScript('window.location.href', $originalUrl);
-});
+})->with([
+    'htmx history enabled' => true,
+    'htmx history disabled' => false,
+]);
