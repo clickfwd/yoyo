@@ -8,10 +8,13 @@ class YoyoBladeCompilerEngine extends LaravelCompilerEngine
 {
     protected $yoyoComponent;
 
-    protected $isRenderingYoyoComponent;
+    protected $isRenderingYoyoComponent = false;
+
+    protected $renderingComponents = [];
 
     public function startYoyoRendering($component)
     {
+        $this->renderingComponents[] = [$this->yoyoComponent, $this->isRenderingYoyoComponent];
         $this->yoyoComponent = $component;
 
         $this->isRenderingYoyoComponent = true;
@@ -19,7 +22,7 @@ class YoyoBladeCompilerEngine extends LaravelCompilerEngine
 
     public function stopYoyoRendering()
     {
-        $this->isRenderingYoyoComponent = false;
+        [$this->yoyoComponent, $this->isRenderingYoyoComponent] = array_pop($this->renderingComponents) ?? [null, false];
     }
 
     /**
@@ -31,6 +34,7 @@ class YoyoBladeCompilerEngine extends LaravelCompilerEngine
             return parent::evaluatePath($__path, $__data);
         }
 
+        $component = $this->yoyoComponent;
         $obLevel = ob_get_level();
 
         ob_start();
@@ -39,7 +43,7 @@ class YoyoBladeCompilerEngine extends LaravelCompilerEngine
             \Closure::bind(function () use ($__path, $__data) {
                 extract($__data, EXTR_SKIP);
                 include $__path;
-            }, $this->yoyoComponent ? $this->yoyoComponent : $this)();
+            }, $component ?: $this)();
         } catch (\Throwable $e) {
             $this->handleViewException($e, $obLevel);
         }

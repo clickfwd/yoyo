@@ -19,6 +19,20 @@
 - Server-dispatched browser events fire once per response, after the response
   loads, including responses that do not swap the DOM. Cached history navigation
   continues to replay its browser events.
+- Nested rendering no longer replaces a parent's pending view or leaves native and
+  Blade partials bound to the child. Built-in providers keep each pending view's
+  template, variables, and component, including repeated casts and fluent hook
+  changes. Twig string templates now receive the component as `this`.
+- Rendering failures restore the previous component context. Native templates also
+  discard removable output buffers without closing buffers opened by the caller.
+  Cleanup preserves the original template error even when an output handler throws.
+  A nonremovable buffer prevents further cleanup, so it and any buffers below it
+  remain open, but the original template error is rethrown without retrying cleanup.
+  Built-in subclasses that prohibit cloning and Blade subclasses that override
+  either rendering lifecycle hook retain their shared render behavior. They do
+  not gain independent pending views. Blade hook overrides keep one start and
+  stop pair on the original provider, with the protected engine bound during
+  preparation and rendering, including template failures.
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
   when htmx history is enabled and the response carries `HX-Push-Url` or
