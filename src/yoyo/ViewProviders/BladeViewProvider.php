@@ -23,8 +23,9 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
 
     public function startYoyoRendering($component): void
     {
+        $this->engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
+
         if ($this->usesLegacyLifecycle()) {
-            $this->engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
             $this->engine->startYoyoRendering($component);
         } else {
             parent::startYoyoRendering($component);
