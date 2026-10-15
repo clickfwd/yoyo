@@ -128,6 +128,25 @@ class NoncloneableLifecycleBladeProvider extends BladeViewProvider
 
 class PlainLifecycleBladeProvider extends BladeViewProvider
 {
+    public function engineAfterStart()
+    {
+        return $this->engine;
+    }
+}
+
+class BladeEngineAccessComponent extends Component
+{
+    public function render()
+    {
+        return $this->view('foo');
+    }
+
+    protected function viewVars(): array
+    {
+        BladeLifecycleState::$observed[] = get_class(BladeLifecycleState::$provider->engineAfterStart()->getCompiler());
+
+        return parent::viewVars();
+    }
 }
 
 class BladeLifecycleComponent extends Component
@@ -214,6 +233,26 @@ it('exposes the protected Blade engine already bound after parent start', functi
     } finally {
         $provider->stopYoyoRendering();
     }
+});
+
+it('resolves the protected Blade engine after inherited start without activating it', function () {
+    $provider = lifecycleBladeProvider(PlainLifecycleBladeProvider::class);
+    $provider->startYoyoRendering(lifecycleBladeComponent('active'));
+    try {
+        expect($provider->engineAfterStart())->toBeInstanceOf(\Clickfwd\Yoyo\Blade\YoyoBladeCompilerEngine::class)
+            ->and($provider->engineAfterStart())->toBe(lifecycleBladeEngine($provider))
+            ->and(trim($provider->getProviderInstance()->render('render-ownership/plain')))->toBe('plain');
+    } finally {
+        $provider->stopYoyoRendering();
+    }
+});
+
+it('exposes the protected Blade engine during component variable preparation with inherited hooks', function () {
+    lifecycleBladeProvider(PlainLifecycleBladeProvider::class);
+    Yoyo::registerComponent('blade-engine-access', BladeEngineAccessComponent::class);
+
+    expect(Yoyo::getInstance()->mount('blade-engine-access')->render())->toContain('blade foo')
+        ->and(BladeLifecycleState::$observed)->toBe([\Illuminate\View\Compilers\BladeCompiler::class]);
 });
 
 it('closes the original Blade hook scope after template or preparation failure and can render again', function ($failure) {
