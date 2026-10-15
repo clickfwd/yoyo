@@ -12,23 +12,11 @@ class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
 
     protected $vars;
 
-    protected $yoyoComponent;
-
     public static $twig_template_extension = 'twig';
 
     public function __construct($view)
     {
         $this->view = $view;
-    }
-
-    public function startYoyoRendering($component): void
-    {
-        $this->yoyoComponent = $component;
-    }
-
-    public function stopYoyoRendering(): void
-    {
-        //
     }
 
     public function normalizeName($template)
@@ -44,15 +32,20 @@ class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
 
     public function render($template, $vars = []): ViewProviderInterface
     {
-        $this->template = $this->normalizeName($template);
+        $template = $this->normalizeName($template);
+        $pending = $this->pendingRender();
+        $pending->template = $template;
+        $pending->vars = $vars;
 
-        $this->vars = $vars;
-
-        return $this;
+        return $pending;
     }
 
     public function makeFromString($content, $vars = []): string
     {
+        if ($this->hasYoyoComponent) {
+            $vars['this'] = $this->yoyoComponent;
+        }
+
         $template = $this->view->createTemplate((string) $content);
 
         return $template->render($vars);
@@ -105,8 +98,12 @@ class TwigViewProvider extends BaseViewProvider implements ViewProviderInterface
 
     public function __toString()
     {
-        $this->vars['this'] = $this->yoyoComponent;
+        $vars = $this->vars;
 
-        return (string) $this->view->render($this->template.'.'.self::$twig_template_extension, $this->vars);
+        if ($this->hasYoyoComponent) {
+            $vars['this'] = $this->yoyoComponent;
+        }
+
+        return (string) $this->view->render($this->template.'.'.self::$twig_template_extension, $vars);
     }
 }

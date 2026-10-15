@@ -83,7 +83,7 @@ class YoyoContainer implements YoyoContainerInterface
                 return array_merge($result, array_values($arguments));
             }
             // Named argument
-            elseif (isset($arguments[$parameter->getName()])) {
+            elseif (array_key_exists($parameter->getName(), $arguments)) {
                 $result[] = $arguments[$parameter->getName()];
                 unset($arguments[$parameter->getName()]);
             }

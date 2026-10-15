@@ -19,23 +19,13 @@ class YoyoViewProvider extends BaseViewProvider implements ViewProviderInterface
         $this->view = $view;
     }
 
-    public function startYoyoRendering($component): void
-    {
-        $this->view->startYoyoRendering($component);
-    }
-
-    public function stopYoyoRendering(): void
-    {
-        //
-    }
-
     public function render($name, $vars = []): ViewProviderInterface
     {
-        $this->name = $name;
+        $pending = $this->pendingRender();
+        $pending->name = $name;
+        $pending->vars = $vars;
 
-        $this->vars = $vars;
-
-        return $this;
+        return $pending;
     }
 
     public function makeFromString($content, $vars = []): string
@@ -87,6 +77,18 @@ class YoyoViewProvider extends BaseViewProvider implements ViewProviderInterface
 
     public function __toString()
     {
-        return $this->view->render($this->name, $this->vars);
+        $component = $this->yoyoComponent;
+
+        if (! $this->hasYoyoComponent) {
+            return $this->view->render($this->name, $this->vars);
+        }
+
+        $this->view->startYoyoRendering($component);
+
+        try {
+            return $this->view->render($this->name, $this->vars);
+        } finally {
+            $this->view->stopYoyoRendering();
+        }
     }
 }
