@@ -837,10 +837,6 @@ YoyoEngine.defineExtension('yoyo', {
 					YoyoEngine.config.defaultSwapStyle
 				evt.detail.elt.setAttribute('hx-swap', `${swap} ${modifier}`)
 			}
-
-			Yoyo.processBrowserEvents(
-				evt.detail.xhr.getResponseHeader('Yoyo-Browser-Event')
-			)
 		}
 
 		if (name === 'htmx:afterSettle') {

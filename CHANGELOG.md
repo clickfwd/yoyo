@@ -16,6 +16,9 @@
   defaults or remain available for lifecycle hooks to initialize.
 - Dynamic template variables now contain the component's current property values.
 
+- Server-dispatched browser events fire once per response, after the response
+  loads, including responses that do not swap the DOM. Cached history navigation
+  continues to replay its browser events.
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
   when htmx history is enabled and the response carries `HX-Push-Url` or
