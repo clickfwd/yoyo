@@ -173,9 +173,11 @@ class ComponentManager
             throw new ComponentMethodNotFound($class, $action);
         }
 
-        $excludedActions = ClassHelpers::getPublicMethods(Component::class, ['render']);
+        $actionName = strtolower($action);
 
-        if (in_array($action, $excludedActions) ||
+        $excludedActions = array_map('strtolower', ClassHelpers::getPublicMethods(Component::class, ['render']));
+
+        if (in_array($actionName, $excludedActions) ||
             (! $isEventListenerAction && ClassHelpers::methodIsPrivate($this->component, $action))) {
             throw new NonPublicComponentMethodCall($class, $action);
         }
@@ -186,7 +188,7 @@ class ComponentManager
             }
         }
 
-        if (! in_array($action, ['render', 'refresh'])) {
+        if ($actionName !== 'render' && $action !== 'refresh') {
             $parameters = $isEventListenerAction ? $eventParams : $this->parseActionArguments();
 
             // Empty params must fall through to existing no-params handling in the else branch
@@ -196,7 +198,7 @@ class ComponentManager
                 $regularParams = $paramInfo['regular'];
 
                 foreach ($regularParams as $param) {
-                    if (! $param['optional'] && ! $param['variadic'] && ! isset($parameters[$param['name']])) {
+                    if (! $param['optional'] && ! $param['variadic'] && ! array_key_exists($param['name'], $parameters)) {
                         throw new \InvalidArgumentException(
                             "Missing required parameter [{$param['name']}] for [{$this->name}::{$action}]"
                         );
@@ -216,19 +218,26 @@ class ComponentManager
                 // Check if the last regular parameter is variadic
                 $hasVariadic = ! empty($regularParams) && end($regularParams)['variadic'];
 
+                $requiredCount = 0;
+                foreach ($regularParams as $param) {
+                    if (! $param['optional'] && ! $param['variadic']) {
+                        $requiredCount++;
+                    }
+                }
+
                 // Handle variadic parameters
                 if ($hasVariadic && count($parameterNames) > 0) {
                     $regularParamCount = count($parameterNames) - 1; // Exclude the variadic parameter
 
-                    if (count($parameters) >= $regularParamCount) {
+                    if (count($parameters) >= $requiredCount) {
                         // Split parameters into regular and variadic
                         $regularParamValues = array_slice($parameters, 0, $regularParamCount);
                         $variadicParamValues = array_slice($parameters, $regularParamCount);
 
                         // Create args array with named regular parameters and indexed variadic parameters
                         $args = [];
-                        for ($i = 0; $i < $regularParamCount; $i++) {
-                            $args[$parameterNames[$i]] = $regularParamValues[$i] ?? null;
+                        foreach ($regularParamValues as $i => $value) {
+                            $args[$parameterNames[$i]] = $value;
                         }
 
                         // Add variadic parameters as indexed values (not named)
@@ -239,20 +248,12 @@ class ComponentManager
                         throw new \InvalidArgumentException("Too few parameters passed to [{$this->name}::{$action}]");
                     }
                 } else {
-                    // Check if all regular parameters are optional
-                    $requiredCount = 0;
-                    foreach ($regularParams as $param) {
-                        if (! $param['optional']) {
-                            $requiredCount++;
-                        }
-                    }
-
                     // Only validate regular parameters (not typed/DI parameters)
                     if (count($parameters) >= $requiredCount && count($parameters) <= count($parameterNames)) {
                         // Parameters count is valid (between required and total)
                         $args = [];
-                        for ($i = 0; $i < count($parameterNames); $i++) {
-                            $args[$parameterNames[$i]] = $parameters[$i] ?? null;
+                        foreach ($parameters as $i => $value) {
+                            $args[$parameterNames[$i]] = $value;
                         }
                     } elseif (empty($parameterNames) && empty($parameters)) {
                         // Method has only typed parameters (or no parameters at all)

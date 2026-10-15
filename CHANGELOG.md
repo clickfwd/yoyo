@@ -4,6 +4,21 @@
 
 ### Fixed
 
+- Framework helper methods are blocked as component actions regardless of letter case,
+  including listener mappings and overridden helpers. Public actions remain
+  case-insensitive, and case-equivalent `render` actions render the component once.
+- Omitted action and event arguments now retain their PHP defaults in both container
+  adapters, including optional arguments before a variadic parameter. Explicit `null`
+  values remain supplied arguments, including required nullable event parameters.
+- Nullable and untyped public properties now accept explicit `null` from caller variables
+  or request data. Non-nullable properties retain their current values when given `null`,
+  and object-typed collaborators still ignore request data. Omitted properties retain their
+  defaults or remain available for lifecycle hooks to initialize.
+- Dynamic template variables now contain the component's current property values.
+
+- Server-dispatched browser events fire once per response, after the response
+  loads, including responses that do not swap the DOM. Cached history navigation
+  continues to replay its browser events.
 - Nested rendering no longer replaces a parent's pending view or leaves native and
   Blade partials bound to the child. Built-in providers keep each pending view's
   template, variables, and component, including repeated casts and fluent hook
@@ -20,8 +35,9 @@
   preparation and rendering, including template failures.
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
-  when the response carries `HX-Push-Url` or `HX-Replace-Url`, so one Back press
-  returns to the previous URL after a paginator click.
+  when htmx history is enabled and the response carries `HX-Push-Url` or
+  `HX-Replace-Url`, so one Back press returns to the previous URL after a paginator
+  click. When htmx history is disabled, Yoyo preserves link history navigation.
 
 ## [0.15.1 (2026-08-10)](https://github.com/clickfwd/yoyo/compare/0.15.0...0.15.1)
 

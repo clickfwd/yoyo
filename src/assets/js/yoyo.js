@@ -212,11 +212,12 @@
 				const url =
 					pushedUrl !== null ? pushedUrl : window.location.href
 
-				// A URL the server named for htmx is recorded by htmx. Pushing it
-				// here as well gives one change two history entries.
+				// With history enabled, htmx records URLs named by the server.
+				// Pushing here as well gives one change two history entries.
 				const htmxOwnsUrl =
-					xhr.getResponseHeader('HX-Push-Url') !== null ||
-					xhr.getResponseHeader('HX-Replace-Url') !== null
+					YoyoEngine.config.historyEnabled &&
+					(xhr.getResponseHeader('HX-Push-Url') !== null ||
+						xhr.getResponseHeader('HX-Replace-Url') !== null)
 
 				if (
 					!history ||
@@ -836,10 +837,6 @@ YoyoEngine.defineExtension('yoyo', {
 					YoyoEngine.config.defaultSwapStyle
 				evt.detail.elt.setAttribute('hx-swap', `${swap} ${modifier}`)
 			}
-
-			Yoyo.processBrowserEvents(
-				evt.detail.xhr.getResponseHeader('Yoyo-Browser-Event')
-			)
 		}
 
 		if (name === 'htmx:afterSettle') {
