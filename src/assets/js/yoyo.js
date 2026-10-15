@@ -231,6 +231,10 @@
 		const yoyoSpinners = new WeakMap()
 		const yoyoSpinnerRequests = new WeakMap()
 
+		document.addEventListener('htmx:beforeSwap', (evt) => {
+			Yoyo.afterRequestActions(evt)
+		}, true)
+
 		function getActionAndParseArguments(detail) {
 			const m = detail.path.match(/^(.+?)\((.*)\)$/);
 			if (!m) {
