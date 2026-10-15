@@ -7,6 +7,14 @@
 - Framework helper methods are blocked as component actions regardless of letter case,
   including listener mappings and overridden helpers. Public actions remain
   case-insensitive, and case-equivalent `render` actions render the component once.
+- Omitted action and event arguments now retain their PHP defaults in both container
+  adapters, including optional arguments before a variadic parameter. Explicit `null`
+  values remain supplied arguments, including required nullable event parameters.
+- Nullable and untyped public properties now accept explicit `null` from caller variables
+  or request data. Non-nullable properties retain their current values when given `null`,
+  and object-typed collaborators still ignore request data. Omitted properties retain their
+  defaults or remain available for lifecycle hooks to initialize.
+- Dynamic template variables now contain the component's current property values.
 
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
