@@ -8,13 +8,58 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
 {
     protected $view;
 
+    protected $engine;
+
     protected $template;
 
     protected $vars;
 
+    private $legacyRenderPending = false;
+
     public function __construct($view)
     {
         $this->view = $view;
+    }
+
+    public function startYoyoRendering($component): void
+    {
+        parent::startYoyoRendering($component);
+
+        if ($this->usesLegacyLifecycle()) {
+            $this->engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
+            $this->engine->startYoyoRendering($component);
+        }
+    }
+
+    public function stopYoyoRendering(): void
+    {
+        $this->legacyRenderPending = false;
+
+        if ($this->usesLegacyLifecycle() && $this->hasYoyoComponent) {
+            $this->engine->stopYoyoRendering();
+        }
+
+        parent::stopYoyoRendering();
+    }
+
+    protected function pendingRender(): static
+    {
+        if ($this->usesLegacyLifecycle()) {
+            $this->legacyRenderPending = $this->hasYoyoComponent;
+
+            return $this;
+        }
+
+        return parent::pendingRender();
+    }
+
+    private function usesLegacyLifecycle(): bool
+    {
+        $type = new \ReflectionObject($this);
+
+        return ! $type->isCloneable()
+            || $type->getMethod('startYoyoRendering')->getDeclaringClass()->getName() !== self::class
+            || $type->getMethod('stopYoyoRendering')->getDeclaringClass()->getName() !== self::class;
     }
 
     public function render($template, $vars = []): ViewProviderInterface
@@ -82,7 +127,7 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
     {
         $component = $this->yoyoComponent;
 
-        if (! $this->hasYoyoComponent) {
+        if ($this->usesLegacyLifecycle() || ! $this->hasYoyoComponent) {
             return $render();
         }
 
@@ -98,6 +143,15 @@ class BladeViewProvider extends BaseViewProvider implements ViewProviderInterfac
 
     public function __toString()
     {
-        return $this->withComponentContext(fn () => (string) $this->view->make($this->template, $this->vars));
+        $stop = $this->legacyRenderPending;
+        $this->legacyRenderPending = false;
+
+        try {
+            return $this->withComponentContext(fn () => (string) $this->view->make($this->template, $this->vars));
+        } finally {
+            if ($stop) {
+                $this->stopYoyoRendering();
+            }
+        }
     }
 }
