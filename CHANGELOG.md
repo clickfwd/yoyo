@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Replacing the request with `mock()` or `reset()` clears keys hidden by `drop()`, so a
+  key dropped earlier is readable again when the replacement request supplies it.
 - Framework helper methods are blocked as component actions regardless of letter case,
   including listener mappings and overridden helpers. Public actions remain
   case-insensitive, and case-equivalent `render` actions render the component once.
