@@ -13,8 +13,11 @@
   Cleanup preserves the original template error even when an output handler throws.
   A nonremovable buffer prevents further cleanup, so it and any buffers below it
   remain open, but the original template error is rethrown without retrying cleanup.
-  Built-in subclasses that prohibit cloning retain their shared render behavior
-  and do not gain independent pending views.
+  Built-in subclasses that prohibit cloning and Blade subclasses that override
+  either rendering lifecycle hook retain their shared render behavior. They do
+  not gain independent pending views. Blade hook overrides keep one start and
+  stop pair on the original provider, with the protected engine bound during
+  preparation and rendering, including template failures.
 - Links with both an `id` and an `href` no longer add two browser history entries
   when the component sets an explicit URL. Yoyo now leaves history updates to htmx
   when the response carries `HX-Push-Url` or `HX-Replace-Url`, so one Back press
