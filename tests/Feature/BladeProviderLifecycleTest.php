@@ -68,6 +68,33 @@ class OwnEngineLifecycleBladeProvider extends BladeViewProvider
     }
 }
 
+class OwnEngineStartOnlyBladeProvider extends BladeViewProvider
+{
+    public $starts = [];
+
+    public function startYoyoRendering($component): void
+    {
+        $this->starts[] = $this;
+        $this->engine = $this->view->getContainer()->get('view.engine.resolver')->resolve('blade');
+        $this->engine->startYoyoRendering($component);
+    }
+}
+
+class OwnEngineStopOnlyBladeProvider extends BladeViewProvider
+{
+    public $stops = [];
+
+    public function stopYoyoRendering(): void
+    {
+        $this->stops[] = $this;
+        $this->engine->stopYoyoRendering();
+    }
+}
+
+class InheritedOwnEngineStopOnlyBladeProvider extends OwnEngineStopOnlyBladeProvider
+{
+}
+
 class StartOnlyLifecycleBladeProvider extends BladeViewProvider
 {
     public $starts = [];
@@ -342,3 +369,30 @@ it('preserves an outer own-engine Blade hook scope after repeated casts', functi
     expect($provider->components)->toBe([])
         ->and(trim($provider->getProviderInstance()->render('render-ownership/plain')))->toBe('plain');
 })->with([false, true]);
+
+it('closes the engine when only the Blade start hook omits its parent call', function () {
+    $provider = new OwnEngineStartOnlyBladeProvider(blade());
+    $provider->startYoyoRendering(lifecycleBladeComponent('first'));
+    $pending = $provider->render('render-ownership/owner', ['value' => 'value']);
+    expect($pending)->toBe($provider)
+        ->and(trim((string) $pending))->toBe('<span>first:value</span>')
+        ->and($provider->starts)->toBe([$provider])
+        ->and(trim($provider->getProviderInstance()->render('render-ownership/plain')))->toBe('plain');
+});
+
+it('releases earlier components when a Blade stop hook omits its parent call', function ($class) {
+    $provider = new $class(blade());
+    $references = [];
+    foreach (['first', 'second', 'third'] as $owner) {
+        $component = lifecycleBladeComponent($owner);
+        $references[] = WeakReference::create($component);
+        $provider->startYoyoRendering($component);
+        expect(trim((string) $provider->render('render-ownership/owner', ['value' => 'value'])))->toBe('<span>'.$owner.':value</span>');
+        unset($component);
+    }
+    gc_collect_cycles();
+    expect($references[0]->get() === null)->toBeTrue()
+        ->and($references[1]->get() === null)->toBeTrue()
+        ->and($provider->stops)->toBe([$provider, $provider, $provider])
+        ->and(trim($provider->getProviderInstance()->render('render-ownership/plain')))->toBe('plain');
+})->with([OwnEngineStopOnlyBladeProvider::class, InheritedOwnEngineStopOnlyBladeProvider::class]);
