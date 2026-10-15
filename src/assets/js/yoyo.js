@@ -53,39 +53,13 @@
 				}
 			},
 			afterProcessNode(evt) {
-				// Create non-existent target
-				if (evt.detail.elt) {
-					this.createNonExistentIdTarget(
-						evt.detail.elt.getAttribute('hx-target')
-					)
-				}
+				const elt = evt.detail.elt
+				if (!elt) return
 
-				// Initialize spinners
-				let component
+				this.createNonExistentIdTarget(elt.getAttribute('hx-target'))
 
-				if (!evt.detail.elt || !isComponent(evt.detail.elt)) {
-					// For innerHTML swap find the component root node
-					component = YoyoEngine.closest(
-						evt.detail.elt,
-						'[hx-swap~=innerHTML]'
-					)
-				} else {
-					component = getComponent(evt.detail.elt)
-				}
-
-				// Fallback: try to find the nearest component from evt.detail.elt or evt.detail.target
-				if (!component && evt.detail.elt) {
-					component = getComponent(evt.detail.elt);
-				}
-				if (!component && evt.detail.target) {
-					component = getComponent(evt.detail.target);
-				}
-
-				if (!component) {
-					return;
-				}
-
-				initializeComponentSpinners(component)
+				const component = getComponent(elt)
+				if (component) initializeComponentSpinners(component, elt)
 			},
 			bootstrapRequest(evt) {
 				const elt = evt.detail.elt
@@ -143,42 +117,23 @@
 					)
 				})
 			},
-			beforeRequestActions(elt) {
-				let component = getComponent(elt)
+			beforeRequestActions(evt) {
+				const callbacks = []
+				yoyoSpinnerRequests.set(evt.detail.xhr, callbacks)
+				spinningStart(getComponent(evt.detail.elt), callbacks)
+			},
+			afterRequestActions(evt) {
+				const callbacks = yoyoSpinnerRequests.get(evt.detail.xhr)
+				if (!callbacks) return
 
-				spinningStart(component)
+				yoyoSpinnerRequests.delete(evt.detail.xhr)
+				spinningStop(callbacks)
 			},
 			afterOnLoadActions(evt) {
-				let component = getComponentById(evt.detail.target.id)
-
-				if (!component) {
-					if (!evt.detail.elt) {
-						return
-					}
-					// Needed when using yoyo:select to replace a specific part of the response
-					// so stop spinning callbacks are run to remove animations in the parts of the component
-					// that were not replaced
-					component = getComponent(evt.detail.elt)
-					if (component) {
-						spinningStop(component)
-					}
-					return
-				}
+				const component = getComponentById(evt.detail.target.id)
+				if (!component) return
 
 				componentCopyYoyoDataFromTo(evt.detail.target, component)
-
-				// For 204 No Content responses or empty responses, explicitly stop spinners
-				// since no DOM swap occurs that would naturally clean up spinner states
-				const xhr = evt.detail.xhr
-				if (xhr.status === 204 || !xhr.responseText) {
-					spinningStop(component)
-				}
-
-				// This isn't needed at this time because the CSS classes/attributes are
-				// automatically removed when a component is updated from the server
-				// however, could be useful to improve transitions in the future. It would
-				// be necessary to add back spinner classes before new HTML is swapped in
-				// spinningStop(component)
 
 				// Timeout needed for targets outside of Yoyo component
 				setTimeout(() => {
@@ -274,7 +229,12 @@
 		 */
 		let yoyoEventCache = new Set()
 
-		let yoyoSpinners = {}
+		const yoyoSpinners = new WeakMap()
+		const yoyoSpinnerRequests = new WeakMap()
+
+		document.addEventListener('htmx:beforeSwap', (evt) => {
+			Yoyo.afterRequestActions(evt)
+		}, true)
 
 		function getActionAndParseArguments(detail) {
 			const m = detail.path.match(/^(.+?)\((.*)\)$/);
@@ -489,21 +449,20 @@
 		 * Component loading state spinners
 		 */
 
-		function spinningStart(component) {
-			const componentId = component.id
+		function spinningStart(component, callbacks) {
+			const spinners = yoyoSpinners.get(component)
+			if (!spinners) return
 
-			if (!yoyoSpinners[componentId]) {
-				return
-			}
-
-			let spinningElts = yoyoSpinners[componentId].generic || []
-
-			spinningElts = spinningElts.concat(
-				yoyoSpinners[componentId]?.actions[component.__yoyo.action] ||
-				[]
-			)
-
-			delete yoyoSpinners[component.id]
+			const spinningElts = []
+			spinners.forEach((directive, elt) => {
+				if (!elt.isConnected || getComponent(elt) !== component) {
+					spinners.delete(elt)
+					return
+				}
+				if (!directive.actions.length || directive.actions.includes(component.__yoyo.action)) {
+					spinningElts.push(directive)
+				}
+			})
 
 			spinningElts.forEach((directive) => {
 				const spinnerElt = directive.elt
@@ -511,21 +470,21 @@
 					let classes = directive.value.split(' ').filter(Boolean)
 
 					doAndSetCallbackOnElToUndo(
-						component,
+						callbacks,
 						directive,
 						() => directive.elt.classList.add(...classes),
 						() => spinnerElt.classList.remove(...classes)
 					)
 				} else if (directive.modifiers.includes('attr')) {
 					doAndSetCallbackOnElToUndo(
-						component,
+						callbacks,
 						directive,
 						() => directive.elt.setAttribute(directive.value, true),
 						() => spinnerElt.removeAttribute(directive.value)
 					)
 				} else {
 					doAndSetCallbackOnElToUndo(
-						component,
+						callbacks,
 						directive,
 						() => (spinnerElt.style.display = 'inline-block'),
 						() => (spinnerElt.style.display = 'none')
@@ -534,60 +493,31 @@
 			})
 		}
 
-		function spinningStop(component) {
-			while (component.__yoyo_on_finish_loading.length > 0) {
-				component.__yoyo_on_finish_loading.shift()()
-			}
+		function spinningStop(callbacks) {
+			while (callbacks.length > 0) callbacks.shift()()
 		}
 
-		function initializeComponentSpinners(component) {
-			const componentId = component.id
-			component.__yoyo_on_finish_loading = []
+		function initializeComponentSpinners(component, subtree) {
+			if (!yoyoSpinners.has(component)) yoyoSpinners.set(component, new Map())
+			const spinners = yoyoSpinners.get(component)
 
-			walk(component, (elt) => {
+			walk(subtree, (elt) => {
+				if (elt !== component && isComponent(elt)) return false
+
 				const directive = extractModifiersAndValue(elt, 'spinning')
 				if (directive) {
-					const yoyoSpinOnAction = elt.getAttribute('yoyo:spin-on')
-					if (yoyoSpinOnAction) {
-						yoyoSpinOnAction
-							.replace(' ', '')
-							.split(',')
-							.forEach((action) => {
-								addActionSpinner(componentId, action, directive)
-							})
-					} else {
-						addGenericSpinner(componentId, directive)
-					}
+					directive.actions = (elt.getAttribute('yoyo:spin-on') || '')
+						.split(',').map((action) => action.trim()).filter(Boolean)
+					spinners.set(elt, directive)
+				} else {
+					spinners.delete(elt)
 				}
 			})
 		}
 
-		function checkSpinnerInitialized(componentId, action) {
-			yoyoSpinners[componentId] = yoyoSpinners[componentId] || {
-				actions: {},
-				generic: [],
-			}
-			if (
-				action &&
-				yoyoSpinners?.[componentId]?.actions?.[action] === undefined
-			) {
-				yoyoSpinners[componentId].actions[action] = []
-			}
-		}
-
-		function addActionSpinner(componentId, action, directive) {
-			checkSpinnerInitialized(componentId, action)
-			yoyoSpinners[componentId].actions[action].push(directive)
-		}
-
-		function addGenericSpinner(componentId, directive) {
-			checkSpinnerInitialized(componentId)
-			yoyoSpinners[componentId].generic.push(directive)
-		}
-
 		// https://github.com/livewire/livewire
 		function doAndSetCallbackOnElToUndo(
-			el,
+			callbacks,
 			directive,
 			doCallback,
 			undoCallback
@@ -598,13 +528,13 @@
 			if (directive.modifiers.includes('delay')) {
 				let timeout = setTimeout(() => {
 					doCallback()
-					el.__yoyo_on_finish_loading.push(() => undoCallback())
+					callbacks.push(() => undoCallback())
 				}, 200)
 
-				el.__yoyo_on_finish_loading.push(() => clearTimeout(timeout))
+				callbacks.push(() => clearTimeout(timeout))
 			} else {
 				doCallback()
-				el.__yoyo_on_finish_loading.push(() => undoCallback())
+				callbacks.push(() => undoCallback())
 			}
 		}
 
@@ -715,7 +645,6 @@
 
 		function componentCopyYoyoDataFromTo(from, to) {
 			to.__yoyo = from?.__yoyo || {}
-			to.__yoyo_on_finish_loading = from?.__yoyo_on_finish_loading || []
 		}
 
 		function componentAddYoyoData(component, data) {
@@ -777,7 +706,11 @@ YoyoEngine.defineExtension('yoyo', {
 				evt.preventDefault()
 			}
 
-			Yoyo.beforeRequestActions(evt.detail.elt)
+			Yoyo.beforeRequestActions(evt)
+		}
+
+		if (name === 'htmx:afterRequest') {
+			Yoyo.afterRequestActions(evt)
 		}
 
 		if (name === 'htmx:afterOnLoad') {
