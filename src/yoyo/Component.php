@@ -232,6 +232,11 @@ abstract class Component
         return $this;
     }
 
+    protected function inline(string $template): InlineView
+    {
+        return new InlineView($template);
+    }
+
     protected function view($template, $vars = []): ViewProviderInterface
     {
         $view = $this->resolver->resolveViewProvider();

@@ -286,9 +286,8 @@ class ComponentManager
             return '';
         }
 
-        // For string based templates
-        if (is_string($view)) {
-            $view = $this->component->createViewFromString($view);
+        if ($view instanceof InlineView) {
+            $view = $this->component->createViewFromString($view->template);
         }
 
         foreach ($hookStack['rendered'] as $method) {

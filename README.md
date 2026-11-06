@@ -215,7 +215,7 @@ To load the necessary scripts in your template add the following code inside the
 
 ## Creating Components
 
-Dynamic components require a class and a template. When using the Blade and Twig view providers, you can also use inline views, where the component markup is returned directly in the component's `render` method.
+Dynamic components require a class and a template. When using the Blade and Twig view providers, you can also use inline views, where the component's `render` method returns its markup through `$this->inline()`.
 
 Anonymous components allow creating components with just a template file.
 
@@ -1221,7 +1221,9 @@ echo (new \Clickfwd\Yoyo\Blade\Yoyo())->update();
 
 ### Inline Views
 
-When dealing with simple templates, you can create components without a template file and instead return an inline view in the component's `render` method.
+When dealing with simple templates, you can create components without a template file and instead return an inline view from the component's `render` method. Wrap the template in `$this->inline()`.
+
+A plain string returned from `render` is finished HTML. Yoyo outputs it as it is and never compiles it, so template syntax inside user content in that string is printed, not run. Only a template passed to `inline()` is compiled. Never build an inline template from user input; pass values as public properties instead.
 
 ```php
 class HelloWorld extends Component
@@ -1231,12 +1233,12 @@ class HelloWorld extends Component
 
 public function render()
 {
-	return <<<'yoyo'
+	return $this->inline(<<<'yoyo'
 		<div>
 		    <input yoyo name="message" type="text" value="{{ $message }}">
 		    <h1>{{ $message }}</h1>
 		</div>		
-	yoyo;
+	yoyo);
 }
 ```
 
@@ -1385,7 +1387,9 @@ echo (new \Clickfwd\Yoyo\Yoyo())->update();
 
 ### Inline Views
 
-When dealing with simple templates, you can create components without a template file and instead return an inline view in the component's `render` method.
+When dealing with simple templates, you can create components without a template file and instead return an inline view from the component's `render` method. Wrap the template in `$this->inline()`.
+
+A plain string returned from `render` is finished HTML. Yoyo outputs it as it is and never compiles it, so template syntax inside user content in that string is printed, not run. Only a template passed to `inline()` is compiled. Never build an inline template from user input; pass values as public properties instead.
 
 ```php
 class HelloWorld extends Component
@@ -1395,12 +1399,12 @@ class HelloWorld extends Component
 
 public function render()
 {
-	return <<<'twig'
+	return $this->inline(<<<'twig'
 		<div>
 		    <input yoyo name="message" type="text" value="{{ message }}">
 		    <h1>{{ message }}</h1>
 		</div>		
-	twig;
+	twig);
 }
 ```
 
