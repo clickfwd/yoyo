@@ -32,7 +32,7 @@ class RenderingOwnershipComponent extends Component
 
     public function render()
     {
-        return $this->content ?? $this->view('render-ownership/'.$this->template);
+        return $this->content !== null ? $this->inline($this->content) : $this->view('render-ownership/'.$this->template);
     }
 
     public function rendered($view)

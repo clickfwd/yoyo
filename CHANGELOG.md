@@ -2,6 +2,18 @@
 
 ## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.1...develop)
 
+### Security
+
+- A string returned from a component's `render` method is no longer compiled as a
+  template. Components that returned already-rendered HTML ran any template syntax inside
+  user content in that HTML, such as `{{ }}` or `@php`, as PHP. A returned string is now
+  output as finished HTML.
+
+### Breaking
+
+- Inline views must be returned through `$this->inline($template)`. A bare template string
+  returned from `render` is now printed as it is, without compiling it.
+
 ### Fixed
 
 - Replacing the request with `mock()` or `reset()` clears keys hidden by `drop()`, so a

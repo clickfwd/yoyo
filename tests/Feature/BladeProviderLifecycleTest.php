@@ -157,7 +157,7 @@ class BladeLifecycleComponent extends Component
 
     public function render()
     {
-        return $this->content ?? $this->view('render-ownership/lifecycle');
+        return $this->content !== null ? $this->inline($this->content) : $this->view('render-ownership/lifecycle');
     }
 
     protected function viewVars(): array
