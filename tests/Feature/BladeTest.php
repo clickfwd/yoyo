@@ -20,6 +20,16 @@ it('updates anonymous component', function () {
     expect(update('foo'))->toContain('blade bar');
 });
 
+it('recompiles a component view whose compiled file was deleted after it rendered', function () {
+    expect(render('foo'))->toContain('blade foo');
+
+    $compiled = glob(__DIR__.'/../compiled/*.php');
+    expect($compiled)->not->toBeEmpty();
+    array_map('unlink', $compiled);
+
+    expect(render('foo'))->toContain('blade foo');
+});
+
 it('renders anonymous component form different location', function () {
     $view = Yoyo::getInstance()->getViewProvider();
     $view->getFinder()->flush();

@@ -2,6 +2,7 @@
 
 namespace Clickfwd\Yoyo\Blade;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\View\Engines\CompilerEngine as LaravelCompilerEngine;
 
 class YoyoBladeCompilerEngine extends LaravelCompilerEngine
@@ -40,6 +41,10 @@ class YoyoBladeCompilerEngine extends LaravelCompilerEngine
         ob_start();
 
         try {
+            if (! $this->files->isFile($__path)) {
+                throw new FileNotFoundException("File does not exist at path {$__path}.");
+            }
+
             \Closure::bind(function () use ($__path, $__data) {
                 extract($__data, EXTR_SKIP);
                 include $__path;
