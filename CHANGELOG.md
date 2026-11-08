@@ -16,6 +16,9 @@
 
 ### Fixed
 
+- A Blade component whose compiled view file was deleted after it rendered, for example
+  by a cache clear during the same request, is compiled again instead of rendering as an
+  empty string.
 - Replacing the request with `mock()` or `reset()` clears keys hidden by `drop()`, so a
   key dropped earlier is readable again when the replacement request supplies it.
 - Embedded initial renders no longer send the HTTP status or response headers. A host
