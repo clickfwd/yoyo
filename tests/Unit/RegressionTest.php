@@ -87,12 +87,12 @@ it('constructs http URL when HTTPS is not set', function () {
 
 it('decodes WordPress magic-quoted JSON via stripslashes fallback', function () {
     // WordPress wp_magic_quotes() adds backslashes to $_REQUEST values.
-    // HTMX sends: ["jreviews-cp::pages.browse-listings"]
-    // After magic quotes: [\"jreviews-cp::pages.browse-listings\"]
-    $magicQuoted = addslashes('["jreviews-cp::pages.browse-listings"]');
+    // HTMX sends: ["admin::pages.browse-items"]
+    // After magic quotes: [\"admin::pages.browse-items\"]
+    $magicQuoted = addslashes('["admin::pages.browse-items"]');
     $decoded = YoyoHelpers::test_json($magicQuoted);
 
-    expect($decoded)->toBe(['jreviews-cp::pages.browse-listings']);
+    expect($decoded)->toBe(['admin::pages.browse-items']);
 });
 
 it('does not strip legitimate backslashes from JSON values', function () {

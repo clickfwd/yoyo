@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.1...develop)
+## [0.16.0 (2026-11-26)](https://github.com/clickfwd/yoyo/compare/0.15.1...0.16.0)
 
 ### Security
 
