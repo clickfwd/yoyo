@@ -5,6 +5,7 @@ $finder = Symfony\Component\Finder\Finder::create()
     ->notName('*.blade.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true)
+    ->exclude('compiled')
     ->in([
         __DIR__ . '/src',
         __DIR__ . '/tests',
