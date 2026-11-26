@@ -6,7 +6,6 @@ on:
 
 jobs:
   style:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     name: Code Style
 
@@ -22,13 +21,8 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-interaction --no-progress
 
-    - name: Run PHP CS Fixer
-      run: vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes
-
-    - name: Commit changes
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: Fix styling
+    - name: Check PHP CS Fixer
+      run: vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes --dry-run --diff
 
   unit:
     runs-on: ubuntu-latest
