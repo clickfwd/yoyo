@@ -1,0 +1,1 @@
+<div>{{ $this->owner }}:before {{ $this->recoverChild() }} @include("render-ownership.owner", ["value" => "partial"]) @yoyo("render-owner", ["owner" => "sibling", "value" => "sibling"]) {{ $this->owner }}:after</div>

@@ -26,10 +26,11 @@ class PhalconViewProvider extends BaseViewProvider implements ViewProviderInterf
 
     public function render($template, $vars = []): ViewProviderInterface
     {
-        $this->template = $template;
-        $this->vars = $vars;
+        $pending = $this->pendingRender();
+        $pending->template = $template;
+        $pending->vars = $vars;
 
-        return $this;
+        return $pending;
     }
 
     public function setViewExtention($viewExtention)

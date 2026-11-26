@@ -95,3 +95,28 @@ it('throws exception for invalid bindings', function () {
 
     $container->get(Foo::class);
 })->throws(BindingNotFoundException::class);
+
+it('preserves explicit null instead of applying a parameter default', function () {
+    $container = new YoyoContainer();
+    $target = new class () {
+        public function value(?string $value = 'fallback')
+        {
+            return $value;
+        }
+    };
+
+    expect($container->call([$target, 'value']))->toBe('fallback');
+    expect($container->call([$target, 'value'], ['value' => null]))->toBeNull();
+});
+
+it('preserves explicit null when constructing a nullable collaborator', function () {
+    $container = new YoyoContainer();
+    $target = new class () {
+        public function __construct(public ?stdClass $collaborator = null)
+        {
+        }
+    };
+
+    expect($container->make(get_class($target))->collaborator)->toBeInstanceOf(stdClass::class);
+    expect($container->make(get_class($target), ['collaborator' => null])->collaborator)->toBeNull();
+});

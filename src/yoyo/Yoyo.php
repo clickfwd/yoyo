@@ -309,24 +309,30 @@ class Yoyo
                 $postComponentProcessingActions();
             }
             if ($e->getCode() == 204) {
-                Response::getInstance()->status(204)->send();
+                if ($spinning) {
+                    Response::getInstance()->status(204)->send();
+                }
                 // Need to throw exception to stop execution and send 204 status code
                 throw $e;
-            } else {
-                return Response::getInstance()->status(200)->send();
             }
+
+            return $spinning ? Response::getInstance()->status(200)->send() : '';
         } catch (HttpException $e) {
             if (isset($postComponentProcessingActions)) {
                 $postComponentProcessingActions();
             }
-            Response::getInstance()->status($e->getStatusCode())->setHeaders($e->getHeaders())->send();
+            if ($spinning) {
+                Response::getInstance()->status($e->getStatusCode())->setHeaders($e->getHeaders())->send();
+            }
 
             throw $e;
         } catch (\Exception $e) {
             if (isset($postComponentProcessingActions)) {
                 $postComponentProcessingActions();
             }
-            Response::getInstance()->send();
+            if ($spinning) {
+                Response::getInstance()->send();
+            }
 
             throw $e;
         }
@@ -341,9 +347,11 @@ class Yoyo
 
         $compiledHtml = $this->compile($componentType, $html, $spinning, $variables, $listeners, $props, $cacheHistory);
 
-        if ($spinning) {
-            $postComponentProcessingActions();
+        if (! $spinning) {
+            return $compiledHtml;
         }
+
+        $postComponentProcessingActions();
 
         return (Response::getInstance())->send($compiledHtml);
     }

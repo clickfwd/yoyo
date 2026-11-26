@@ -1,6 +1,68 @@
 # Changelog
 
-## [Unreleased](https://github.com/clickfwd/yoyo/compare/0.15.1...develop)
+## [0.16.0 (2026-11-26)](https://github.com/clickfwd/yoyo/compare/0.15.1...0.16.0)
+
+### Security
+
+- A string returned from a component's `render` method is no longer compiled as a
+  template. Components that returned already-rendered HTML ran any template syntax inside
+  user content in that HTML, such as `{{ }}` or `@php`, as PHP. A returned string is now
+  output as finished HTML.
+
+### Breaking
+
+- Inline views must be returned through `$this->inline($template)`. A bare template string
+  returned from `render` is now printed as it is, without compiling it.
+
+### Fixed
+
+- A Blade component whose compiled view file was deleted after it rendered, for example
+  by a cache clear during the same request, is compiled again instead of rendering as an
+  empty string.
+- Replacing the request with `mock()` or `reset()` clears keys hidden by `drop()`, so a
+  key dropped earlier is readable again when the replacement request supplies it.
+- Embedded initial renders no longer send the HTTP status or response headers. A host
+  page that answers 404 keeps its 404 when it renders a component. Update requests still
+  set their status and headers, including 204 and HTTP exceptions.
+- Framework helper methods are blocked as component actions regardless of letter case,
+  including listener mappings and overridden helpers. Public actions remain
+  case-insensitive, and case-equivalent `render` actions render the component once.
+- Omitted action and event arguments now retain their PHP defaults in both container
+  adapters, including optional arguments before a variadic parameter. Explicit `null`
+  values remain supplied arguments, including required nullable event parameters.
+- Nullable and untyped public properties now accept explicit `null` from caller variables
+  or request data. Non-nullable properties retain their current values when given `null`,
+  and object-typed collaborators still ignore request data. Omitted properties retain their
+  defaults or remain available for lifecycle hooks to initialize.
+- Dynamic template variables now contain the component's current property values.
+
+- Server-dispatched browser events fire once per response, after the response
+  loads, including responses that do not swap the DOM. Cached history navigation
+  continues to replay its browser events.
+- Nested rendering no longer replaces a parent's pending view or leaves native and
+  Blade partials bound to the child. Built-in providers keep each pending view's
+  template, variables, and component, including repeated casts and fluent hook
+  changes. Twig string templates now receive the component as `this`.
+- Rendering failures restore the previous component context. Native templates also
+  discard removable output buffers without closing buffers opened by the caller.
+  Cleanup preserves the original template error even when an output handler throws.
+  A nonremovable buffer prevents further cleanup, so it and any buffers below it
+  remain open, but the original template error is rethrown without retrying cleanup.
+  Built-in subclasses that prohibit cloning and Blade subclasses that override
+  either rendering lifecycle hook retain their shared render behavior. They do
+  not gain independent pending views. Blade hook overrides keep one start and
+  stop pair on the original provider, with the protected engine bound during
+  preparation and rendering, including template failures.
+- Loading indicators apply once per request and continue to work after 204 and
+  no-swap responses. Nested components keep independent indicators. Indicators
+  stop when their request finishes or is aborted, including responses that delay
+  the DOM swap. Responses that reuse DOM elements preserve the server's disabled,
+  class, and display state after loading ends.
+- Links with both an `id` and an `href` no longer add two browser history entries
+  when the component sets an explicit URL. Yoyo now leaves history updates to htmx
+  when htmx history is enabled and the response carries `HX-Push-Url` or
+  `HX-Replace-Url`, so one Back press returns to the previous URL after a paginator
+  click. When htmx history is disabled, Yoyo preserves link history navigation.
 
 ## [0.15.1 (2026-08-10)](https://github.com/clickfwd/yoyo/compare/0.15.0...0.15.1)
 

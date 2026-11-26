@@ -27,6 +27,8 @@ class Request implements RequestInterface
 
         $this->server = $server;
 
+        $this->dropped = [];
+
         $this->decodedRequest = null;
 
         return $this;
@@ -37,6 +39,8 @@ class Request implements RequestInterface
         $this->request = [];
 
         $this->server = [];
+
+        $this->dropped = [];
 
         $this->decodedRequest = null;
     }

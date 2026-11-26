@@ -1,0 +1,1 @@
+<div><?= $this->owner ?>:before<?= $this->recoverChild() ?><?= \Clickfwd\Yoyo\Yoyo::getViewProvider()->getProviderInstance()->render("render-ownership/owner", ["value" => "partial"]) ?><?= \Yoyo\yoyo_render("render-owner", ["owner" => "sibling", "value" => "sibling"]) ?><?= $this->owner ?>:after</div>

@@ -1,6 +1,5 @@
 <?php
 
-use Clickfwd\Yoyo\Exceptions\BypassRenderMethod;
 use Clickfwd\Yoyo\Exceptions\ComponentMethodNotFound;
 use Clickfwd\Yoyo\Exceptions\ComponentNotFound;
 use Clickfwd\Yoyo\Exceptions\HttpException;
@@ -88,14 +87,6 @@ it('passes action parameters to component method arguments', function () {
 it('loads dynamic component with registered alias', function () {
     Yoyo::registerComponent('registeredalias', \Tests\App\Yoyo\Registered::class);
     expect(render('registeredalias'))->toContain('id="registered"');
-});
-
-it('returns empty response with 204 status on skipRender', function () {
-    expect(render('empty-response'))->toBeEmpty()->and(http_response_code())->toBe(204);
-})->throws(BypassRenderMethod::class);
-
-it('returns empty response with 200 status on skipRenderAndReplace', function () {
-    expect(render('empty-response-and-remove'))->toBeEmpty()->and(http_response_code())->toBe(200);
 });
 
 it('dynamically resolves class and named arguments in mount method', function () {

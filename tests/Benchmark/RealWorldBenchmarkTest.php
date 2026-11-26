@@ -69,7 +69,7 @@ $formHtml = <<<'HTML'
 </form>
 HTML;
 
-// 3. Listing list with nested child components per row (JReviews pattern)
+// 3. Listing list with nested child components per row
 //    Parent Yoyo component renders the list; each row has 3 child Yoyo
 //    components already compiled: favorite, mylist, comparison
 function buildListingList(int $rows): string
